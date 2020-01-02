@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>2883ffd4-df36-4a99-ab03-63b84ac4f797</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{0fd7e37d-d9a9-44c9-91e7-13bb3bb309be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{f70c68fd-9041-4986-b5f1-fa45451b5d57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="content">
+      <UniqueIdentifier>ee07972c-4263-4a53-b130-af5439ca85a8</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{79b8276d-4766-4898-a1df-257f9191d950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{dc3fc7ae-0efe-4290-8c43-22ba07fcde2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\media">
+      <UniqueIdentifier>{878562ac-9cfb-4012-820f-0c1a36e37596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
+      <UniqueIdentifier>{b12352f2-eae9-4b21-9491-2282eb265ab8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="graphics\graphics.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\modelloader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\model.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\vertexshader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\pixelshader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\texture.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\shaderbuffer.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\material.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\entity.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\camera.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="common\helpers.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\scene.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="common\resourceloadingmanager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="content\game.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\boundingvolume.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\firstpersoncontroller.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\hitbox.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="math\matrix2x2.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix3x3.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix4x4.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\position.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\quaternion.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector2.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector3.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector4.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\formulas.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\linalg.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\graphics.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="common\helpers.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\model.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\modelloader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\vertexshader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\pixelshader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\shaderbuffer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\texture.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\material.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\entity.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\camera.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\scene.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="common\resourceloadingmanager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="content\game.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\firstpersoncontroller.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\boundingvolume.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\hitbox.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="math\geometry.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\media\square.png">
+      <Filter>Assets\media</Filter>
+    </Image>
+    <Image Include="Assets\media\test_normal.png">
+      <Filter>Assets\media</Filter>
+    </Image>
+    <Image Include="Assets\media\test_diffuse.png">
+      <Filter>Assets\media</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\VertexShader.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\PixelShader.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
