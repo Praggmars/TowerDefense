@@ -1,7 +1,10 @@
 #pragma once
 
-#include "graphics/scene.h"
+#include "level.h"
 #include "graphics/firstpersoncontroller.h"
+#include "graphics/editorstylecontroller.h"
+
+#define FREELOOK_CAMERA 0
 
 namespace TowerDefense
 {
@@ -14,22 +17,22 @@ namespace TowerDefense
 
 		private:
 			gfx::Graphics& m_graphics;
+			GameResources m_gameResources;
 			gfx::Scene::P m_scene;
+			Level::P m_level;
+			Turret::P m_movingTurret;
+#if FREELOOK_CAMERA
 			gfx::FirstPersonController m_cameraController;
+#else
+			gfx::EditorStyleController m_cameraController;
+#endif
 			mth::float2 m_cursor;
 			mth::float2 m_windowSize;
-			std::vector<gfx::Entity::P> m_baseEntities;
-			std::vector<gfx::Entity::P> m_placedEntities;
-			gfx::Entity::P m_movingEntity;
-			gfx::Entity::P m_selectedEntity;
 			Windows::Foundation::IAsyncAction^ m_mainLoopWorker;
 
 		private:
-			void CreateScene();
 			void Update(float deltaTime);
 			void Render();
-
-			void ColorEntitiesByPointing();
 
 		public:
 			Game(gfx::Graphics& graphics);
@@ -43,7 +46,7 @@ namespace TowerDefense
 			void MouseUp(mth::float2 cursor);
 			void WindowSizeChanged(mth::float2 size);
 
-			void PlaceCube();
+			void PlaceTurret();
 		};
 	}
 }

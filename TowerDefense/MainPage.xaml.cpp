@@ -50,6 +50,6 @@ namespace TowerDefense
 	}
 	void MainPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 	{
-		m_game->PlaceCube();
+		m_game->PlaceTurret();
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "camera.h"
+#include "math/position.hpp"
 
 namespace TowerDefense
 {

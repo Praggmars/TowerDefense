@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TowerDefense", "TowerDefense\TowerDefense.vcxproj", "{EE07972C-4263-4A53-B130-AF5439CA85A8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Console", "Console\Console.vcxproj", "{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -41,6 +43,18 @@ Global
 		{EE07972C-4263-4A53-B130-AF5439CA85A8}.Release|x86.ActiveCfg = Release|Win32
 		{EE07972C-4263-4A53-B130-AF5439CA85A8}.Release|x86.Build.0 = Release|Win32
 		{EE07972C-4263-4A53-B130-AF5439CA85A8}.Release|x86.Deploy.0 = Release|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|ARM.ActiveCfg = Debug|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|x64.ActiveCfg = Debug|x64
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|x64.Build.0 = Debug|x64
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|x86.ActiveCfg = Debug|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Debug|x86.Build.0 = Debug|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|ARM.ActiveCfg = Release|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|ARM64.ActiveCfg = Release|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|x64.ActiveCfg = Release|x64
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|x64.Build.0 = Release|x64
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|x86.ActiveCfg = Release|Win32
+		{89A1D0D8-1E5C-45B3-9F1A-BCC44374F64D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

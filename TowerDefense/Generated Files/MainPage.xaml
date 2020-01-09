@@ -9,7 +9,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <SwapChainPanel x:ConnectionId='2' x:Name="m_swapChainPanel">
-        <Button x:ConnectionId='3' Content="Cube" Margin="28,28,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.244,-0.646"                     />
+        <Button x:ConnectionId='3' Content="Turret" Margin="28,28,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.244,-0.646"                     />
     </SwapChainPanel>
 </Page>
 

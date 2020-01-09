@@ -234,7 +234,12 @@
     <ClInclude Include="common\helpers.h" />
     <ClInclude Include="common\resourceloadingmanager.h" />
     <ClInclude Include="content\game.h" />
+    <ClInclude Include="content\level.h" />
+    <ClInclude Include="content\placementarea.h" />
+    <ClInclude Include="content\player.h" />
+    <ClInclude Include="content\turret.h" />
     <ClInclude Include="graphics\camera.h" />
+    <ClInclude Include="graphics\editorstylecontroller.h" />
     <ClInclude Include="graphics\firstpersoncontroller.h" />
     <ClInclude Include="graphics\entity.h" />
     <ClInclude Include="graphics\graphics.h" />
@@ -299,7 +304,11 @@
     <ClCompile Include="common\helpers.cpp" />
     <ClCompile Include="common\resourceloadingmanager.cpp" />
     <ClCompile Include="content\game.cpp" />
+    <ClCompile Include="content\level.cpp" />
+    <ClCompile Include="content\placementarea.cpp" />
+    <ClCompile Include="content\turret.cpp" />
     <ClCompile Include="graphics\camera.cpp" />
+    <ClCompile Include="graphics\editorstylecontroller.cpp" />
     <ClCompile Include="graphics\entity.cpp" />
     <ClCompile Include="graphics\firstpersoncontroller.cpp" />
     <ClCompile Include="graphics\graphics.cpp" />

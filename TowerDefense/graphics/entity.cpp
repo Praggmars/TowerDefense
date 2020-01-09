@@ -17,7 +17,7 @@ namespace TowerDefense
 			if (makeHitbox)
 				m_hitbox = phy::Hitbox::CreateP(modelLoader);
 		}
-		Entity::Entity(Graphics& graphics, Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox) :
+		Entity::Entity(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox) :
 			m_visible(true)
 		{
 			m_model = model;
@@ -30,17 +30,17 @@ namespace TowerDefense
 		{
 			return std::make_shared<Entity>(graphics, modelLoader, makeHitbox);
 		}
-		Entity::P Entity::CreateP(Graphics& graphics, Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox)
+		Entity::P Entity::CreateP(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox)
 		{
-			return std::make_shared<Entity>(graphics, model, materials, materialCount, hitbox);
+			return std::make_shared<Entity>(model, materials, materialCount, hitbox);
 		}
 		Entity::U Entity::CreateU(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox)
 		{
 			return std::make_unique<Entity>(graphics, modelLoader, makeHitbox);
 		}
-		Entity::U Entity::CreateU(Graphics& graphics, Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox)
+		Entity::U Entity::CreateU(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox)
 		{
-			return std::make_unique<Entity>(graphics, model, materials, materialCount, hitbox);
+			return std::make_unique<Entity>(model, materials, materialCount, hitbox);
 		}
 		void Entity::Render(Graphics& graphics, ShaderBuffer& materialBuffer)
 		{

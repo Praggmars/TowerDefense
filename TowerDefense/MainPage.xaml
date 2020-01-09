@@ -9,6 +9,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <SwapChainPanel x:Name="m_swapChainPanel">
-        <Button Content="Cube" Margin="28,28,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.244,-0.646" Click="Button_Click"/>
+        <Button Content="Turret" Margin="28,28,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.244,-0.646" Click="Button_Click"/>
     </SwapChainPanel>
 </Page>

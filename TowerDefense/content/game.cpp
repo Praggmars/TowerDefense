@@ -6,111 +6,47 @@ namespace TowerDefense
 {
 	namespace content
 	{
-		void Game::CreateScene()
-		{
-			float size = 0.45f;
-			m_scene->BackgroundColor(mth::float4(0.8f, 0.4f, 0.2f, 1.0f));
-			//Platform::String^ appInstallFolder = Windows::ApplicationModel::Package::Current->InstalledLocation->Path;
-			//std::wstring filename(appInstallFolder->Begin(), appInstallFolder->End());
-			gfx::Texture::P texture = gfx::Texture::CreateColoredTexture(m_graphics, hlp::Color{ 0, 0, 0, 255 }, 16);
-			gfx::Texture::P normalmap = gfx::Texture::CreateDefaultNormalmap(m_graphics, 16);
-			gfx::ModelLoader ml;
-			ml.CreateQuad(mth::float2(-size), mth::float2(size * 2.0f), 0.0f);
-			//ml.CreateCube(mth::float3(-size), mth::float3(size * 2.0f));
-			gfx::Model::P model = gfx::Model::CreateP(m_graphics, ml);
-			phy::Hitbox::P hitbox = phy::Hitbox::CreateP(ml);
-			m_scene->Camera().position = mth::float3(2.0f, 5.2f, -10.0f);
-			m_scene->Camera().rotation = mth::float3(0.6f, -0.2f, 0.0f);
-
-			float from = -5.0f, to = 5.0f;
-			for (float z = from; z <= to; z++)
-			{
-				for (float x = from; x <= to; x++)
-				{
-					gfx::Material::P material = gfx::Material::CreateP(texture, normalmap);
-					material->MaterialBuffer().color = mth::float4((x + 5.0f) / 10.0f, 1.0f, (z + 5.0f) / 10.0f, 1.0f);
-					material->MaterialBuffer().textureWeight = 0.0f;
-					gfx::Entity::P e = gfx::Entity::CreateP(m_graphics, model, &material, 1, hitbox);
-					e->position.x = x;
-					e->position.z = z;
-					m_scene->AddEntity(e);
-					m_baseEntities.push_back(e);
-				}
-			}
-		}
 		void Game::Update(float deltaTime)
 		{
+#if FREELOOK_CAMERA
 			m_cameraController.Update(deltaTime);
-			ColorEntitiesByPointing();
+#endif
+
+			m_level->Update(deltaTime);
+
+			if (m_movingTurret)
+			{
+				mth::float3 origin = m_scene->Camera().position;
+				mth::float3 dir = m_scene->Camera().DirectionFromPoint(m_cursor, m_windowSize);
+				auto area = m_level->PointedArea(origin, dir);
+				m_movingTurret->Visible(false);
+				if (area && !area->HasTurret())
+				{
+					m_movingTurret->Visible(true);
+					for (auto& m : area->Materials())
+						m->MaterialBuffer().textureWeight = 0.25f;
+
+					m_movingTurret->position = area->position;
+					m_movingTurret->position.y += 0.5f;
+				}
+			}
+			m_level->HighlightPath(mth::vec2<int>(1, 1), mth::vec2<int>(4, 6));
 		}
 		void Game::Render()
 		{
 			m_scene->Render(m_graphics);
 		}
-		void Game::ColorEntitiesByPointing()
-		{
-			mth::float3 origin = m_scene->Camera().position;
-			mth::float3 dir = m_scene->Camera().DirectionFromPoint(m_cursor, m_windowSize);
-			float minDistance = INFINITY;
-			m_selectedEntity = nullptr;
-
-			for (auto& e : m_scene->Entities())
-				for (auto& m : e->Materials())
-					m->MaterialBuffer().textureWeight = 0.0f;
-
-			if (m_movingEntity)
-			{
-				for (auto& e : m_baseEntities)
-				{
-					if (e->Hitbox())
-					{
-						float distance = e->Hitbox()->DistanceInDirection(origin, dir, e->WorldMatrix());
-						if (distance < minDistance)
-						{
-							minDistance = distance;
-							m_selectedEntity = e;
-						}
-					}
-				}
-
-				m_movingEntity->Visible(false);
-				if (m_selectedEntity)
-				{
-					for (auto& m : m_selectedEntity->Materials())
-						m->MaterialBuffer().textureWeight = 0.75f;
-
-					m_movingEntity->Visible(true);
-					m_movingEntity->position = m_selectedEntity->position;
-					m_movingEntity->position.y += 1.0f;
-				}
-			}
-			else
-			{
-				for (auto& e : m_placedEntities)
-				{
-					if (e->Hitbox())
-					{
-						float distance = e->Hitbox()->DistanceInDirection(origin, dir, e->WorldMatrix());
-						if (distance < minDistance)
-						{
-							minDistance = distance;
-							m_selectedEntity = e;
-						}
-					}
-				}
-				if (m_selectedEntity)
-				{
-					for (auto& m : m_selectedEntity->Materials())
-						m->MaterialBuffer().textureWeight = 0.75f;
-				}
-			}
-		}
 		Game::Game(gfx::Graphics& graphics) :
 			m_graphics(graphics),
+			m_gameResources(graphics),
 			m_scene(gfx::Scene::CreateP(graphics)),
+			m_level(Level::CreateP(m_scene, m_gameResources, 11, 9)),
 			m_cameraController(m_scene->Camera())
 		{
-			CreateScene();
+#if !FREELOOK_CAMERA
+			m_cameraController.SetControllerData(mth::float3(), 15.0f, mth::float3(0.3f, -0.3f, 0.0f));
+			m_cameraController.UpdateTarget();
+#endif
 
 			auto workItemHandler = ref new Windows::System::Threading::WorkItemHandler(
 				[this](Windows::Foundation::IAsyncAction^ action)
@@ -148,39 +84,12 @@ namespace TowerDefense
 		void Game::KeyUp(Windows::System::VirtualKey key)
 		{
 			m_cameraController.KeyUp(key);
-
-			Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
-			if (key == Windows::System::VirtualKey::P)
-			{
-				if (m_movingEntity)
-				{
-					if (m_selectedEntity)
-					{
-						m_placedEntities.push_back(m_movingEntity);
-						m_movingEntity = nullptr;
-					}
-				}
-				else
-				{
-					if (m_selectedEntity)
-					{
-						m_scene->RemoveEntity(m_selectedEntity);
-						for (auto e = m_placedEntities.begin(); e != m_placedEntities.end(); e++)
-						{
-							if (*e == m_selectedEntity)
-							{
-								m_placedEntities.erase(e);
-								break;
-							}
-						}
-						m_selectedEntity = nullptr;
-					}
-				}
-			}
 		}
 		void Game::MouseDown(mth::float2 cursor)
 		{
+#if FREELOOK_CAMERA
 			m_cameraController.MouseDown(cursor);
+#endif
 		}
 		void Game::MouseMove(mth::float2 cursor)
 		{
@@ -189,26 +98,42 @@ namespace TowerDefense
 		}
 		void Game::MouseUp(mth::float2 cursor)
 		{
+#if FREELOOK_CAMERA
 			m_cameraController.MouseUp();
+#endif
+			if (m_movingTurret)
+			{
+				Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
+				mth::float3 origin = m_scene->Camera().position;
+				mth::float3 dir = m_scene->Camera().DirectionFromPoint(m_cursor, m_windowSize);
+				auto area = m_level->PointedArea(origin, dir);
+				if (area && !area->HasTurret())
+				{
+					m_movingTurret->position = area->position;
+					m_movingTurret->position.y += 0.5f;
+					area->PlaceTurret(m_movingTurret);
+					m_scene->AddEntity(m_movingTurret);
+					m_movingTurret = nullptr;
+				}
+		}
 		}
 		void Game::WindowSizeChanged(mth::float2 size)
 		{
 			m_windowSize = size;
 			m_scene->Camera().SetScreenAspect(gfx::Camera::ToScreenAspect(size.x, size.y));
 		}
-		void Game::PlaceCube()
+		void Game::PlaceTurret()
 		{
 			Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
 
-			m_scene->RemoveEntity(m_movingEntity);
-			gfx::ModelLoader ml;
-			ml.CreateCube(mth::float3(-0.4f), mth::float3(0.8f));
+			if (m_movingTurret)
+				m_scene->RemoveEntity(m_movingTurret);
 
 			gfx::Material::P material = gfx::Material::CreateP(
-				gfx::Texture::CreateColoredTexture(m_graphics, { 0, 0, 0, 255 }, 16),
-				gfx::Texture::CreateDefaultNormalmap(m_graphics, 16));
-			m_movingEntity = gfx::Entity::CreateP(m_graphics, gfx::Model::CreateP(m_graphics, ml), &material, 1, phy::Hitbox::CreateP(ml));
-			m_scene->AddEntity(m_movingEntity);
+				m_gameResources.turretTexture,
+				m_gameResources.turretNormalmap);
+			m_movingTurret = Turret::CreateP(m_gameResources.turretModel, &material, 1, m_gameResources.turretHitbox);
+			m_scene->AddEntity(m_movingTurret);
 		}
 	}
 }
