@@ -29,6 +29,9 @@
     <Filter Include="Assets\data">
       <UniqueIdentifier>{3850cee3-8e45-484c-bc63-28e379120ab9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="algorithm">
+      <UniqueIdentifier>{5a4bc727-9250-40e3-bc4c-c55fcf8eef63}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -92,10 +95,18 @@
     <ClCompile Include="content\level.cpp">
       <Filter>content</Filter>
     </ClCompile>
-    <ClCompile Include="content\placementarea.cpp">
+    <ClCompile Include="algorithm\pathfinder.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="content\turret.cpp">
       <Filter>content</Filter>
     </ClCompile>
-    <ClCompile Include="content\turret.cpp" />
+    <ClCompile Include="content\contentcommon.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="content\enemy.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -189,14 +200,23 @@
     <ClInclude Include="content\turret.h">
       <Filter>content</Filter>
     </ClInclude>
-    <ClInclude Include="content\placementarea.h">
-      <Filter>content</Filter>
-    </ClInclude>
     <ClInclude Include="content\player.h">
       <Filter>content</Filter>
     </ClInclude>
     <ClInclude Include="graphics\editorstylecontroller.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="common\array2d.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="content\enemy.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="content\contentcommon.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm\pathfinder.h">
+      <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

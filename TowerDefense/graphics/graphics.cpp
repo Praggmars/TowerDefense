@@ -24,12 +24,12 @@ namespace TowerDefense
 				ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &device, &m_featureLevel, &context);
 
 			if (FAILED(hr))
-				hlp::ThrowIfFailed(D3D11CreateDevice(
+				ThrowIfFailed(D3D11CreateDevice(
 					nullptr, D3D_DRIVER_TYPE_WARP, 0, D3D11_CREATE_DEVICE_BGRA_SUPPORT, featureLevels,
 					ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, &device, &m_featureLevel, &context));
 
-			hlp::ThrowIfFailed(device.As(&m_device3D));
-			hlp::ThrowIfFailed(context.As(&m_context3D));
+			ThrowIfFailed(device.As(&m_device3D));
+			ThrowIfFailed(context.As(&m_context3D));
 		}
 		void Graphics::CreateRasterizerState()
 		{
@@ -46,7 +46,7 @@ namespace TowerDefense
 			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 			rasterizerDesc.ForcedSampleCount = 0;
 			rasterizerDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-			hlp::ThrowIfFailed(m_device3D->CreateRasterizerState2(&rasterizerDesc, &m_rasterizerState));
+			ThrowIfFailed(m_device3D->CreateRasterizerState2(&rasterizerDesc, &m_rasterizerState));
 
 			m_context3D->RSSetState(m_rasterizerState.Get());
 		}
@@ -67,7 +67,7 @@ namespace TowerDefense
 			depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 			depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 			depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-			hlp::ThrowIfFailed(m_device3D->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState));
+			ThrowIfFailed(m_device3D->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState));
 			m_context3D->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 		}
 		void Graphics::CreateWindowSizeDependentResources()
@@ -85,15 +85,15 @@ namespace TowerDefense
 			m_swapChainPanel->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::High, ref new Windows::UI::Core::DispatchedHandler([=]()
 				{
 					Microsoft::WRL::ComPtr<ISwapChainPanelNative> panelNative;
-					hlp::ThrowIfFailed(reinterpret_cast<IUnknown*>(m_swapChainPanel)->QueryInterface(IID_PPV_ARGS(&panelNative)));
-					hlp::ThrowIfFailed(panelNative->SetSwapChain(m_swapChain.Get()));
+					ThrowIfFailed(reinterpret_cast<IUnknown*>(m_swapChainPanel)->QueryInterface(IID_PPV_ARGS(&panelNative)));
+					ThrowIfFailed(panelNative->SetSwapChain(m_swapChain.Get()));
 				}, Platform::CallbackContext::Any));
 		}
 		void Graphics::CreateSwapChain()
 		{
 			if (m_swapChain)
 			{
-				hlp::ThrowIfFailed(m_swapChain->ResizeBuffers(2, m_width, m_height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
+				ThrowIfFailed(m_swapChain->ResizeBuffers(2, m_width, m_height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
 			}
 			else
 			{
@@ -112,33 +112,33 @@ namespace TowerDefense
 				swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 				Microsoft::WRL::ComPtr<IDXGIDevice3> dxgiDevice;
-				hlp::ThrowIfFailed(m_device3D.As(&dxgiDevice));
+				ThrowIfFailed(m_device3D.As(&dxgiDevice));
 
 				Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-				hlp::ThrowIfFailed(dxgiDevice->GetAdapter(&dxgiAdapter));
+				ThrowIfFailed(dxgiDevice->GetAdapter(&dxgiAdapter));
 
 				Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;
-				hlp::ThrowIfFailed(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
+				ThrowIfFailed(dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)));
 
 				Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain;
-				hlp::ThrowIfFailed(dxgiFactory->CreateSwapChainForComposition(m_device3D.Get(), &swapChainDesc, nullptr, &swapChain));
+				ThrowIfFailed(dxgiFactory->CreateSwapChainForComposition(m_device3D.Get(), &swapChainDesc, nullptr, &swapChain));
 
-				hlp::ThrowIfFailed(swapChain.As(&m_swapChain));
+				ThrowIfFailed(swapChain.As(&m_swapChain));
 
-				hlp::ThrowIfFailed(dxgiDevice->SetMaximumFrameLatency(1));
+				ThrowIfFailed(dxgiDevice->SetMaximumFrameLatency(1));
 			}
 		}
 		void Graphics::CreateRenderTargetView()
 		{
 			Microsoft::WRL::ComPtr<ID3D11Texture2D1> backBuffer;
-			hlp::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-			hlp::ThrowIfFailed(m_device3D->CreateRenderTargetView1(backBuffer.Get(), nullptr, &m_renderTargetView));
+			ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+			ThrowIfFailed(m_device3D->CreateRenderTargetView1(backBuffer.Get(), nullptr, &m_renderTargetView));
 
 			CD3D11_TEXTURE2D_DESC1 depthStencilDesc(DXGI_FORMAT_D24_UNORM_S8_UINT, m_width, m_height, 1, 1, D3D11_BIND_DEPTH_STENCIL);
 			Microsoft::WRL::ComPtr<ID3D11Texture2D1> depthStencil;
-			hlp::ThrowIfFailed(m_device3D->CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencil));
+			ThrowIfFailed(m_device3D->CreateTexture2D1(&depthStencilDesc, nullptr, &depthStencil));
 			CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
-			hlp::ThrowIfFailed(m_device3D->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, &m_depthStencilView));
+			ThrowIfFailed(m_device3D->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, &m_depthStencilView));
 		}
 		void Graphics::CreateViewport()
 		{
@@ -184,7 +184,7 @@ namespace TowerDefense
 		}
 		void Graphics::Present()
 		{
-			hlp::ThrowIfFailed(m_swapChain->Present(1, 0));
+			ThrowIfFailed(m_swapChain->Present(1, 0));
 			/*DXGI_PRESENT_PARAMETERS parameters = { 0 };
 			HRESULT hr = m_swapChain->Present1(1, 0, &parameters);
 			m_context3D->DiscardView1(m_renderTargetView.Get(), nullptr, 0);

@@ -6,6 +6,7 @@ namespace TowerDefense
 	namespace gfx
 	{
 		Scene::Scene(Graphics& graphics) :
+			m_graphics(graphics),
 			m_vertexShader(VertexShader::CreateP(graphics)),
 			m_vsMatrixBuffer(ShaderBuffer::CreateP(graphics, sizeof(mth::float4x4) * 2)),
 			m_pixelShader(PixelShader::CreateP(graphics)),
@@ -20,46 +21,31 @@ namespace TowerDefense
 		{
 			return std::make_unique<Scene>(graphics);
 		}
-		void Scene::AddEntity(Entity::P entity)
+		void Scene::StartRendering(Camera& camera)
 		{
-			m_entities.push_back(entity);
+			m_graphics.Clear(static_cast<float*>(m_bgColor));
+
+			m_vertexShader->SetToRender(m_graphics);
+			m_vsMatrixBuffer->SetToVertexShader(m_graphics);
+			m_pixelShader->SetToRender(m_graphics);
+			m_psLightBuffer->SetToPixelShader(m_graphics);
+			m_psMaterialBuffer->SetToPixelShader(m_graphics, 1);
+
+			camera.Update();
+			m_matrixBuffer[1] = camera.CameraMatrix();
+
+			m_lightData.m_lightPosition = camera.position;
+			m_psLightBuffer->WriteBuffer(m_graphics, &m_lightData);
 		}
-		void Scene::RemoveEntity(Entity::P entity)
+		void Scene::RenderEntity(Entity& entity)
 		{
-			for (auto e = m_entities.begin(); e != m_entities.end(); e++)
-			{
-				if (*e == entity)
-				{
-					m_entities.erase(e);
-					return;
-				}
-			}
+			m_matrixBuffer[0] = entity.WorldMatrix();
+			m_vsMatrixBuffer->WriteBuffer(m_graphics, m_matrixBuffer);
+			entity.Render(m_graphics, *m_psMaterialBuffer);
 		}
-		void Scene::Render(Graphics& graphics)
+		void Scene::EndRendering()
 		{
-			graphics.Clear(static_cast<float*>(m_bgColor));
-
-			m_vertexShader->SetToRender(graphics);
-			m_vsMatrixBuffer->SetToVertexShader(graphics);
-			m_pixelShader->SetToRender(graphics);
-			m_psLightBuffer->SetToPixelShader(graphics);
-			m_psMaterialBuffer->SetToPixelShader(graphics, 1);
-
-			mth::float4x4 matrixBuffer[2];
-			m_camera.Update();
-			matrixBuffer[1] = m_camera.CameraMatrix();
-
-			m_lightData.m_lightPosition = m_camera.position;
-			m_psLightBuffer->WriteBuffer(graphics, &m_lightData);
-			
-			for (auto& e : m_entities)
-			{
-				matrixBuffer[0] = e->WorldMatrix();
-				m_vsMatrixBuffer->WriteBuffer(graphics, matrixBuffer);
-				e->Render(graphics, *m_psMaterialBuffer);
-			}
-
-			graphics.Present();
+			m_graphics.Present();
 		}
 	}
 }

@@ -18,6 +18,7 @@ namespace TowerDefense
 		private:
 			gfx::Graphics& m_graphics;
 			GameResources m_gameResources;
+			gfx::Camera m_camera;
 			gfx::Scene::P m_scene;
 			Level::P m_level;
 			Turret::P m_movingTurret;
@@ -29,6 +30,9 @@ namespace TowerDefense
 			mth::float2 m_cursor;
 			mth::float2 m_windowSize;
 			Windows::Foundation::IAsyncAction^ m_mainLoopWorker;
+
+			float m_timeCounter;
+			unsigned m_secondCounter;
 
 		private:
 			void Update(float deltaTime);

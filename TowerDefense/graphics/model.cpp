@@ -59,11 +59,11 @@ namespace TowerDefense
 		{
 			if (loader.Filename()[0] == '\0')
 				return std::make_shared<Model>(graphics, loader);
-			auto model = hlp::ResourceLoadingManager::Instance().FindModel(loader.Filename());
+			auto model = ResourceLoadingManager::Instance().FindModel(loader.Filename());
 			if (!model)
 			{
 				model = std::make_shared<Model>(graphics, loader);
-				hlp::ResourceLoadingManager::Instance().AddModel(model, loader.Filename());
+				ResourceLoadingManager::Instance().AddModel(model, loader.Filename());
 			}
 			return model;
 		}

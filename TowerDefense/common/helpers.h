@@ -6,31 +6,28 @@
 
 namespace TowerDefense
 {
-	namespace hlp
+	void ThrowIfFailed(HRESULT hr);
+
+	struct Color
 	{
-		void ThrowIfFailed(HRESULT hr);
+		unsigned char r;
+		unsigned char g;
+		unsigned char b;
+		unsigned char a;
+	};
 
-		struct Color
-		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-			unsigned char a;
-		};
+	Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::string& shaderCode, const char* entry, const char* target);
 
-		Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::string& shaderCode, const char* entry, const char* target);
+	class Exception
+	{
+		std::wstring m_what;
 
-		class Exception
-		{
-			std::wstring m_what;
+	public:
+		Exception();
+		Exception(const wchar_t* what);
+		static Exception FileOpen(const wchar_t* filename);
+		static Exception FileRead(const wchar_t* filename);
 
-		public:
-			Exception();
-			Exception(const wchar_t* what);
-			static Exception FileOpen(const wchar_t* filename);
-			static Exception FileRead(const wchar_t* filename);
-
-			inline const wchar_t* What() { return m_what.c_str(); }
-		};
-	}
+		inline const wchar_t* What() { return m_what.c_str(); }
+	};
 }

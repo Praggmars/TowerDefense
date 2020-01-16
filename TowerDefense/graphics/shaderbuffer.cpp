@@ -18,7 +18,7 @@ namespace TowerDefense
 			bufferDesc.StructureByteStride = 0;
 			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-			hlp::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_buffer));
+			ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_buffer));
 		}
 		ShaderBuffer::P ShaderBuffer::CreateP(Graphics& graphics, unsigned size)
 		{

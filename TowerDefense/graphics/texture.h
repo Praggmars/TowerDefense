@@ -28,7 +28,7 @@ namespace TowerDefense
 			static Texture::U CreateU(Graphics& graphics, void* data, unsigned width, unsigned height);
 			static Texture::U CreateU(Graphics& graphics, const wchar_t* filename);
 
-			static Texture::P CreateColoredTexture(Graphics& graphics, hlp::Color color, unsigned size);
+			static Texture::P CreateColoredTexture(Graphics& graphics, Color color, unsigned size);
 			static Texture::P CreateDefaultTexture(Graphics& graphics, unsigned size);
 			static Texture::P CreateDefaultNormalmap(Graphics& graphics, unsigned size);
 

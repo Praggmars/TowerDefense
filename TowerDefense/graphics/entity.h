@@ -25,10 +25,13 @@ namespace TowerDefense
 		public:
 			Entity(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox = false);
 			Entity(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox = nullptr);
+			Entity(Model::P model, Material::P material, phy::Hitbox::P hitbox = nullptr);
 			static Entity::P CreateP(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox = false);
 			static Entity::P CreateP(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox = nullptr);
+			static Entity::P CreateP(Model::P model, Material::P material, phy::Hitbox::P hitbox = nullptr);
 			static Entity::U CreateU(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox = false);
 			static Entity::U CreateU(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox = nullptr);
+			static Entity::U CreateU(Model::P model, Material::P material, phy::Hitbox::P hitbox = nullptr);
 
 			void Render(Graphics& graphics, ShaderBuffer& materialBuffer);
 

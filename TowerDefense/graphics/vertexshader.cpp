@@ -62,16 +62,16 @@ PixelInputType main(VertexInputType input)
 			default:
 				target = "vs_3_0";
 			}
-			Microsoft::WRL::ComPtr<ID3DBlob> shaderBuffer = hlp::CompileShader(g_ShaderCode, "main", target);
+			Microsoft::WRL::ComPtr<ID3DBlob> shaderBuffer = CompileShader(g_ShaderCode, "main", target);
 
-			hlp::ThrowIfFailed(graphics.Device3D()->CreateVertexShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), nullptr, &m_vertexShader));
+			ThrowIfFailed(graphics.Device3D()->CreateVertexShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), nullptr, &m_vertexShader));
 			D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[4];
 			inputLayoutDesc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 			inputLayoutDesc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 			inputLayoutDesc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 			inputLayoutDesc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 
-			hlp::ThrowIfFailed(graphics.Device3D()->CreateInputLayout(
+			ThrowIfFailed(graphics.Device3D()->CreateInputLayout(
 				inputLayoutDesc, 4, shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), &m_inputLayout));
 		}
 		VertexShader::P VertexShader::CreateP(Graphics& graphics)

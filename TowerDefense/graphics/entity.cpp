@@ -26,6 +26,8 @@ namespace TowerDefense
 				m_materials[i] = materials[i];
 			m_hitbox = hitbox;
 		}
+		Entity::Entity(Model::P model, Material::P material, phy::Hitbox::P hitbox) :
+			Entity(model, &material, 1, hitbox) {}
 		Entity::P Entity::CreateP(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox)
 		{
 			return std::make_shared<Entity>(graphics, modelLoader, makeHitbox);
@@ -34,6 +36,10 @@ namespace TowerDefense
 		{
 			return std::make_shared<Entity>(model, materials, materialCount, hitbox);
 		}
+		Entity::P Entity::CreateP(Model::P model, Material::P material, phy::Hitbox::P hitbox)
+		{
+			return std::make_shared<Entity>(model, material, hitbox);
+		}
 		Entity::U Entity::CreateU(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox)
 		{
 			return std::make_unique<Entity>(graphics, modelLoader, makeHitbox);
@@ -41,6 +47,10 @@ namespace TowerDefense
 		Entity::U Entity::CreateU(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox)
 		{
 			return std::make_unique<Entity>(model, materials, materialCount, hitbox);
+		}
+		Entity::U Entity::CreateU(Model::P model, Material::P material, phy::Hitbox::P hitbox)
+		{
+			return std::make_unique<Entity>(model, material, hitbox);
 		}
 		void Entity::Render(Graphics& graphics, ShaderBuffer& materialBuffer)
 		{

@@ -29,7 +29,7 @@ namespace TowerDefense
 			t2dd.Usage = D3D11_USAGE_DEFAULT;
 			t2dd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			t2dd.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-			hlp::ThrowIfFailed(device->CreateTexture2D(&t2dd, nullptr, &texture));
+			ThrowIfFailed(device->CreateTexture2D(&t2dd, nullptr, &texture));
 			context->UpdateSubresource(texture.Get(), 0, nullptr, data, m_width * 4, 0);
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC srvd{};
@@ -37,7 +37,7 @@ namespace TowerDefense
 			srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			srvd.Texture2D.MostDetailedMip = 0;
 			srvd.Texture2D.MipLevels = -1;
-			hlp::ThrowIfFailed(device->CreateShaderResourceView(texture.Get(), &srvd, &m_shaderResourceView));
+			ThrowIfFailed(device->CreateShaderResourceView(texture.Get(), &srvd, &m_shaderResourceView));
 			context->GenerateMips(m_shaderResourceView.Get());
 		}
 		void Texture::LoadFromFile(Graphics& graphics, const wchar_t* filename)
@@ -49,14 +49,14 @@ namespace TowerDefense
 			unsigned width, height;
 			std::vector<unsigned char> pixels;
 
-			hlp::ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&factory));
-			hlp::ThrowIfFailed(factory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder));
-			hlp::ThrowIfFailed(decoder->GetFrame(0, &frame));
-			hlp::ThrowIfFailed(factory->CreateFormatConverter(&converter));
-			hlp::ThrowIfFailed(converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPRGBA, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeCustom));
-			hlp::ThrowIfFailed(converter->GetSize(&width, &height));
+			ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&factory));
+			ThrowIfFailed(factory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder));
+			ThrowIfFailed(decoder->GetFrame(0, &frame));
+			ThrowIfFailed(factory->CreateFormatConverter(&converter));
+			ThrowIfFailed(converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPRGBA, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeCustom));
+			ThrowIfFailed(converter->GetSize(&width, &height));
 			pixels.resize(width * height * 4);
-			hlp::ThrowIfFailed(converter->CopyPixels(nullptr, width * 4, pixels.size(), pixels.data()));
+			ThrowIfFailed(converter->CopyPixels(nullptr, width * 4, pixels.size(), pixels.data()));
 			CreateTexture(graphics, pixels.data(), width, height);
 		}
 		Texture::Texture(Graphics& graphics, void* data, unsigned width, unsigned height)
@@ -73,11 +73,11 @@ namespace TowerDefense
 		}
 		Texture::P Texture::CreateP(Graphics& graphics, const wchar_t* filename)
 		{
-			auto texture = hlp::ResourceLoadingManager::Instance().FindTexture(filename);
+			auto texture = ResourceLoadingManager::Instance().FindTexture(filename);
 			if (!texture)
 			{
 				texture = std::make_shared<Texture>(graphics, filename);
-				hlp::ResourceLoadingManager::Instance().AddTexture(texture, filename);
+				ResourceLoadingManager::Instance().AddTexture(texture, filename);
 			}
 			return texture;
 		}
@@ -89,10 +89,10 @@ namespace TowerDefense
 		{
 			return std::make_unique<Texture>(graphics, filename);
 		}
-		Texture::P Texture::CreateColoredTexture(Graphics& graphics, hlp::Color color, unsigned size)
+		Texture::P Texture::CreateColoredTexture(Graphics& graphics, Color color, unsigned size)
 		{
-			std::vector<hlp::Color> pixels(size * size);
-			for (hlp::Color& c : pixels)
+			std::vector<Color> pixels(size * size);
+			for (Color& c : pixels)
 				c = color;
 			return std::make_shared<Texture>(graphics, pixels.data(), size, size);
 		}

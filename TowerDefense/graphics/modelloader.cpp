@@ -86,7 +86,7 @@ namespace TowerDefense
 			Clear();
 			std::ifstream infile(filename, std::ios::in | std::ios::binary);
 			if (!infile.is_open())
-				throw hlp::Exception::FileOpen(filename);
+				throw Exception::FileOpen(filename);
 			m_filename = filename;
 
 			unsigned vertexCount;
@@ -96,43 +96,43 @@ namespace TowerDefense
 			unsigned stringSize;
 
 			infile.read(reinterpret_cast<char*>(&vertexCount), sizeof(vertexCount));
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			infile.read(reinterpret_cast<char*>(&indexCount), sizeof(indexCount));
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			infile.read(reinterpret_cast<char*>(&groupCount), sizeof(groupCount));
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			infile.read(reinterpret_cast<char*>(&materialCount), sizeof(materialCount));
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_vertices.resize(vertexCount);
 			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0])* vertexCount);
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_indices.resize(indexCount);
 			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0])* indexCount);
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_groups.resize(groupCount);
 			infile.read(reinterpret_cast<char*>(m_groups.data()), sizeof(m_groups[0])* groupCount);
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_materials.resize(materialCount);
 			for (unsigned i = 0; i < materialCount; i++)
 			{
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].texture.resize(stringSize + 1);
 				infile.read(reinterpret_cast<char*>(m_materials[i].texture.data()), sizeof(wchar_t)* (stringSize + 1));
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].normalmap.resize(stringSize + 1);
 				infile.read(reinterpret_cast<char*>(m_materials[i].normalmap.data()), sizeof(wchar_t)* (stringSize + 1));
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 			}
 		}
 		void ModelLoader::LoadText(const wchar_t* filename)
@@ -140,7 +140,7 @@ namespace TowerDefense
 			Clear();
 			std::wifstream infile(filename, std::ios::in | std::ios::binary);
 			if (!infile.is_open())
-				throw hlp::Exception::FileOpen(filename);
+				throw Exception::FileOpen(filename);
 			m_filename = filename;
 
 			unsigned vertexCount;
@@ -150,28 +150,28 @@ namespace TowerDefense
 			unsigned stringSize;
 
 			infile >> vertexCount >> indexCount >> groupCount >> materialCount;
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_vertices.resize(vertexCount);
 			for (auto& v : m_vertices)
 				infile >> v.position >> v.texcoord >> v.normal >> v.tangent;
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_indices.resize(indexCount);
 			for (auto& i : m_indices)
 				infile >> i;
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_groups.resize(groupCount);
 			for (auto& g : m_groups)
 				infile >> g.startIndex >> g.indexCount >> g.materialIndex;
-			if (!infile.good()) throw hlp::Exception::FileRead(filename);
+			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_materials.resize(materialCount);
 			for (unsigned i = 0; i < materialCount; i++)
 			{
 				infile >> stringSize;
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].texture.reserve(stringSize + 1);
 				for (size_t i = 0; i < stringSize; i++)
 				{
@@ -179,10 +179,10 @@ namespace TowerDefense
 					infile >> ch;
 					m_materials[i].texture += ch;
 				}
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 
 				infile >> stringSize;
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].normalmap.reserve(stringSize + 1);
 				for (size_t i = 0; i < stringSize; i++)
 				{
@@ -190,7 +190,7 @@ namespace TowerDefense
 					infile >> ch;
 					m_materials[i].normalmap += ch;
 				}
-				if (!infile.good()) throw hlp::Exception::FileRead(filename);
+				if (!infile.good()) throw Exception::FileRead(filename);
 			}
 		}
 		void ModelLoader::Clear()

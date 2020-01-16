@@ -5,52 +5,12 @@ namespace TowerDefense
 {
 	namespace content
 	{
-		GameResources::GameResources(gfx::Graphics& graphics)
-		{
-			gfx::ModelLoader ml;
-			ml.CreateCube(mth::float3(-0.45f), mth::float3(0.9f));
-			turretTexture = gfx::Texture::CreateColoredTexture(graphics, { 200, 255, 200, 255 }, 16);
-			turretNormalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
-			turretModel = gfx::Model::CreateP(graphics, ml);
-			turretHitbox = phy::Hitbox::CreateP(ml);
-
-			ml.CreateCube(mth::float3(-0.35f), mth::float3(0.7f));
-			enemyTexture = gfx::Texture::CreateColoredTexture(graphics, { 255, 200, 200, 255 }, 16);
-			enemyNormalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
-			enemyModel = gfx::Model::CreateP(graphics, ml);
-			enemyHitbox = phy::Hitbox::CreateP(ml);
-
-			ml.CreateQuad(mth::float2(-0.475f), mth::float2(0.95f), 0.0f);
-			areaTexture = gfx::Texture::CreateColoredTexture(graphics, { 200, 200, 255, 255 }, 16);
-			areaNormalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
-			areaModel = gfx::Model::CreateP(graphics, ml);
-			areaHitbox = phy::Hitbox::CreateP(ml);
-		}
-
 		Level::Level(gfx::Scene::P scene, GameResources& gameResources, int width, int height) :
-			m_width(width), m_height(height)
-		{
-			scene->BackgroundColor(mth::float4(0.8f, 0.4f, 0.2f, 1.0f));
-			m_places.reserve(width * height);
-
-			for (int y = 0; y < m_height; y++)
-			{
-				for (int x = 0; x < m_width; x++)
-				{
-					gfx::Material::P material = gfx::Material::CreateP(gameResources.areaTexture, gameResources.areaNormalmap);
-					material->MaterialBuffer().color = mth::float4(0.0f, 0.0f, 0.0f, 1.0f);
-					PlacementArea::P e = PlacementArea::CreateP(gameResources.areaModel, &material, 1, gameResources.areaHitbox);
-					e->position.x = x - m_width * 0.5f;
-					e->position.z = y - m_height * 0.5f;
-					scene->AddEntity(e);
-					m_places.push_back(e);
-				}
-			}
-		}
-		PlacementArea::P Level::Place(int x, int y)
-		{
-			return m_places[y * m_width + x];
-		}
+			m_scene(scene),
+			m_levelMap(GameObject::CreateP(gameResources.area)),
+			m_places(width, height),
+			m_enemyStartPoint{ 0, height / 2 },
+			m_enemyEndPoint{ width - 1, height / 2 } {}
 		Level::P Level::CreateP(gfx::Scene::P scene, GameResources& gameResources, int width, int height)
 		{
 			return std::make_shared<Level>(scene, gameResources, width, height);
@@ -61,147 +21,166 @@ namespace TowerDefense
 		}
 		void Level::Update(float delta)
 		{
+			for (auto& e : m_enemies)
+				e->Update(delta);
+
 			for (auto& a : m_places)
-				for (auto& m : a->Materials())
-					m->MaterialBuffer().textureWeight = 1.0f;
+			{
+				if (a.turret)
+				{
+					for (auto& m : a.turret->Materials())
+						m->MaterialBuffer().textureWeight = 1.0f;
+					a.turret->Update(delta);
+					a.turret->Shoot(m_enemies.data(), m_enemies.size());
+				}
+			}
+
+			auto iter = m_enemies.begin();
+			while (iter != m_enemies.end())
+			{
+				auto e = *iter;
+				if (e->Finished() || !e->Alive())
+					iter = m_enemies.erase(iter);
+				else
+					iter++;
+			}
 		}
-		PlacementArea::P Level::PointedArea(mth::float3 origin, mth::float3 direction)
+		void Level::Render(gfx::Scene& scene)
 		{
-			PlacementArea::P area;
+			scene.RenderEntity(*m_levelMap);
+			for (auto& p : m_places)
+				if (p.turret)
+					scene.RenderEntity(*p.turret);
+			for (auto& e : m_enemies)
+				scene.RenderEntity(*e);
+		}
+		std::optional<alg::Point> Level::PointedArea(mth::float3 origin, mth::float3 direction)
+		{
+			float distance = m_levelMap->Hitbox()->DistanceInDirection(origin, direction, m_levelMap->WorldMatrix());
+			if (distance == NAN || distance == INFINITY || distance == -INFINITY)
+				return {};
+			mth::float3 groundPoint = origin + distance * direction;
+			alg::Point p = {
+				static_cast<int>(floor(groundPoint.x)),
+				static_cast<int>(floor(groundPoint.z))
+			};
+			return p;
+		}
+		Turret::P Level::PointedTurret(mth::float3 origin, mth::float3 direction)
+		{
+			Turret::P turret;
 			float minDistance = INFINITY;
 			for (auto& a : m_places)
 			{
-				if (a->Hitbox())
+				Turret::P t = a.turret;
+				if (t && t->Hitbox())
 				{
-					float distance = a->Hitbox()->DistanceInDirection(origin, direction, a->WorldMatrix());
+					float distance = t->Hitbox()->DistanceInDirection(origin, direction, t->WorldMatrix());
 					if (distance < minDistance)
 					{
 						minDistance = distance;
-						area = a;
+						turret = t;
 					}
 				}
 			}
-			return area;
+			return turret;
 		}
-		void Level::HighlightPath(mth::vec2<int> start, mth::vec2<int> end)
+		Enemy::P Level::PointedEnemy(mth::float3 origin, mth::float3 direction)
 		{
-			class PathFinder
+			Enemy::P enemy;
+			float minDistance = INFINITY;
+			for (auto& e : m_enemies)
 			{
-				using Point = mth::vec2<int>;
-				struct Node
+				if (e->Hitbox())
 				{
-					enum class Type { BLOCK, PATH, EMPTY, START, END };
-					Type type;
-					unsigned cost;
-					Point prev;
-					bool needCheck;
-				};
-
-				unsigned m_width, m_height;
-				std::vector<Node> nodes;
-				Point m_start;
-				Point m_end;
-
-			private:
-				inline Node& node(int x, int y) { return nodes[y * m_width + x]; }
-				inline Node& node(Point p) { return nodes[p.y * m_width + p.x]; }
-				bool LeastCostEstimate(Point& best)
-				{
-					unsigned least = UINT32_MAX;
-					for (int y = 0; y < m_height; y++)
+					float distance = e->Hitbox()->DistanceInDirection(origin, direction, e->WorldMatrix());
+					if (distance < minDistance)
 					{
-						for (int x = 0; x < m_width; x++)
-						{
-							Node& n = node(x, y);
-							if (n.needCheck)
-							{
-								Point p{ x, y };
-								int estimate = abs(p.x - m_end.x) + abs(p.y - m_end.y) + n.cost;
-								if (estimate < least)
-								{
-									least = estimate;
-									best = p;
-								}
-							}
-						}
-					}
-					return least != UINT32_MAX;
-				}
-
-			public:
-
-				PathFinder(PlacementArea::P* places, unsigned width, unsigned height) :
-					m_width(width), m_height(height)
-				{
-					nodes.resize(width * height);
-					for (int i = 0; i < width * height; i++)
-						nodes[i].type = places[i]->HasTurret() ? Node::Type::BLOCK : Node::Type::EMPTY;
-				}
-
-				void FindPath(Point start, Point end)
-				{
-					node(m_start = start).type = Node::Type::START;
-					node(m_end = end).type = Node::Type::END;
-
-					for (Node& n : nodes)
-					{
-						n.cost = UINT32_MAX;
-						n.needCheck = false;
-					}
-
-					node(m_start).cost = 0;
-					Point current = m_start;
-					do
-					{
-						node(current).needCheck = false;
-						Point points[]{
-							Point(current.x - 1, current.y),
-							Point(current.x + 1, current.y),
-							Point(current.x, current.y - 1),
-							Point(current.x, current.y + 1) };
-						for (Point p : points)
-						{
-							if (p.x >= 0 && p.x < m_width && p.y >= 0 && p.y < m_height)
-							{
-								Node& neighbor = node(p);
-								if (neighbor.type == Node::Type::END)
-								{
-									neighbor.prev = current;
-									Point n = neighbor.prev;
-									for (Point n = neighbor.prev; node(n).type != Node::Type::START; n = node(n).prev)
-										node(n).type = Node::Type::PATH;
-									return;
-								}
-								if (neighbor.type == Node::Type::EMPTY)
-								{
-									if (neighbor.cost > node(current).cost + 1)
-									{
-										neighbor.cost = node(current).cost + 1;
-										neighbor.prev = current;
-										neighbor.needCheck = true;
-									}
-								}
-							}
-						}
-					} while (LeastCostEstimate(current));
-				}
-
-				void ColorPlaces(PlacementArea::P* places)
-				{
-					for (int i = 0; i < m_width * m_height; i++)
-					{
-						if (nodes[i].type == Node::Type::PATH || nodes[i].type == Node::Type::START || nodes[i].type == Node::Type::END)
-						{
-							for (auto& m : places[i]->Materials())
-								m->MaterialBuffer().textureWeight = 0.25f;
-						}
+						minDistance = distance;
+						enemy = e;
 					}
 				}
-			};
-
-			PathFinder pf(m_places.data(), m_width, m_height);
-			pf.FindPath(start, end);
-			pf.ColorPlaces(m_places.data());
+			}
+			return enemy;
+		}
+		GameObject::P Level::PointedTurretOrEnemy(mth::float3 origin, mth::float3 direction)
+		{
+			GameObject::P ret;
+			float minDistance = INFINITY;
+			for (auto& a : m_places)
+			{
+				Turret::P t = a.turret;
+				if (t && t->Hitbox())
+				{
+					float distance = t->Hitbox()->DistanceInDirection(origin, direction, t->WorldMatrix());
+					if (distance < minDistance)
+					{
+						minDistance = distance;
+						ret = t;
+					}
+				}
+			}
+			for (auto& e : m_enemies)
+			{
+				if (e->Hitbox())
+				{
+					float distance = e->Hitbox()->DistanceInDirection(origin, direction, e->WorldMatrix());
+					if (distance < minDistance)
+					{
+						minDistance = distance;
+						ret = e;
+					}
+				}
+			}
+			return ret;
+		}
+		void Level::PlaceTurret(alg::Point mapPosition, Turret::P turret)
+		{
+			auto& place = m_places(mapPosition.x, mapPosition.y);
+			if (!place.turret)
+			{
+				place.turret = turret;
+				turret->Place(mapPosition);
+				RegeneratePaths();
+			}
+		}
+		void Level::DestroyTurret(alg::Point mapPosition)
+		{
+			auto& place = m_places(mapPosition.x, mapPosition.y);
+			if (place.turret)
+			{
+				place.turret = nullptr;
+				RegeneratePaths();
+			}
+		}
+		void Level::RegeneratePaths()
+		{
+			for (auto& e : m_enemies)
+			{
+				UpdatePathFinder(e->PathFinder());
+				e->RestartPath(m_enemyEndPoint);
+			}
+		}
+		void Level::UpdatePathFinder(alg::PathFinder& pathFinder)
+		{
+			for (size_t y = 0; y < m_places.height(); y++)
+			{
+				for (size_t x = 0; x < m_places.width(); x++)
+				{
+					if (m_places(x, y).turret)
+						pathFinder.Block(x, y);
+					else
+						pathFinder.Unblock(x, y);
+				}
+			}
+		}
+		void Level::SpawnEnemy(Enemy::P enemy)
+		{
+			enemy->position = mth::float3(m_enemyStartPoint.x, 0.0f, m_enemyStartPoint.y);
+			enemy->PathFinder().Resize(m_places.width(), m_places.height());
+			UpdatePathFinder(enemy->PathFinder());
+			enemy->StartPath(m_enemyStartPoint, m_enemyEndPoint);
+			m_enemies.push_back(enemy);
 		}
 	}
 }

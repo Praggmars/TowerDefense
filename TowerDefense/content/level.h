@@ -1,45 +1,37 @@
 #pragma once
 
-#include "placementarea.h"
 #include "turret.h"
+#include "enemy.h"
 #include "graphics/scene.h"
+#include "common/array2d.hpp"
+#include "contentcommon.h"
+#include <optional>
 
 namespace TowerDefense
 {
 	namespace content
 	{
-		struct GameResources
-		{
-			gfx::Model::P   turretModel;
-			gfx::Texture::P turretTexture;
-			gfx::Texture::P turretNormalmap;
-			phy::Hitbox::P  turretHitbox;
-			
-			gfx::Model::P   enemyModel;
-			gfx::Texture::P enemyTexture;
-			gfx::Texture::P enemyNormalmap;
-			phy::Hitbox::P  enemyHitbox;
-
-			gfx::Model::P   areaModel;
-			gfx::Texture::P areaTexture;
-			gfx::Texture::P areaNormalmap;
-			phy::Hitbox::P  areaHitbox;
-
-			GameResources(gfx::Graphics& graphics);
-		};
-
 		class Level
 		{
 		public:
 			SMART_PTR(Level)
 		private:
-			int m_width;
-			int m_height;
-			std::vector<PlacementArea::P> m_places;
-			std::vector<Turret::P> m_turrets;
+			struct MapElement
+			{
+				Turret::P turret;
+				alg::Point mapPosition;
+			};
+			gfx::Scene::P m_scene;
+			GameObject::P m_levelMap;
+			Array2D<MapElement> m_places;
+			std::vector<Enemy::P> m_enemies;
+
+			alg::Point m_enemyStartPoint;
+			alg::Point m_enemyEndPoint;
 
 		private:
-			PlacementArea::P Place(int x, int y);
+			void RegeneratePaths();
+			void UpdatePathFinder(alg::PathFinder& pathFinder);
 
 		public:
 			Level(gfx::Scene::P scene, GameResources& gameResources, int width, int height);
@@ -47,10 +39,16 @@ namespace TowerDefense
 			static Level::U CreateU(gfx::Scene::P scene, GameResources& gameResources, int width, int height);
 
 			void Update(float delta);
+			void Render(gfx::Scene& scene);
 
-			PlacementArea::P PointedArea(mth::float3 origin, mth::float3 direction);
+			void PlaceTurret(alg::Point mapPosition, Turret::P turret);
+			void DestroyTurret(alg::Point mapPosition);
+			void SpawnEnemy(Enemy::P enemy);
 
-			void HighlightPath(mth::vec2<int> start, mth::vec2<int> end);
+			std::optional<alg::Point> PointedArea(mth::float3 origin, mth::float3 direction);
+			Turret::P PointedTurret(mth::float3 origin, mth::float3 direction);
+			Enemy::P PointedEnemy(mth::float3 origin, mth::float3 direction);
+			GameObject::P PointedTurretOrEnemy(mth::float3 origin, mth::float3 direction);
 		};
 	}
 }

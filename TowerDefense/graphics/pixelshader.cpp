@@ -74,8 +74,8 @@ float4 main(PixelInputType input) : SV_TARGET
 			default:
 				target = "ps_3_0";
 			}
-			Microsoft::WRL::ComPtr<ID3DBlob> shaderBuffer = hlp::CompileShader(g_ShaderCode, "main", target);
-			hlp::ThrowIfFailed(graphics.Device3D()->CreatePixelShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), nullptr, &m_pixelShader));
+			Microsoft::WRL::ComPtr<ID3DBlob> shaderBuffer = CompileShader(g_ShaderCode, "main", target);
+			ThrowIfFailed(graphics.Device3D()->CreatePixelShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), nullptr, &m_pixelShader));
 		}
 		PixelShader::P PixelShader::CreateP(Graphics& graphics)
 		{
