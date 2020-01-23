@@ -21,7 +21,7 @@ namespace TowerDefense
 		m_game = content::Game::CreateU(*m_graphics);
 	}
 
-	void TowerDefense::MainPage::OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+	void MainPage::OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
 	{
 		m_game->WindowSizeChanged(mth::float2(e->NewSize.Width, e->NewSize.Height));
 		Concurrency::critical_section::scoped_lock lock(m_graphics->GetLock());

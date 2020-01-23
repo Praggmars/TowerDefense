@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>0cca091e-df27-4a6c-8695-8d2cdf03c57b</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{ca74e94a-07d8-45a5-99ca-32abf25377db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{7de92f57-6361-40d9-ac6e-af50bf4f8c7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{7538cabf-f9b8-4684-addc-133df1a0f2d6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="common\helpers.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\resourceloadingmanager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\modelloader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\texture.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\camera.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\graphics.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\model.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="common\helpers.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\resourceloadingmanager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="math\formulas.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\geometry.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\linalg.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix2x2.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix3x3.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix4x4.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\position.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\quaternion.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector2.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector3.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector4.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\model.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\modelloader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\texture.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\camera.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\graphics.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assimp.dll" />
+  </ItemGroup>
+</Project>
