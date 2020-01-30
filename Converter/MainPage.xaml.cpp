@@ -34,9 +34,8 @@ namespace Converter
 		m_shadowMap = gfx::ShadowMap::CreateU(*m_graphics, static_cast<unsigned>(m_shadowMapSize), static_cast<unsigned>(m_shadowMapSize));
 		m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &Converter::MainPage::OnSizeChanged);
 
-		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
-		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
-		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\yamakaze\yamakaze_lifebelt.obj)");
+		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
+		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
 		//m_modelLoaders[1]->Transform(mth::float4x4::Translation(mth::float3(0.0f, 2.0f, 0.0f)));
 		//m_modelLoaders[1]->CreateResources(*m_graphics);
 
