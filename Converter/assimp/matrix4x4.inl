@@ -109,7 +109,7 @@ inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiMatrix3x3t<TReal>& m)
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation, const aiVector3t<TReal>& position)
+inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation, const aiVector3t<TReal>& lightPosition)
 {
 	// build a 3x3 rotation matrix
 	aiMatrix3x3t<TReal> m = rotation.GetMatrix();
@@ -117,17 +117,17 @@ inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiVector3t<TReal>& scaling, cons
 	a1 = m.a1 * scaling.x;
 	a2 = m.a2 * scaling.x;
 	a3 = m.a3 * scaling.x;
-	a4 = position.x;
+	a4 = lightPosition.x;
 
 	b1 = m.b1 * scaling.y;
 	b2 = m.b2 * scaling.y;
 	b3 = m.b3 * scaling.y;
-	b4 = position.y;
+	b4 = lightPosition.y;
 	
 	c1 = m.c1 * scaling.z;
 	c2 = m.c2 * scaling.z;
 	c3 = m.c3 * scaling.z;
-	c4= position.z;
+	c4= lightPosition.z;
 
 	d1 = static_cast<TReal>(0.0);
 	d2 = static_cast<TReal>(0.0);
@@ -299,14 +299,14 @@ inline bool aiMatrix4x4t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsil
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
 inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-	aiVector3t<TReal>& position) const
+	aiVector3t<TReal>& lightPosition) const
 {
 	const aiMatrix4x4t<TReal>& _this = *this;
 
 	// extract translation
-	position.x = _this[0][3];
-	position.y = _this[1][3];
-	position.z = _this[2][3];
+	lightPosition.x = _this[0][3];
+	lightPosition.y = _this[1][3];
+	lightPosition.z = _this[2][3];
 
 	// extract the rows of the matrix
 	aiVector3t<TReal> vRows[3] = {
@@ -353,14 +353,14 @@ inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuater
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
 inline void aiMatrix4x4t<TReal>::DecomposeNoScaling (aiQuaterniont<TReal>& rotation,
-	aiVector3t<TReal>& position) const
+	aiVector3t<TReal>& lightPosition) const
 {
 	const aiMatrix4x4t<TReal>& _this = *this;
 
 	// extract translation
-	position.x = _this[0][3];
-	position.y = _this[1][3];
-	position.z = _this[2][3];
+	lightPosition.x = _this[0][3];
+	lightPosition.y = _this[1][3];
+	lightPosition.z = _this[2][3];
 
 	// extract rotation
 	rotation = aiQuaterniont<TReal>((aiMatrix3x3t<TReal>)_this);

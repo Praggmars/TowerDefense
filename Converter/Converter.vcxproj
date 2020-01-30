@@ -205,6 +205,8 @@
     <ClInclude Include="graphics\graphics.h" />
     <ClInclude Include="graphics\model.h" />
     <ClInclude Include="graphics\modelloader.h" />
+    <ClInclude Include="graphics\pointlight.h" />
+    <ClInclude Include="graphics\shadowmap.h" />
     <ClInclude Include="graphics\texture.h" />
     <ClInclude Include="math\formulas.hpp" />
     <ClInclude Include="math\geometry.hpp" />
@@ -257,6 +259,8 @@
     <ClCompile Include="graphics\graphics.cpp" />
     <ClCompile Include="graphics\model.cpp" />
     <ClCompile Include="graphics\modelloader.cpp" />
+    <ClCompile Include="graphics\pointlight.cpp" />
+    <ClCompile Include="graphics\shadowmap.cpp" />
     <ClCompile Include="graphics\texture.cpp" />
     <ClCompile Include="MainPage.xaml.cpp">
       <DependentUpon>MainPage.xaml</DependentUpon>

@@ -18,18 +18,24 @@
                         PointerWheelChanged="OnPointerWheelChanged"/>
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Visible">
             <StackPanel x:Name="m_menuPanel" Background="#FFFFEEDD" Padding="0,0,10,0">
-                <TextBox x:Name="m_filenameTextBox" Margin="10,10,10,10"/>
+                <TextBlock Text="Model" FontSize="20" Margin="10,10,10,0"/>
+                <ComboBox x:Name="m_modelList"  HorizontalAlignment="Stretch" Margin="10,10,10,10" DropDownOpened="ModelList_DropDownOpened" SelectionChanged="ModelList_SelectionChanged"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <CheckBox x:Name="m_modelShownCheckBox" Content="show" Checked="ModelShownCheckBox_CheckChanged" Unchecked="ModelShownCheckBox_CheckChanged"/>
+                    <Button Content="Delete" Click="DeleteButton_Click"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Export bin" Margin="10,10,10,10" Click="ExportBinButton_Click"/>
                     <Button Content="Export text" Margin="10,10,10,10" Click="ExportTextButton_Click" IsEnabled="False"/>
                 </StackPanel>
                 <TextBlock Text="Material" FontSize="20" Margin="10,10,10,0"/>
-                <ComboBox x:Name="m_materialList" HorizontalAlignment="Stretch" Margin="10,10,10,10" DropDownOpened="m_materialList_DropDownOpened" SelectionChanged="m_materialList_SelectionChanged"/>
+                <ComboBox x:Name="m_materialList" HorizontalAlignment="Stretch" Margin="10,10,10,10" DropDownOpened="MaterialList_DropDownOpened" SelectionChanged="MaterialList_SelectionChanged"/>
                 <TextBlock Text="Texture" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
-                <TextBox x:Name="m_textureTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10"/>
+                <TextBox x:Name="m_textureTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" IsReadOnly="True"/>
                 <TextBlock Text="Normal map" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
                 <TextBox x:Name="m_normalmapTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10"/>
-                <Grid  Margin="10,10,10,10">
+                <TextBlock Text="Diffuse color" FontSize="16" Margin="10,10,10,10"/>
+                <Grid Margin="10,10,10,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -41,21 +47,50 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="Red:" Grid.Column="0" Grid.Row="0"/>
-                    <Slider x:Name="m_redSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="0" Grid.Row="1" Margin="3,3,3,3"/>
+                    <Slider x:Name="m_diffuseRedSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="0" Grid.Row="1" Margin="3,3,3,3"/>
                     <TextBlock Text="Green:" Grid.Column="1" Grid.Row="0"/>
-                    <Slider x:Name="m_greenSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="1" Grid.Row="1" Margin="3,3,3,3"/>
+                    <Slider x:Name="m_diffuseGreenSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="1" Grid.Row="1" Margin="3,3,3,3"/>
                     <TextBlock Text="Blue:" Grid.Column="2" Grid.Row="0"/>
-                    <Slider x:Name="m_blueSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="2" Grid.Row="1" Margin="3,3,3,3"/>
+                    <Slider x:Name="m_diffuseBlueSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="2" Grid.Row="1" Margin="3,3,3,3"/>
                     <TextBlock Text="Alpha:" Grid.Column="3" Grid.Row="0"/>
-                    <Slider x:Name="m_alphaSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="3" Grid.Row="1" Margin="3,3,3,3"/>
+                    <Slider x:Name="m_diffuseAlphaSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="3" Grid.Row="1" Margin="3,3,3,3"/>
                 </Grid>
                 <Grid Margin="10,10,10,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Color weight"/>
-                    <Slider Grid.Column="1" x:Name="m_colorWeightSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625"/>
+                    <TextBlock Grid.Column="0" Text="Texture weight"/>
+                    <Slider Grid.Column="1" x:Name="m_textureWeightSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625"/>
+                </Grid>
+                <TextBlock Text="Specular color" FontSize="16" Margin="10,10,10,10"/>
+                <Grid Margin="10,10,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Red:" Grid.Column="0" Grid.Row="0"/>
+                    <Slider x:Name="m_specularRedSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="0" Grid.Row="1" Margin="3,3,3,3"/>
+                    <TextBlock Text="Green:" Grid.Column="1" Grid.Row="0"/>
+                    <Slider x:Name="m_specularGreenSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="1" Grid.Row="1" Margin="3,3,3,3"/>
+                    <TextBlock Text="Blue:" Grid.Column="2" Grid.Row="0"/>
+                    <Slider x:Name="m_specularBlueSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="2" Grid.Row="1" Margin="3,3,3,3"/>
+                    <TextBlock Text="Alpha:" Grid.Column="3" Grid.Row="0"/>
+                    <Slider x:Name="m_specularAlphaSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="1.0" StepFrequency="0.00390625" Grid.Column="3" Grid.Row="1" Margin="3,3,3,3"/>
+                </Grid>
+                <Grid Margin="10,10,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Specular power"/>
+                    <Slider Grid.Column="1" x:Name="m_specularPowerSlider" ValueChanged="MaterialDataChanged" Minimum="0.0" Maximum="32.0" StepFrequency="0.00390625"/>
                 </Grid>
             </StackPanel>
         </ScrollViewer>

@@ -1,11 +1,36 @@
 #pragma once
 
 #include "common/helpers.h"
+#include "math/linalg.hpp"
 
 namespace Converter
 {
 	namespace gfx
 	{
+		struct CB_MatrixBuffer
+		{
+			mth::float4x4 worldMatrix;
+			mth::float4x4 cameraMatrix;
+			mth::float4x4 lightMatrix;
+		};
+		struct CB_LightBuffer
+		{
+			mth::float4 diffuseColor;
+			mth::float4 ambientColor;
+			mth::float3 sourcePosition;
+			float shadowMapDelta;
+			mth::float3 eyePosition;
+			float padding2;
+		};
+		struct CB_MaterialBuffer
+		{
+			mth::float4 diffuseColor;
+			mth::float4 specularColor;
+			float textureWeight;
+			float specularPower;
+			float padding[2];
+		};
+
 		class Graphics
 		{
 		public:
@@ -34,6 +59,8 @@ namespace Converter
 			unsigned m_psLightBufferSize;
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_psMaterialBuffer;
 			unsigned m_psMaterialBufferSize;
+			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_textureSampler;
+			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowSampler;
 
 			Concurrency::critical_section m_lock;
 
@@ -52,6 +79,7 @@ namespace Converter
 			void CreatePixelShader();
 			void CreateShaderBuffers();
 			void WriteShaderBuffer(ID3D11Buffer* buffer, void* data, unsigned size);
+			void CreateSamplerStates();
 
 		public:
 			Graphics();
@@ -61,6 +89,7 @@ namespace Converter
 			void Clear();
 			void Clear(float r, float g, float b, float a = 1.0f);
 			void Clear(float color[4]);
+			void SetScreenAsRenderTarget();
 			void Present();
 
 			void WriteVSMatrixBuffer(void* data);

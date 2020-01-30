@@ -5,7 +5,12 @@ namespace Converter
 {
 	namespace gfx
 	{
-		Texture::Texture(Graphics& graphics, void* data, unsigned width, unsigned height)
+		Texture::Texture(unsigned width, unsigned height) :
+			m_width(width),
+			m_height(height) {}
+		Texture::Texture(Graphics& graphics, void* data, unsigned width, unsigned height) :
+			m_width(width),
+			m_height(height)
 		{
 			ID3D11Device* device = graphics.Device3D();
 			ID3D11DeviceContext* context = graphics.Context3D();

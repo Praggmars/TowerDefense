@@ -5,6 +5,7 @@
 
 #include "modelloader.h"
 #include <wincodec.h>
+#include <sstream>
 
 #pragma comment (lib, "assimp/lib/assimp.lib")
 #pragma comment (lib, "windowscodecs.lib")
@@ -131,8 +132,65 @@ namespace Converter
 			return data;
 		}
 
-#pragma region Assimp loader
+		void ModelLoader::LoadTDM(const wchar_t* filename)
+		{
+			std::ifstream infile(filename, std::ios::in | std::ios::binary);
+			if (!infile.is_open())
+				throw Exception::FileOpen(filename);
 
+			unsigned vertexCount;
+			unsigned indexCount;
+			unsigned groupCount;
+			unsigned materialCount;
+			unsigned stringSize;
+
+			infile.read(reinterpret_cast<char*>(&vertexCount), sizeof(vertexCount));
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			infile.read(reinterpret_cast<char*>(&indexCount), sizeof(indexCount));
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			infile.read(reinterpret_cast<char*>(&groupCount), sizeof(groupCount));
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			infile.read(reinterpret_cast<char*>(&materialCount), sizeof(materialCount));
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			m_vertices.resize(vertexCount);
+			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0])* vertexCount);
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			m_indices.resize(indexCount);
+			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0])* indexCount);
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			m_vertexGroups.resize(groupCount);
+			infile.read(reinterpret_cast<char*>(m_vertexGroups.data()), sizeof(m_vertexGroups[0])* groupCount);
+			if (!infile.good()) throw Exception::FileRead(filename);
+
+			m_materials.resize(materialCount);
+			for (unsigned i = 0; i < materialCount; i++)
+			{
+				std::wstringstream ss;
+				ss << L"Material" << i;
+				m_materials[i].name = ss.str();
+
+				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
+				if (!infile.good()) throw Exception::FileRead(filename);
+				m_materials[i].texture.resize(stringSize + 1);
+				infile.read(reinterpret_cast<char*>(&m_materials[i].texture[0]), sizeof(wchar_t)* (stringSize + 1));
+				if (!infile.good()) throw Exception::FileRead(filename);
+
+				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
+				if (!infile.good()) throw Exception::FileRead(filename);
+				m_materials[i].normalmap.resize(stringSize + 1);
+				infile.read(reinterpret_cast<char*>(&m_materials[i].normalmap[0]), sizeof(wchar_t)* (stringSize + 1));
+				if (!infile.good()) throw Exception::FileRead(filename);
+			}
+		}
+
+#pragma region Assimp loader
+		
 		void ModelLoader::LoadAssimp()
 		{
 			std::string filename;
@@ -155,11 +213,11 @@ namespace Converter
 				throw std::exception(("Importing " + filename + " failed: " + error).c_str());
 			}
 
-			m_materials.resize(scene->mNumMaterials - 1);
-			for (unsigned m = 0; m < scene->mNumMaterials - 1; m++)
+			m_materials.resize(scene->mNumMaterials);
+			for (unsigned m = 0; m < scene->mNumMaterials; m++)
 			{
 				aiString str;
-				aiMaterial& mat = *scene->mMaterials[m + 1];
+				aiMaterial& mat = *scene->mMaterials[m];
 
 				if (aiReturn_SUCCESS == mat.Get(AI_MATKEY_NAME, str))
 				{
@@ -189,6 +247,11 @@ namespace Converter
 					for (int i = lastSlashIndex + 1; str.data[i]; i++)
 						m_materials[m].normalmap += str.data[i];
 				}
+
+				m_materials[m].diffuseColor = 1.0f;
+				m_materials[m].textureWeight = 1.0f;
+				m_materials[m].specularColor = 0.0f;
+				m_materials[m].specularPower = 1.0f;
 			}
 
 			m_vertexGroups.resize(scene->mNumMeshes);
@@ -198,7 +261,7 @@ namespace Converter
 			{
 				aiMesh* mesh = scene->mMeshes[m];
 				m_vertexGroups[m].startIndex = indexCount;
-				m_vertexGroups[m].materialIndex = mesh->mMaterialIndex - 1;
+				m_vertexGroups[m].materialIndex = mesh->mMaterialIndex;
 				vertexCount += scene->mMeshes[m]->mNumVertices;
 				for (unsigned i = 0; i < scene->mMeshes[m]->mNumFaces; i++)
 					indexCount += scene->mMeshes[m]->mFaces[i].mNumIndices;
@@ -267,12 +330,12 @@ namespace Converter
 
 #pragma endregion
 
-		ModelLoader::ModelLoader() {}
-		ModelLoader::ModelLoader(const wchar_t* filename)
+		ModelLoader::ModelLoader() : m_visible(true) {}
+		ModelLoader::ModelLoader(const wchar_t* filename) : m_visible(true)
 		{
 			LoadModel(filename);
 		}
-		ModelLoader::ModelLoader(Graphics& graphics, const wchar_t* filename)
+		ModelLoader::ModelLoader(Graphics& graphics, const wchar_t* filename) : m_visible(true)
 		{
 			LoadModel(graphics, filename);
 		}
@@ -282,7 +345,10 @@ namespace Converter
 			StoreFilePath(filename);
 
 			CreateDefaultTextures();
-			LoadAssimp();
+			if (m_extension == L".tdm")
+				LoadTDM(filename);
+			else
+				LoadAssimp();
 
 			LoadImages();
 		}
@@ -349,6 +415,74 @@ namespace Converter
 					outfile.write(reinterpret_cast<const char*>(m_materials[i].normalmap.data()), sizeof(wchar_t)* (stringSize + 1));
 				}
 			}
+		}
+		std::vector<unsigned char> ModelLoader::WriteToMemory()
+		{
+			size_t size = 0;
+			unsigned vertexCount = m_vertices.size();;
+			unsigned indexCount = m_indices.size();
+			unsigned groupCount = m_vertexGroups.size();
+			unsigned materialCount = m_materials.size();
+			unsigned stringSize;
+
+			size += sizeof(vertexCount);
+			size += sizeof(indexCount);
+			size += sizeof(groupCount);
+			size += sizeof(materialCount);
+			size += sizeof(m_vertices[0]) * vertexCount;
+			size += sizeof(m_indices[0]) * indexCount;
+			size += sizeof(m_vertexGroups[0]) * groupCount;
+
+			for (unsigned i = 0; i < materialCount; i++)
+			{
+				stringSize = m_materials[i].texture.length();
+				size += sizeof(stringSize);
+				size += sizeof(wchar_t) * (stringSize + 1);
+
+				stringSize = m_materials[i].normalmap.length();
+				size += sizeof(stringSize);
+				size += sizeof(wchar_t) * (stringSize + 1);
+			}
+
+			std::vector<unsigned char> out(size);
+			size = 0;
+
+			memcpy(&out[size], &vertexCount, sizeof(vertexCount));
+			size += sizeof(vertexCount);
+
+			memcpy(&out[size], &indexCount, sizeof(indexCount));
+			size += sizeof(indexCount);
+
+			memcpy(&out[size], &groupCount, sizeof(groupCount));
+			size += sizeof(groupCount);
+
+			memcpy(&out[size], &materialCount, sizeof(materialCount));
+			size += sizeof(materialCount);
+
+			memcpy(&out[size], m_vertices.data(), sizeof(m_vertices[0]) * vertexCount);
+			size += sizeof(m_vertices[0]) * vertexCount;
+
+			memcpy(&out[size], m_indices.data(), sizeof(m_indices[0]) * indexCount);
+			size += sizeof(m_indices[0]) * indexCount;
+
+			memcpy(&out[size], m_vertexGroups.data(), sizeof(m_vertexGroups[0]) * groupCount);
+			size += sizeof(m_vertexGroups[0]) * groupCount;
+
+			for (unsigned i = 0; i < materialCount; i++)
+			{
+				stringSize = m_materials[i].texture.length();
+				memcpy(&out[size], &stringSize, sizeof(stringSize));
+				size += sizeof(stringSize);
+				memcpy(&out[size], m_materials[i].texture.data(), sizeof(wchar_t) * (stringSize + 1));
+				size += sizeof(wchar_t) * (stringSize + 1);
+
+				stringSize = m_materials[i].normalmap.length();
+				memcpy(&out[size], &stringSize, sizeof(stringSize));
+				size += sizeof(stringSize);
+				memcpy(&out[size], m_materials[i].normalmap.data(), sizeof(wchar_t) * (stringSize + 1));
+				size += sizeof(wchar_t) * (stringSize + 1);
+			}
+			return std::move(out);
 		}
 		void ModelLoader::FlipInsideOut()
 		{
@@ -437,9 +571,17 @@ namespace Converter
 			for (unsigned i = 0; i < m_indices[i]; i++)
 				m_indices[i] = i;
 		}
+		void ModelLoader::RenderMesh(Graphics& graphics)
+		{
+			if (m_visible && m_model)
+			{
+				m_model->SetBuffersToRender(graphics);
+				m_model->RenderGroup(graphics, 0, m_indices.size());
+			}
+		}
 		void ModelLoader::RenderModel(Graphics& graphics)
 		{
-			if (m_model)
+			if (m_visible && m_model)
 			{
 				m_model->SetBuffersToRender(graphics);
 				for (unsigned i = 0; i < m_vertexGroups.size(); i++)
@@ -447,11 +589,12 @@ namespace Converter
 					auto& mat = m_materials[m_vertexGroups[i].materialIndex];
 					FetchTexture(mat.texture, true)->SetToRender(graphics, 0);
 					FetchTexture(mat.normalmap, false)->SetToRender(graphics, 1);
-					float materialBuffer[] = {
-						mat.color.x,mat.color.y,mat.color.z,mat.color.w,
-						1.0f - mat.colorWeight, 0.0f, 0.0f, 0.0f
-					};
-					graphics.WritePSMaterialBuffer(materialBuffer);
+					gfx::CB_MaterialBuffer materialBuffer;
+					materialBuffer.diffuseColor = mat.diffuseColor;
+					materialBuffer.specularColor = mat.specularColor;
+					materialBuffer.specularPower = mat.specularPower;
+					materialBuffer.textureWeight = mat.textureWeight;
+					graphics.WritePSMaterialBuffer(&materialBuffer);
 					m_model->RenderGroup(graphics, m_vertexGroups[i].startIndex, m_vertexGroups[i].indexCount);
 				}
 			}
@@ -459,6 +602,10 @@ namespace Converter
 		std::wstring ModelLoader::OutputFileName()
 		{
 			return m_folderName + m_bareFileName + L".tdm";
+		}
+		std::wstring ModelLoader::InputFileName()
+		{
+			return m_folderName + m_bareFileName + m_extension;
 		}
 	}
 }

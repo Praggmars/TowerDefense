@@ -13,9 +13,10 @@ namespace Windows {
             namespace Controls {
                 ref class SwapChainPanel;
                 ref class StackPanel;
-                ref class TextBox;
                 ref class ComboBox;
+                ref class TextBox;
                 ref class Slider;
+                ref class CheckBox;
             }
         }
     }
@@ -44,15 +45,21 @@ namespace Converter
     
         private: ::Windows::UI::Xaml::Controls::SwapChainPanel^ m_swapChainPanel;
         private: ::Windows::UI::Xaml::Controls::StackPanel^ m_menuPanel;
-        private: ::Windows::UI::Xaml::Controls::TextBox^ m_filenameTextBox;
+        private: ::Windows::UI::Xaml::Controls::ComboBox^ m_modelList;
         private: ::Windows::UI::Xaml::Controls::ComboBox^ m_materialList;
         private: ::Windows::UI::Xaml::Controls::TextBox^ m_textureTextBox;
         private: ::Windows::UI::Xaml::Controls::TextBox^ m_normalmapTextBox;
-        private: ::Windows::UI::Xaml::Controls::Slider^ m_colorWeightSlider;
-        private: ::Windows::UI::Xaml::Controls::Slider^ m_redSlider;
-        private: ::Windows::UI::Xaml::Controls::Slider^ m_greenSlider;
-        private: ::Windows::UI::Xaml::Controls::Slider^ m_blueSlider;
-        private: ::Windows::UI::Xaml::Controls::Slider^ m_alphaSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_specularPowerSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_specularRedSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_specularGreenSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_specularBlueSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_specularAlphaSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_textureWeightSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseRedSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseGreenSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseBlueSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseAlphaSlider;
+        private: ::Windows::UI::Xaml::Controls::CheckBox^ m_modelShownCheckBox;
     };
 }
 

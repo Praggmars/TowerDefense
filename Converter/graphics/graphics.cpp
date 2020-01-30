@@ -38,17 +38,15 @@ namespace Converter
 			rasterizerDesc.CullMode = D3D11_CULL_BACK;
 			rasterizerDesc.DepthBias = 0;
 			rasterizerDesc.DepthBiasClamp = 0.0f;
+			rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 			rasterizerDesc.DepthClipEnable = true;
 			rasterizerDesc.FrontCounterClockwise = false;
 			rasterizerDesc.MultisampleEnable = true;
 			rasterizerDesc.ScissorEnable = false;
-			rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 			rasterizerDesc.ForcedSampleCount = 0;
 			rasterizerDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 			ThrowIfFailed(m_device3D->CreateRasterizerState2(&rasterizerDesc, &m_rasterizerState));
-
-			m_context3D->RSSetState(m_rasterizerState.Get());
 		}
 		void Graphics::CreateDepthStencilState()
 		{
@@ -164,7 +162,6 @@ namespace Converter
 		void Graphics::CreateViewport()
 		{
 			m_viewport = CD3D11_VIEWPORT(0.0f, 0.0f, static_cast<float>(m_width), static_cast<float>(m_height));
-			m_context3D->RSSetViewports(1, &m_viewport);
 		}
 		void Graphics::CreateVertexShader()
 		{
@@ -173,23 +170,25 @@ cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
 	matrix cameraMatrix;
+	matrix lightMatrix;
 };
 
 struct VertexInputType
 {
 	float3 position : POSITION;
 	float2 texcoord : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+	float3 normal   : NORMAL;
+	float3 tangent  : TANGENT;
 };
 
 struct PixelInputType
 {
-	float4 wndpos: SV_POSITION;
+	float4 wndpos   : SV_POSITION;
 	float3 position : POSITION;
-	float2 texcoord : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+	float2 texcoord : TEXCOORD0;
+	float3 normal   : NORMAL;
+	float3 tangent  : TANGENT;
+    float4 lightTex : TEXCOORD1;
 };
 
 PixelInputType main(VertexInputType input)
@@ -197,6 +196,7 @@ PixelInputType main(VertexInputType input)
 	PixelInputType output;
 	output.wndpos = mul(float4(input.position, 1.0f), worldMatrix);
 	output.position = output.wndpos.xyz;
+	output.lightTex = mul(output.wndpos, lightMatrix);
 	output.wndpos = mul(output.wndpos, cameraMatrix);
 	output.texcoord = input.texcoord;
 	output.normal = mul(input.normal, (float3x3)worldMatrix);
@@ -235,56 +235,123 @@ PixelInputType main(VertexInputType input)
 				throw std::exception("Failed to create input layout.");
 
 			m_context3D->IASetInputLayout(m_inputLayout.Get());
-			m_context3D->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 		}
 		void Graphics::CreatePixelShader()
 		{
 			static const char* code = R"(
-Texture2D tex;
-Texture2D normalmap;
-SamplerState ss;
+#define COMPARISON 1
+Texture2D texture_diffuse;
+Texture2D texture_normal;
+Texture2D texture_shadowMap;
+SamplerState textureSampler;
+SamplerComparisonState shadowMapSampler;
 
 cbuffer LightBuffer
 {
-	float4 lightColor;
-	float3 lightPosition;
-	float ambient;
+	float4 light_diffuseColor;
+	float4 light_ambientColor;
+	float3 light_sourcePosition;
+	float  light_shadowMapDelta;
+	float3 light_eyePosition;
+	float  light_padding2;
 };
 
 cbuffer MaterialBuffer
 {
-	float4 materialColor;
-	float textureWeight;
-	float padding[3];
+	float4 material_diffuseColor;
+	float4 material_specularColor;
+	float  material_textureWeight;
+	float  material_specularPower;
+	float  material_padding[2];
 };
 
 struct PixelInputType
 {
-	float4 wndpos : SV_POSITION;
+	float4 wndpos   : SV_POSITION;
 	float3 position : POSITION;
-	float2 texcoord : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+	float2 texcoord : TEXCOORD0;
+	float3 normal   : NORMAL;
+	float3 tangent  : TANGENT;
+    float4 lightTex : TEXCOORD1;
 };
+
+float4 PixelColor(float2 texCoord)
+{
+	return texture_diffuse.Sample(textureSampler, texCoord) * material_textureWeight + material_diffuseColor * (1.0f - material_textureWeight);
+}
+float3 PixelNormal(float3 normal, float3 tangent, float2 texCoord)
+{
+	tangent = normalize(tangent - dot(tangent, normal) * normal);
+	normal = normalize(normal);
+	float3 bitangent = cross(tangent, normal);
+	float4 bumpmap = texture_normal.Sample(textureSampler, texCoord) * 2.0f - 1.0f;
+	return normalize(mul(bumpmap.xyz, float3x3(tangent, bitangent, normal)));
+}
+float ShadowFactor1x1(float3 lightTex)
+{
+	return texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy, lightTex.z).r;
+}
+float ShadowFactor3x3(float3 lightTex)
+{
+	const float d = light_shadowMapDelta;
+	float percentLit = 0.0f;
+	const float2 offsets[] = {
+		float2(-d,   -d), float2(0.0f,   -d), float2(d,   -d),
+		float2(-d, 0.0f), float2(0.0f, 0.0f), float2(d, 0.0f),
+		float2(-d,    d), float2(0.0f,    d), float2(d,    d)
+	};
+	[unroll]
+	for (int i = 0; i < 9; i++)
+		percentLit += texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy + offsets[i], lightTex.z).r;
+	return percentLit / 9.0f;
+}
+float ShadowFactor5x5(float3 lightTex)
+{
+	const float d = light_shadowMapDelta;
+	float percentLit = 0.0f;
+	const float2 offsets[] = {
+		float2(-2.0f * d, -2.0f * d), float2(-d, -2.0f * d), float2(0.0f, -2.0f * d), float2(d, -2.0f * d), float2(2.0f * d, -2.0f * d),
+		float2(-2.0f * d,        -d), float2(-d,        -d), float2(0.0f,        -d), float2(d,        -d), float2(2.0f * d,        -d),
+		float2(-2.0f * d,      0.0f), float2(-d,      0.0f), float2(0.0f,      0.0f), float2(d,      0.0f), float2(2.0f * d,      0.0f),
+		float2(-2.0f * d,         d), float2(-d,         d), float2(0.0f,         d), float2(d,         d), float2(2.0f * d,         d),
+		float2(-2.0f * d,  2.0f * d), float2(-d,  2.0f * d), float2(0.0f,  2.0f * d), float2(d,  2.0f * d), float2(2.0f * d,  2.0f * d)
+	};
+	[unroll]
+	for (int i = 0; i < 25; i++)
+		percentLit += texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy + offsets[i], lightTex.z).r;
+	return percentLit / 25.0f;
+}
 
 float4 main(PixelInputType input) : SV_TARGET
 {
-	float4 color = tex.Sample(ss, input.texcoord);
-	color = color * textureWeight + materialColor * (1.0f - textureWeight);
-	float4 bumpmap = normalmap.Sample(ss, input.texcoord) * 2.0f - 1.0f;
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 pixelColor = PixelColor(input.texcoord);
+	float3 pixelNormal = PixelNormal(input.normal, input.tangent, input.texcoord);
 
-	input.tangent = normalize(input.tangent - dot(input.tangent, input.normal) * input.normal);
-	input.normal = normalize(input.normal);
-	float3 bitangent = cross(input.tangent, input.normal);
-	float3x3 texSpace = float3x3(input.tangent, bitangent, input.normal);
-	float3 normal = normalize(mul(bumpmap, texSpace));
+	float3 viewDirection = normalize(light_eyePosition - input.position);
+	float3 lightDirection = normalize(light_sourcePosition - input.position);
 
-	float3 lightDirection = normalize(lightPosition - input.position);
-	float intensity = saturate(dot(normal, lightDirection));
-	intensity = ambient + (1 - ambient) * intensity;
-	color.xyz *= intensity;
+	input.lightTex.x = input.lightTex.x / input.lightTex.w * 0.5f + 0.5f;
+	input.lightTex.y = input.lightTex.y / input.lightTex.w * (-0.5f) + 0.5f;
+	input.lightTex.z = input.lightTex.z / input.lightTex.w;
+	float shadowFactor = ShadowFactor3x3(input.lightTex.xyz);
+	float intensity = shadowFactor * saturate(dot(pixelNormal, lightDirection));
 
-	return color * lightColor;
+	float4 color = light_ambientColor;
+
+	if (intensity > 0.0f)
+	{
+		color = saturate(color + light_diffuseColor * intensity);
+		float3 reflection = normalize(2.0f * intensity * pixelNormal - lightDirection);
+		reflection = reflect(-lightDirection, pixelNormal);
+		specular = pow(saturate(dot(reflection, viewDirection)), material_specularPower);
+		specular *= material_specularColor;
+	}
+	color = color * pixelColor;
+
+	color = saturate(color + specular);
+	color.w = pixelColor.w;
+	return color;
 }
 )";
 			const char* target = nullptr;
@@ -307,17 +374,15 @@ float4 main(PixelInputType input) : SV_TARGET
 			HRESULT hr = m_device3D->CreatePixelShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_pixelShader);
 			if (FAILED(hr))
 				throw std::exception("Failed to create pixel shader.");
-
-			m_context3D->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		}
 		void Graphics::CreateShaderBuffers()
 		{
 			D3D11_BUFFER_DESC bufferDesc;
 			HRESULT hr;
 
-			m_vsMatrixBufferSize = sizeof(float) * 16 * 2;
-			m_psLightBufferSize = sizeof(float) * 8;
-			m_psMaterialBufferSize = sizeof(float) * 8;
+			m_vsMatrixBufferSize = sizeof(CB_MatrixBuffer);
+			m_psLightBufferSize = sizeof(CB_LightBuffer);
+			m_psMaterialBufferSize = sizeof(CB_MaterialBuffer);
 
 			bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 			bufferDesc.ByteWidth = 0;
@@ -340,10 +405,6 @@ float4 main(PixelInputType input) : SV_TARGET
 			hr = m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psMaterialBuffer);
 			if (FAILED(hr))
 				throw std::exception("Failed to create constant buffer");
-
-			m_context3D->VSSetConstantBuffers(0, 1, m_vsMatrixBuffer.GetAddressOf());
-			m_context3D->PSSetConstantBuffers(0, 1, m_psLightBuffer.GetAddressOf());
-			m_context3D->PSSetConstantBuffers(1, 1, m_psMaterialBuffer.GetAddressOf());
 		}
 		void Graphics::WriteShaderBuffer(ID3D11Buffer* buffer, void* data, unsigned size)
 		{
@@ -353,6 +414,30 @@ float4 main(PixelInputType input) : SV_TARGET
 				memcpy(resource.pData, data, size);
 				m_context3D->Unmap(buffer, 0);
 			}
+		}
+		void Graphics::CreateSamplerStates()
+		{
+			D3D11_SAMPLER_DESC samplerDesc{};
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MipLODBias = 0.0f;
+			samplerDesc.MaxAnisotropy = 1;
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+			samplerDesc.BorderColor[0] = 1.0f;
+			samplerDesc.BorderColor[1] = 1.0f;
+			samplerDesc.BorderColor[2] = 1.0f;
+			samplerDesc.BorderColor[3] = 1.0f;
+			samplerDesc.MinLOD = 0.0f;
+			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			ThrowIfFailed(m_device3D->CreateSamplerState(&samplerDesc, &m_textureSampler));
+
+			samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+			ThrowIfFailed(m_device3D->CreateSamplerState(&samplerDesc, &m_shadowSampler));
 		}
 		Graphics::Graphics() :
 			m_viewport(),
@@ -368,6 +453,7 @@ float4 main(PixelInputType input) : SV_TARGET
 			CreateVertexShader();
 			CreatePixelShader();
 			CreateShaderBuffers();
+			CreateSamplerStates();
 
 			m_context3D->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		}
@@ -391,10 +477,23 @@ float4 main(PixelInputType input) : SV_TARGET
 		}
 		void Graphics::Clear(float color[4])
 		{
-			ID3D11RenderTargetView* rendeTarget[1] = { m_renderTargetView.Get() };
-			m_context3D->OMSetRenderTargets(1, rendeTarget, m_depthStencilView.Get());
 			m_context3D->ClearRenderTargetView(m_renderTargetView.Get(), color);
 			m_context3D->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		}
+		void Graphics::SetScreenAsRenderTarget()
+		{
+			ID3D11RenderTargetView* rendeTargets[1] = { m_renderTargetView.Get() };
+			m_context3D->RSSetState(m_rasterizerState.Get());
+			m_context3D->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+			m_context3D->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+			m_context3D->IASetInputLayout(m_inputLayout.Get());
+			m_context3D->RSSetViewports(1, &m_viewport);
+			m_context3D->OMSetRenderTargets(1, rendeTargets, m_depthStencilView.Get());
+			m_context3D->PSSetSamplers(0, 1, m_textureSampler.GetAddressOf());
+			m_context3D->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
+			m_context3D->VSSetConstantBuffers(0, 1, m_vsMatrixBuffer.GetAddressOf());
+			m_context3D->PSSetConstantBuffers(0, 1, m_psLightBuffer.GetAddressOf());
+			m_context3D->PSSetConstantBuffers(1, 1, m_psMaterialBuffer.GetAddressOf());
 		}
 		void Graphics::Present()
 		{

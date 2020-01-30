@@ -33,8 +33,10 @@ namespace Converter
 			std::wstring name;
 			std::wstring texture;
 			std::wstring normalmap;
-			mth::float4 color;
-			float colorWeight;
+			mth::float4 diffuseColor;
+			float textureWeight;
+			mth::float4 specularColor;
+			float specularPower;
 		};
 		struct VertexGroup
 		{
@@ -45,7 +47,6 @@ namespace Converter
 
 		class ModelLoader
 		{
-
 			std::vector<Vertex> m_vertices;
 			std::vector<unsigned> m_indices;
 			std::vector<VertexGroup> m_vertexGroups;
@@ -55,6 +56,7 @@ namespace Converter
 			std::wstring m_extension;
 			std::map<std::wstring, TextureData> m_loadedTextures;
 			Model::P m_model;
+			bool m_visible;
 
 		private:
 			void StoreFilePath(const wchar_t* path);
@@ -62,6 +64,7 @@ namespace Converter
 			void LoadImages();
 			TextureData LoadTexture(std::wstring& filename);
 
+			void LoadTDM(const wchar_t* filename);
 			void LoadAssimp();
 
 			Texture::P FetchTexture(std::wstring& filename, bool image);
@@ -76,6 +79,7 @@ namespace Converter
 			void Clear();
 
 			void Export(const wchar_t* filename);
+			std::vector<unsigned char> WriteToMemory();
 
 			void FlipInsideOut();
 			void Transform(mth::float4x4 transform);
@@ -84,10 +88,13 @@ namespace Converter
 			void CalculateTangents();
 			void Triangularize();
 
+			void RenderMesh(Graphics& graphics);
 			void RenderModel(Graphics& graphics);
 
 			std::wstring OutputFileName();
+			std::wstring InputFileName();
 			inline std::wstring& FolderName() { return m_folderName; }
+			inline std::wstring& ModelName() { return m_bareFileName; }
 			inline Vertex* Vertices() { return m_vertices.data(); }
 			inline unsigned VertexCount() { return m_vertices.size(); }
 			inline unsigned* Indices() { return m_indices.data(); }
@@ -97,6 +104,8 @@ namespace Converter
 			inline unsigned MaterialCount() { return m_materials.size(); }
 			inline MaterialData& Material(unsigned index) { return m_materials[index]; }
 			inline Texture::P Image(std::wstring& filename) { return m_loadedTextures[filename].texture; }
+			inline void Visible(bool visible) { m_visible = visible; }
+			inline bool Visible() { return m_visible; }
 		};
 	}
 }

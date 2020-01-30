@@ -52,16 +52,20 @@ void ::Converter::MainPage::Connect(int __connectionId, ::Platform::Object^ __ta
         break;
     case 4:
         {
-            this->m_filenameTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            this->m_modelList = safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_modelList))->DropDownOpened += ref new ::Windows::Foundation::EventHandler<::Platform::Object^>(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Platform::Object^))&MainPage::ModelList_DropDownOpened);
+            (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_modelList))->SelectionChanged += ref new ::Windows::UI::Xaml::Controls::SelectionChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::SelectionChangedEventArgs^))&MainPage::ModelList_SelectionChanged);
         }
         break;
     case 5:
         {
             this->m_materialList = safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(__target);
             (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_materialList))->DropDownOpened += ref new ::Windows::Foundation::EventHandler<::Platform::Object^>(this, (void (::Converter::MainPage::*)
-                (::Platform::Object^, ::Platform::Object^))&MainPage::m_materialList_DropDownOpened);
+                (::Platform::Object^, ::Platform::Object^))&MainPage::MaterialList_DropDownOpened);
             (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_materialList))->SelectionChanged += ref new ::Windows::UI::Xaml::Controls::SelectionChangedEventHandler(this, (void (::Converter::MainPage::*)
-                (::Platform::Object^, ::Windows::UI::Xaml::Controls::SelectionChangedEventArgs^))&MainPage::m_materialList_SelectionChanged);
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::SelectionChangedEventArgs^))&MainPage::MaterialList_SelectionChanged);
         }
         break;
     case 6:
@@ -76,51 +80,102 @@ void ::Converter::MainPage::Connect(int __connectionId, ::Platform::Object^ __ta
         break;
     case 8:
         {
-            this->m_colorWeightSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_colorWeightSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_specularPowerSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_specularPowerSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 9:
         {
-            this->m_redSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_redSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_specularRedSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_specularRedSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 10:
         {
-            this->m_greenSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_greenSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_specularGreenSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_specularGreenSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 11:
         {
-            this->m_blueSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_blueSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_specularBlueSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_specularBlueSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 12:
         {
-            this->m_alphaSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_alphaSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_specularAlphaSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_specularAlphaSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 13:
         {
-            ::Windows::UI::Xaml::Controls::Button^ element13 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element13))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
-                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::ExportBinButton_Click);
+            this->m_textureWeightSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_textureWeightSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
         }
         break;
     case 14:
         {
-            ::Windows::UI::Xaml::Controls::Button^ element14 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
-            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element14))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
+            this->m_diffuseRedSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_diffuseRedSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
+        }
+        break;
+    case 15:
+        {
+            this->m_diffuseGreenSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_diffuseGreenSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
+        }
+        break;
+    case 16:
+        {
+            this->m_diffuseBlueSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_diffuseBlueSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
+        }
+        break;
+    case 17:
+        {
+            this->m_diffuseAlphaSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_diffuseAlphaSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::MaterialDataChanged);
+        }
+        break;
+    case 18:
+        {
+            ::Windows::UI::Xaml::Controls::Button^ element18 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element18))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::ExportBinButton_Click);
+        }
+        break;
+    case 19:
+        {
+            ::Windows::UI::Xaml::Controls::Button^ element19 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element19))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
                 (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::ExportTextButton_Click);
+        }
+        break;
+    case 20:
+        {
+            this->m_modelShownCheckBox = safe_cast<::Windows::UI::Xaml::Controls::CheckBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::CheckBox^>(this->m_modelShownCheckBox))->Checked += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::ModelShownCheckBox_CheckChanged);
+            (safe_cast<::Windows::UI::Xaml::Controls::CheckBox^>(this->m_modelShownCheckBox))->Unchecked += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::ModelShownCheckBox_CheckChanged);
+        }
+        break;
+    case 21:
+        {
+            ::Windows::UI::Xaml::Controls::Button^ element21 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element21))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::DeleteButton_Click);
         }
         break;
     }

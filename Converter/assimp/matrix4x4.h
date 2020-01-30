@@ -85,7 +85,7 @@ public:
 	 * @param position The position for the x,y,z axes
 	 */
 	aiMatrix4x4t(const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation,
-		const aiVector3t<TReal>& position);
+		const aiVector3t<TReal>& lightPosition);
 
 public:
 
@@ -135,7 +135,7 @@ public:
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
 	void Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-		aiVector3t<TReal>& position) const;
+		aiVector3t<TReal>& lightPosition) const;
 
 	// -------------------------------------------------------------------
 	/** @brief Decompose a trafo matrix with no scaling into its 
@@ -145,7 +145,7 @@ public:
 	 *  @param position Receives the output position for the x,y,z axes
 	 */
 	void DecomposeNoScaling (aiQuaterniont<TReal>& rotation,
-		aiVector3t<TReal>& position) const;
+		aiVector3t<TReal>& lightPosition) const;
 
 
 	// -------------------------------------------------------------------
