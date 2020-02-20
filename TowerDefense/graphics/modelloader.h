@@ -13,13 +13,9 @@ namespace TowerDefense
 			mth::float2 texcoord;
 			mth::float3 normal;
 			mth::float3 tangent;
-		};
-
-		/*struct VertexBoned
-		{
-			Vertex vertex;
+			mth::float3 boneWeights;
 			unsigned boneIndices[4];
-		};*/
+		};
 
 		struct MaterialLoader
 		{

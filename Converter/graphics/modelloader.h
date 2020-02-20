@@ -44,6 +44,11 @@ namespace Converter
 			unsigned indexCount;
 			unsigned materialIndex;
 		};
+		struct Bone
+		{
+			std::wstring name;
+			mth::float4x4 offset;
+		};
 
 		class ModelLoader
 		{
@@ -51,6 +56,7 @@ namespace Converter
 			std::vector<unsigned> m_indices;
 			std::vector<VertexGroup> m_vertexGroups;
 			std::vector<MaterialData> m_materials;
+			std::vector<Bone> m_bones;
 			std::wstring m_folderName;
 			std::wstring m_bareFileName;
 			std::wstring m_extension;

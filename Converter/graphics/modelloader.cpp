@@ -190,7 +190,7 @@ namespace Converter
 		}
 
 #pragma region Assimp loader
-		
+
 		void ModelLoader::LoadAssimp()
 		{
 			std::string filename;
@@ -257,6 +257,7 @@ namespace Converter
 			m_vertexGroups.resize(scene->mNumMeshes);
 			unsigned vertexCount = 0;
 			unsigned indexCount = 0;
+			unsigned boneCount = 0;
 			for (unsigned m = 0; m < scene->mNumMeshes; m++)
 			{
 				aiMesh* mesh = scene->mMeshes[m];
@@ -266,12 +267,15 @@ namespace Converter
 				for (unsigned i = 0; i < scene->mMeshes[m]->mNumFaces; i++)
 					indexCount += scene->mMeshes[m]->mFaces[i].mNumIndices;
 				m_vertexGroups[m].indexCount = indexCount - m_vertexGroups[m].startIndex;
+				boneCount += mesh->mNumBones;
 			}
 			m_vertices.resize(vertexCount);
 			m_indices.resize(indexCount);
+			m_bones.resize(boneCount);
 
 			vertexCount = 0;
 			indexCount = 0;
+			boneCount = 0;
 			for (unsigned m = 0; m < scene->mNumMeshes; m++)
 			{
 				aiMesh* mesh = scene->mMeshes[m];
@@ -312,7 +316,24 @@ namespace Converter
 						m_indices[indexCount++] = mesh->mFaces[f].mIndices[i - 1] + vertexCount;
 					}
 				}
+
+				/*for (unsigned b = 0; b < mesh->mNumBones; b++)
+				{
+					auto& bone = *mesh->mBones[b];
+					m_bones[boneCount + b].name.reserve(bone.mName.length + 1);
+					for (int i = 0; i < bone.mName.length; i++)
+						m_bones[boneCount + b].name += bone.mName.data[i];
+					auto matrix = bone.mOffsetMatrix;
+					memcpy(&m_bones[boneCount + b].offset, &matrix, sizeof(matrix));
+					for (unsigned w = 0; w < bone.mNumWeights; w++)
+					{
+						Vertex& vert = m_vertices[vertexCount + bone.mWeights[w].mVertexId];
+						unsigned index = vert.boneWeights(0)
+						m_vertices[vertexCount + bone.mWeights[w].mVertexId];
+					}
+				}*/
 				vertexCount += mesh->mNumVertices;
+				boneCount += mesh->mNumBones;
 			}
 		}
 
@@ -514,9 +535,9 @@ namespace Converter
 				v.normal = 0.0f;
 			for (unsigned i = 0; i < m_indices.size(); i += 3)
 			{
-				mth::float3 v1(m_vertices[m_indices[i + 0]].normal);
-				mth::float3 v2(m_vertices[m_indices[i + 1]].normal);
-				mth::float3 v3(m_vertices[m_indices[i + 2]].normal);
+				mth::float3 v1(m_vertices[m_indices[i + 0]].position);
+				mth::float3 v2(m_vertices[m_indices[i + 1]].position);
+				mth::float3 v3(m_vertices[m_indices[i + 2]].position);
 				mth::float3 n = (v1 - v2).Cross(v1 - v3);
 				m_vertices[m_indices[i + 0]].normal += n;
 				m_vertices[m_indices[i + 1]].normal += n;

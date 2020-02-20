@@ -201,6 +201,7 @@
   <ItemGroup>
     <ClInclude Include="common\helpers.h" />
     <ClInclude Include="common\resourceloadingmanager.h" />
+    <ClInclude Include="graphics\ambientocclusion.h" />
     <ClInclude Include="graphics\camera.h" />
     <ClInclude Include="graphics\graphics.h" />
     <ClInclude Include="graphics\model.h" />
@@ -255,6 +256,7 @@
     </ClCompile>
     <ClCompile Include="common\helpers.cpp" />
     <ClCompile Include="common\resourceloadingmanager.cpp" />
+    <ClCompile Include="graphics\ambientocclusion.cpp" />
     <ClCompile Include="graphics\camera.cpp" />
     <ClCompile Include="graphics\graphics.cpp" />
     <ClCompile Include="graphics\model.cpp" />

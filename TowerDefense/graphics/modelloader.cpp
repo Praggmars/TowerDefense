@@ -15,26 +15,34 @@ namespace TowerDefense
 		{
 			Clear();
 			m_vertices.resize(4);
-			m_vertices[0] = {
+			m_vertices[0] = Vertex{
 				mth::float3(position.x, y, position.y),
 				mth::float2(0.0f, 0.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
-				mth::float3(0.0f, 0.0f, 1.0f) };
+				mth::float3(0.0f, 0.0f, 1.0f),
+				mth::float3(),
+				{ 0, 0, 0, 0 } };
 			m_vertices[1] = {
 				mth::float3(position.x + size.x, y, position.y),
 				mth::float2(0.0f, 1.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
-				mth::float3(0.0f, 0.0f, 1.0f) };
+				mth::float3(0.0f, 0.0f, 1.0f),
+				mth::float3(),
+				{ 0, 0, 0, 0 } };
 			m_vertices[2] = {
 				mth::float3(position.x + size.x, y, position.y + size.y),
 				mth::float2(1.0f, 1.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
-				mth::float3(0.0f, 0.0f, 1.0f) };
+				mth::float3(0.0f, 0.0f, 1.0f),
+				mth::float3(),
+				{ 0, 0, 0, 0 } };
 			m_vertices[3] = {
 				mth::float3(position.x, y, position.y + size.y),
 				mth::float2(1.0f, 0.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
-				mth::float3(0.0f, 0.0f, 1.0f) };
+				mth::float3(0.0f, 0.0f, 1.0f),
+				mth::float3(),
+				{ 0, 0, 0, 0 } };
 			m_indices.resize(6);
 			m_indices[0] = 0;
 			m_indices[1] = 2;
@@ -49,30 +57,30 @@ namespace TowerDefense
 		{
 			Clear();
 			m_vertices.reserve(24);
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3() });
-			m_vertices.push_back({ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
 			unsigned indices[] = { 0, 2, 1, 0, 3, 2, 4, 6, 5, 4, 7, 6, 8, 10, 9, 8, 11, 10, 12, 14, 13, 12, 15, 14, 16, 18, 17, 16, 19, 18, 20, 22, 21, 20, 23, 22 };
 			m_indices.resize(36);
 			memcpy(m_indices.data(), indices, sizeof(indices));

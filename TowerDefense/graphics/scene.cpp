@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "scene.h"
 
-namespace TowerDefense
+/*namespace TowerDefense
 {
 	namespace gfx
 	{
@@ -48,4 +48,4 @@ namespace TowerDefense
 			m_graphics.Present();
 		}
 	}
-}
+}*/

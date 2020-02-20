@@ -2,7 +2,7 @@
 
 #include "graphics.h"
 
-namespace Converter
+namespace TowerDefense
 {
 	namespace gfx
 	{
@@ -19,8 +19,7 @@ namespace Converter
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_buffer;
 			unsigned m_bufferSize;
 			D3D11_VIEWPORT m_viewport;
-			unsigned m_width;
-			unsigned m_height;
+			unsigned m_size;
 
 		private:
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> CreateDepthMap(ID3D11Device3* device);
@@ -30,13 +29,15 @@ namespace Converter
 			void CreateBuffer(ID3D11Device3* device);
 
 		public:
-			ShadowMap(Graphics& graphics, unsigned width, unsigned height);
-			static ShadowMap::P CreateP(Graphics& graphics, unsigned width, unsigned height);
-			static ShadowMap::U CreateU(Graphics& graphics, unsigned width, unsigned height);
+			ShadowMap(Graphics& graphics, unsigned size);
+			static ShadowMap::P CreateP(Graphics& graphics, unsigned size);
+			static ShadowMap::U CreateU(Graphics& graphics, unsigned size);
 
 			void SetTextureToRender(Graphics& graphics, unsigned index);
 			void SetAsRenderTarget(Graphics& graphics);
 			void WriteBuffer(Graphics& graphics, void* data);
+
+			inline unsigned Size() { return m_size; }
 		};
 	}
 }

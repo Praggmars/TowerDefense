@@ -1,10 +1,10 @@
 #pragma once
 
 #include "level.h"
-#include "graphics/firstpersoncontroller.h"
 #include "graphics/editorstylecontroller.h"
-
-#define FREELOOK_CAMERA 0
+#include "graphics/pointlight.h"
+#include "graphics/ambientocclusion.h"
+#include "graphics/shadowmap.h"
 
 namespace TowerDefense
 {
@@ -17,16 +17,15 @@ namespace TowerDefense
 
 		private:
 			gfx::Graphics& m_graphics;
+			gfx::ShadowMap& m_shadowMap;
+			gfx::AmbientOcclusion& m_ambeintOcclusion;
+
 			GameResources m_gameResources;
+			gfx::PointLight m_light;
 			gfx::Camera m_camera;
-			gfx::Scene::P m_scene;
 			Level::P m_level;
 			Turret::P m_movingTurret;
-#if FREELOOK_CAMERA
-			gfx::FirstPersonController m_cameraController;
-#else
 			gfx::EditorStyleController m_cameraController;
-#endif
 			mth::float2 m_cursor;
 			mth::float2 m_windowSize;
 			Windows::Foundation::IAsyncAction^ m_mainLoopWorker;
@@ -39,15 +38,13 @@ namespace TowerDefense
 			void Render();
 
 		public:
-			Game(gfx::Graphics& graphics);
-			static Game::P CreateP(gfx::Graphics& graphics);
-			static Game::U CreateU(gfx::Graphics& graphics);
+			Game(gfx::Graphics& graphics, gfx::ShadowMap& shadowMap, gfx::AmbientOcclusion& ambeintOcclusion);
+			static Game::P CreateP(gfx::Graphics& graphics, gfx::ShadowMap& shadowMap, gfx::AmbientOcclusion& ambeintOcclusion);
+			static Game::U CreateU(gfx::Graphics& graphics, gfx::ShadowMap& shadowMap, gfx::AmbientOcclusion& ambeintOcclusion);
 
-			void KeyDown(Windows::System::VirtualKey key);
-			void KeyUp(Windows::System::VirtualKey key);
-			void MouseDown(mth::float2 cursor);
-			void MouseMove(mth::float2 cursor);
-			void MouseUp(mth::float2 cursor);
+			void MouseDown(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
+			void MouseMove(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
+			void MouseUp(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
 			void WindowSizeChanged(mth::float2 size);
 
 			void PlaceTurret();

@@ -47,6 +47,9 @@
     <ClCompile Include="graphics\pointlight.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\ambientocclusion.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -108,6 +111,9 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics\pointlight.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\ambientocclusion.h">
       <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>

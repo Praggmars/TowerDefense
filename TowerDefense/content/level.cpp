@@ -5,19 +5,21 @@ namespace TowerDefense
 {
 	namespace content
 	{
-		Level::Level(gfx::Scene::P scene, GameResources& gameResources, int width, int height) :
-			m_scene(scene),
+		Level::Level(GameResources& gameResources, int width, int height) :
 			m_levelMap(GameObject::CreateP(gameResources.area)),
 			m_places(width, height),
 			m_enemyStartPoint{ 0, height / 2 },
-			m_enemyEndPoint{ width - 1, height / 2 } {}
-		Level::P Level::CreateP(gfx::Scene::P scene, GameResources& gameResources, int width, int height)
+			m_enemyEndPoint{ width - 1, height / 2 } 
 		{
-			return std::make_shared<Level>(scene, gameResources, width, height);
+			AddRenderedEntity(*m_levelMap);
 		}
-		Level::U Level::CreateU(gfx::Scene::P scene, GameResources& gameResources, int width, int height)
+		Level::P Level::CreateP(GameResources& gameResources, int width, int height)
 		{
-			return std::make_unique<Level>(scene, gameResources, width, height);
+			return std::make_shared<Level>(gameResources, width, height);
+		}
+		Level::U Level::CreateU(GameResources& gameResources, int width, int height)
+		{
+			return std::make_unique<Level>(gameResources, width, height);
 		}
 		void Level::Update(float delta)
 		{
@@ -38,21 +40,15 @@ namespace TowerDefense
 			auto iter = m_enemies.begin();
 			while (iter != m_enemies.end())
 			{
-				auto e = *iter;
+				Enemy::P& e = *iter;
 				if (e->Finished() || !e->Alive())
+				{
+					RemoveRenderedEntity(*e);
 					iter = m_enemies.erase(iter);
+				}
 				else
 					iter++;
 			}
-		}
-		void Level::Render(gfx::Scene& scene)
-		{
-			scene.RenderEntity(*m_levelMap);
-			for (auto& p : m_places)
-				if (p.turret)
-					scene.RenderEntity(*p.turret);
-			for (auto& e : m_enemies)
-				scene.RenderEntity(*e);
 		}
 		std::optional<alg::Point> Level::PointedArea(mth::float3 origin, mth::float3 direction)
 		{
@@ -141,6 +137,7 @@ namespace TowerDefense
 			{
 				place.turret = turret;
 				turret->Place(mapPosition);
+				AddRenderedEntity(*turret);
 				RegeneratePaths();
 			}
 		}
@@ -149,8 +146,28 @@ namespace TowerDefense
 			auto& place = m_places(mapPosition.x, mapPosition.y);
 			if (place.turret)
 			{
+				RemoveRenderedEntity(*place.turret);
 				place.turret = nullptr;
 				RegeneratePaths();
+			}
+		}
+		void Level::AddRenderedEntity(gfx::Entity& entity)
+		{
+			m_renderedEntities.push_back(&entity);
+		}
+		void Level::RemoveRenderedEntity(gfx::Entity& entity)
+		{
+			void* toRemove = &entity;
+			auto iter = m_renderedEntities.begin();
+			while (iter != m_renderedEntities.end())
+			{
+				void* current = *iter;
+				if (toRemove == current)
+				{
+					m_renderedEntities.erase(iter);
+					return;
+				}
+				iter++;
 			}
 		}
 		void Level::RegeneratePaths()
@@ -181,6 +198,7 @@ namespace TowerDefense
 			UpdatePathFinder(enemy->PathFinder());
 			enemy->StartPath(m_enemyStartPoint, m_enemyEndPoint);
 			m_enemies.push_back(enemy);
+			AddRenderedEntity(*enemy);
 		}
 	}
 }

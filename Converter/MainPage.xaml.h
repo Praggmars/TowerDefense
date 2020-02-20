@@ -5,6 +5,7 @@
 #include "graphics/camera.h"
 #include "graphics/shadowmap.h"
 #include "graphics/pointlight.h"
+#include "graphics/ambientocclusion.h"
 
 namespace Converter
 {
@@ -12,6 +13,7 @@ namespace Converter
 	{
 		gfx::Graphics::U m_graphics;
 		gfx::ShadowMap::U m_shadowMap;
+		gfx::AmbientOcclusion::U m_ssao;
 		gfx::Camera m_camera;
 		gfx::PointLight m_light;
 		std::vector<std::unique_ptr<gfx::ModelLoader>> m_modelLoaders;

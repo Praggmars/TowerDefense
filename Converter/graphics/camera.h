@@ -35,6 +35,8 @@ namespace Converter
 			void ScreenAspectRatio(float screenAspectRatio);
 
 			mth::float4x4 CameraMatrix();
+			inline mth::float4x4 ViewMatrix() { return m_viewMatrix; }
+			inline mth::float4x4 ProjectionMatrix() { return m_projectionMatrix; }
 		};
 	}
 }

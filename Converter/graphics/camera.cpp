@@ -23,6 +23,7 @@ namespace Converter
 			m_sensitivity(0.005f),
 			m_tracking(false)
 		{
+			SetPosition();
 			SetProjection();
 		}
 		void Camera::StartTracking(mth::float2 cursor)

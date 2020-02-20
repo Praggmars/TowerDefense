@@ -32,10 +32,11 @@ namespace Converter
 		m_graphics = gfx::Graphics::CreateU();
 		m_graphics->SetSwapChainPanel(m_swapChainPanel);
 		m_shadowMap = gfx::ShadowMap::CreateU(*m_graphics, static_cast<unsigned>(m_shadowMapSize), static_cast<unsigned>(m_shadowMapSize));
+		m_ssao = gfx::AmbientOcclusion::CreateU(*m_graphics);
 		m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &Converter::MainPage::OnSizeChanged);
 
-		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
-		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
+		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
+		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
 		//m_modelLoaders[1]->Transform(mth::float4x4::Translation(mth::float3(0.0f, 2.0f, 0.0f)));
 		//m_modelLoaders[1]->CreateResources(*m_graphics);
 
@@ -46,6 +47,7 @@ namespace Converter
 		Concurrency::critical_section::scoped_lock lock(m_graphics->GetLock());
 		m_graphics->Resize(static_cast<unsigned>(e->NewSize.Width), static_cast<unsigned>(e->NewSize.Height));
 		m_camera.ScreenAspectRatio(e->NewSize.Width / e->NewSize.Height);
+		m_ssao->Resize(*m_graphics);
 		Draw();
 	}
 	void MainPage::OnDragOver(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
@@ -164,7 +166,6 @@ namespace Converter
 		matrixBuffer.worldMatrix = mth::float4x4::Identity();
 		matrixBuffer.cameraMatrix = m_camera.CameraMatrix();
 		matrixBuffer.lightMatrix = m_light.LightMatrix();
-		//matrixBuffer.cameraMatrix = matrixBuffer.lightMatrix;
 
 		gfx::CB_LightBuffer lightBuffer;
 		lightBuffer.ambientColor = 0.3f;
@@ -172,6 +173,7 @@ namespace Converter
 		lightBuffer.sourcePosition = m_light.position;
 		lightBuffer.shadowMapDelta = 1.0f / m_shadowMapSize;
 		lightBuffer.eyePosition = m_camera.position;
+		lightBuffer.screenSize = mth::float2(static_cast<float>(m_graphics->Width()), static_cast<float>(m_graphics->Height()));
 
 		mth::float4x4 lightMatrix = matrixBuffer.lightMatrix;
 		m_shadowMap->SetAsRenderTarget(*m_graphics);
@@ -181,12 +183,17 @@ namespace Converter
 			ml->RenderMesh(*m_graphics);
 		}
 
+		m_ssao->SetAsRenderTarget(*m_graphics, m_camera);
+		for (auto& ml : m_modelLoaders)
+			ml->RenderMesh(*m_graphics);
+		m_ssao->RenderOcclusionMap(*m_graphics, m_camera);
+
 		m_graphics->SetScreenAsRenderTarget();
 
 		m_graphics->WriteVSMatrixBuffer(&matrixBuffer);
 		m_graphics->WritePSLightBuffer(&lightBuffer);
 		m_shadowMap->SetTextureToRender(*m_graphics, 2);
-		m_shadowMap->SetTextureToRender(*m_graphics, 0);
+		m_ssao->SetTextureToRender(*m_graphics, 3);
 
 		m_graphics->Clear(0.2f, 0.3f, 0.5f);
 		for (auto& ml : m_modelLoaders)

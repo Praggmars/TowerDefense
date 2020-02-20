@@ -8,7 +8,7 @@ namespace TowerDefense
 		Material::Material(Texture::P texture, Texture::P normalmap) :
 			m_texture(texture),
 			m_normalmap(normalmap),
-			m_materialBuffer{ mth::float4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, {0.0f, 0.0f, 0.0f} } {}
+			m_materialBuffer{ mth::float4(1.0f), mth::float4(), 0.0f, 1.0f,{ 0.0f, 0.0f } } {}
 		Material::P Material::CreateP(Texture::P texture, Texture::P normalmap)
 		{
 			return std::make_shared<Material>(texture, normalmap);
@@ -17,9 +17,9 @@ namespace TowerDefense
 		{
 			return std::make_unique<Material>(texture, normalmap);
 		}
-		void Material::SetToRender(Graphics& graphics, ShaderBuffer& materialBuffer)
+		void Material::SetToRender(Graphics& graphics)
 		{
-			materialBuffer.WriteBuffer(graphics, &m_materialBuffer);
+			graphics.WritePSMaterialBuffer(&m_materialBuffer);
 			if (m_texture)
 				m_texture->SetToRender(graphics, 0);
 			if (m_normalmap)

@@ -52,14 +52,16 @@ namespace TowerDefense
 		{
 			return std::make_unique<Entity>(model, material, hitbox);
 		}
-		void Entity::Render(Graphics& graphics, ShaderBuffer& materialBuffer)
+		void Entity::Render(Graphics& graphics, CB_MatrixBuffer& matrixBuffer)
 		{
 			if (m_visible)
 			{
+				matrixBuffer.worldMatrix = WorldMatrix();
+				graphics.WriteVSMatrixBuffer(&matrixBuffer);
 				m_model->SetBuffersToRender(graphics);
 				for (unsigned i = 0; i < m_materials.size(); i++)
 				{
-					m_materials[i]->SetToRender(graphics, materialBuffer);
+					m_materials[i]->SetToRender(graphics);
 					m_model->RenderGroup(graphics, i);
 				}
 			}

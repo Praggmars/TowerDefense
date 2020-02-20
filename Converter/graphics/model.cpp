@@ -21,7 +21,7 @@ namespace Converter
 			if (FAILED(hr))
 				throw std::exception("Failed to create vertex buffer");
 
-			bufferDesc.ByteWidth = indexCount * sizeof(UINT);
+			bufferDesc.ByteWidth = indexCount * sizeof(unsigned);
 			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			subResourceData.pSysMem = indices;
 

@@ -33,7 +33,7 @@ namespace TowerDefense
 			static Entity::U CreateU(Model::P model, Material::P* materials, unsigned materialCount, phy::Hitbox::P hitbox = nullptr);
 			static Entity::U CreateU(Model::P model, Material::P material, phy::Hitbox::P hitbox = nullptr);
 
-			void Render(Graphics& graphics, ShaderBuffer& materialBuffer);
+			void Render(Graphics& graphics, CB_MatrixBuffer& matrixBuffer);
 
 			inline Model::P Model() { return m_model; }
 			inline std::vector<Material::P>& Materials() { return m_materials; }

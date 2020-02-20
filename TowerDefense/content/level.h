@@ -21,7 +21,6 @@ namespace TowerDefense
 				Turret::P turret;
 				alg::Point mapPosition;
 			};
-			gfx::Scene::P m_scene;
 			GameObject::P m_levelMap;
 			Array2D<MapElement> m_places;
 			std::vector<Enemy::P> m_enemies;
@@ -29,17 +28,20 @@ namespace TowerDefense
 			alg::Point m_enemyStartPoint;
 			alg::Point m_enemyEndPoint;
 
+			std::vector<gfx::Entity*> m_renderedEntities;
+
 		private:
+			void AddRenderedEntity(gfx::Entity& entity);
+			void RemoveRenderedEntity(gfx::Entity& entity);
 			void RegeneratePaths();
 			void UpdatePathFinder(alg::PathFinder& pathFinder);
 
 		public:
-			Level(gfx::Scene::P scene, GameResources& gameResources, int width, int height);
-			static Level::P CreateP(gfx::Scene::P scene, GameResources& gameResources, int width, int height);
-			static Level::U CreateU(gfx::Scene::P scene, GameResources& gameResources, int width, int height);
+			Level(GameResources& gameResources, int width, int height);
+			static Level::P CreateP(GameResources& gameResources, int width, int height);
+			static Level::U CreateU(GameResources& gameResources, int width, int height);
 
 			void Update(float delta);
-			void Render(gfx::Scene& scene);
 
 			void PlaceTurret(alg::Point mapPosition, Turret::P turret);
 			void DestroyTurret(alg::Point mapPosition);
@@ -49,6 +51,8 @@ namespace TowerDefense
 			Turret::P PointedTurret(mth::float3 origin, mth::float3 direction);
 			Enemy::P PointedEnemy(mth::float3 origin, mth::float3 direction);
 			GameObject::P PointedTurretOrEnemy(mth::float3 origin, mth::float3 direction);
+
+			inline std::vector<gfx::Entity*>& RenderedEntities() { return m_renderedEntities; }
 		};
 	}
 }

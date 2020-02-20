@@ -8,13 +8,6 @@ namespace TowerDefense
 {
 	namespace gfx
 	{
-		struct MaterialBuffer
-		{
-			mth::float4 color;
-			float textureWeight;
-			float padding[3];
-		};
-
 		class Material
 		{
 		public:
@@ -24,16 +17,16 @@ namespace TowerDefense
 			Texture::P m_texture;
 			Texture::P m_normalmap;
 
-			MaterialBuffer m_materialBuffer;
+			CB_MaterialBuffer m_materialBuffer;
 
 		public:
 			Material(Texture::P texture, Texture::P normalmap);
 			static Material::P CreateP(Texture::P texture, Texture::P normalmap);
 			static Material::U CreateU(Texture::P texture, Texture::P normalmap);
 
-			void SetToRender(Graphics& graphics, ShaderBuffer& materialBuffer);
+			void SetToRender(Graphics& graphics);
 
-			inline MaterialBuffer& MaterialBuffer() { return m_materialBuffer; }
+			inline CB_MaterialBuffer& MaterialBuffer() { return m_materialBuffer; }
 		};
 	}
 }

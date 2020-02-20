@@ -1,15 +1,16 @@
 #include "pch.h"
 #include "shadowmap.h"
+#include "math/linalg.hpp"
 
-namespace Converter
+namespace TowerDefense
 {
 	namespace gfx
 	{
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> ShadowMap::CreateDepthMap(ID3D11Device3* device)
 		{
 			D3D11_TEXTURE2D_DESC textureDesc{};
-			textureDesc.Width = m_width;
-			textureDesc.Height = m_height;
+			textureDesc.Width = m_size;
+			textureDesc.Height = m_size;
 			textureDesc.MipLevels = 1;
 			textureDesc.ArraySize = 1;
 			textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
@@ -144,10 +145,9 @@ void main(PixelInputType input)
 			bufferDesc.ByteWidth = m_bufferSize;
 			ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_buffer));
 		}
-		ShadowMap::ShadowMap(Graphics& graphics, unsigned width, unsigned height) :
-			m_viewport{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f },
-			m_width(width),
-			m_height(height)
+		ShadowMap::ShadowMap(Graphics& graphics, unsigned size) :
+			m_viewport{ 0.0f, 0.0f, static_cast<float>(size), static_cast<float>(size), 0.0f, 1.0f },
+			m_size(size)
 		{
 			auto* device = graphics.Device3D();
 			auto depthMap = CreateDepthMap(device);
@@ -171,13 +171,13 @@ void main(PixelInputType input)
 			CreatePixelShader(graphics);
 			CreateBuffer(device);
 		}
-		ShadowMap::P ShadowMap::CreateP(Graphics& graphics, unsigned width, unsigned height)
+		ShadowMap::P ShadowMap::CreateP(Graphics& graphics, unsigned size)
 		{
-			return std::make_shared<ShadowMap>(graphics, width, height);
+			return std::make_shared<ShadowMap>(graphics, size);
 		}
-		ShadowMap::U ShadowMap::CreateU(Graphics& graphics, unsigned width, unsigned height)
+		ShadowMap::U ShadowMap::CreateU(Graphics& graphics, unsigned size)
 		{
-			return std::make_unique<ShadowMap>(graphics, width, height);
+			return std::make_unique<ShadowMap>(graphics, size);
 		}
 		void ShadowMap::SetTextureToRender(Graphics& graphics, unsigned index)
 		{

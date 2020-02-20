@@ -6,7 +6,7 @@
 #include "entity.h"
 #include "camera.h"
 
-namespace TowerDefense
+/*namespace TowerDefense
 {
 	namespace gfx
 	{
@@ -45,4 +45,4 @@ namespace TowerDefense
 			inline void BackgroundColor(mth::float4 color) { m_bgColor = color; }
 		};
 	}
-}
+}*/

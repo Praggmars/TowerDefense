@@ -4,6 +4,8 @@
 
 #define SMART_PTR(TYPE) using P = std::shared_ptr<TYPE>; using W = std::weak_ptr<TYPE>; using U = std::unique_ptr<TYPE>;
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
+
 namespace Converter
 {
 	void ThrowIfFailed(HRESULT hr);

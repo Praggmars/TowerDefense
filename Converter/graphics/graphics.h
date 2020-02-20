@@ -20,7 +20,9 @@ namespace Converter
 			mth::float3 sourcePosition;
 			float shadowMapDelta;
 			mth::float3 eyePosition;
-			float padding2;
+			float padding1;
+			mth::float2 screenSize;
+			float padding2[2];
 		};
 		struct CB_MaterialBuffer
 		{

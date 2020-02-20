@@ -87,7 +87,7 @@ namespace Converter
 				throw std::exception("Failed to create blend state");
 
 			float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-			m_context3D->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
+			//m_context3D->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
 		}
 		void Graphics::CreateWindowSizeDependentResources()
 		{
@@ -173,12 +173,19 @@ cbuffer MatrixBuffer
 	matrix lightMatrix;
 };
 
+cbuffer BoneBuffer
+{
+	matrix bones[96];
+};
+
 struct VertexInputType
 {
 	float3 position : POSITION;
 	float2 texcoord : TEXCOORD;
 	float3 normal   : NORMAL;
 	float3 tangent  : TANGENT;
+	float3 weights  : WEIGHTS;
+	uint4 bones     : BONES;
 };
 
 struct PixelInputType
@@ -221,30 +228,27 @@ PixelInputType main(VertexInputType input)
 				target = "vs_4_0";
 			}
 			Microsoft::WRL::ComPtr<ID3DBlob>byteCode = CompileShader(code, "main", target);
-			HRESULT hr = m_device3D->CreateVertexShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_vertexShader);
-			if (FAILED(hr))
-				throw std::exception("Failed to create vertex shader.");
-			D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[4];
-			inputLayoutDesc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-			inputLayoutDesc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-			inputLayoutDesc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-			inputLayoutDesc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-			hr = m_device3D->CreateInputLayout(inputLayoutDesc, 4,
-				byteCode->GetBufferPointer(), byteCode->GetBufferSize(), &m_inputLayout);
-			if (FAILED(hr))
-				throw std::exception("Failed to create input layout.");
+			ThrowIfFailed(m_device3D->CreateVertexShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_vertexShader));
+			D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[6];
+			inputLayoutDesc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,   0, 0,                            D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			inputLayoutDesc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,      0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			inputLayoutDesc[2] = { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			inputLayoutDesc[3] = { "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			inputLayoutDesc[4] = { "WEIGHTS",  0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			inputLayoutDesc[5] = { "BONES",    0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			ThrowIfFailed(m_device3D->CreateInputLayout(inputLayoutDesc, 6, byteCode->GetBufferPointer(), byteCode->GetBufferSize(), &m_inputLayout));
 
 			m_context3D->IASetInputLayout(m_inputLayout.Get());
 		}
 		void Graphics::CreatePixelShader()
 		{
 			static const char* code = R"(
-#define COMPARISON 1
-Texture2D texture_diffuse;
-Texture2D texture_normal;
-Texture2D texture_shadowMap;
-SamplerState textureSampler;
-SamplerComparisonState shadowMapSampler;
+Texture2D texture_diffuse : register(t0);
+Texture2D texture_normal : register(t1);
+Texture2D texture_shadowMap : register(t2);
+Texture2D texture_ambientMap : register(t3);
+SamplerState sampler_texture : register(s0);
+SamplerComparisonState sampler_shadowMap : register(s1);
 
 cbuffer LightBuffer
 {
@@ -253,7 +257,9 @@ cbuffer LightBuffer
 	float3 light_sourcePosition;
 	float  light_shadowMapDelta;
 	float3 light_eyePosition;
-	float  light_padding2;
+	float  light_padding1;
+	float2 light_screenSize;
+	float  light_padding2[2];
 };
 
 cbuffer MaterialBuffer
@@ -277,19 +283,19 @@ struct PixelInputType
 
 float4 PixelColor(float2 texCoord)
 {
-	return texture_diffuse.Sample(textureSampler, texCoord) * material_textureWeight + material_diffuseColor * (1.0f - material_textureWeight);
+	return texture_diffuse.Sample(sampler_texture, texCoord) * material_textureWeight + material_diffuseColor * (1.0f - material_textureWeight);
 }
 float3 PixelNormal(float3 normal, float3 tangent, float2 texCoord)
 {
 	tangent = normalize(tangent - dot(tangent, normal) * normal);
 	normal = normalize(normal);
 	float3 bitangent = cross(tangent, normal);
-	float4 bumpmap = texture_normal.Sample(textureSampler, texCoord) * 2.0f - 1.0f;
+	float4 bumpmap = texture_normal.Sample(sampler_texture, texCoord) * 2.0f - 1.0f;
 	return normalize(mul(bumpmap.xyz, float3x3(tangent, bitangent, normal)));
 }
 float ShadowFactor1x1(float3 lightTex)
 {
-	return texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy, lightTex.z).r;
+	return texture_shadowMap.SampleCmpLevelZero(sampler_shadowMap, lightTex.xy, lightTex.z).r;
 }
 float ShadowFactor3x3(float3 lightTex)
 {
@@ -302,7 +308,7 @@ float ShadowFactor3x3(float3 lightTex)
 	};
 	[unroll]
 	for (int i = 0; i < 9; i++)
-		percentLit += texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy + offsets[i], lightTex.z).r;
+		percentLit += texture_shadowMap.SampleCmpLevelZero(sampler_shadowMap, lightTex.xy + offsets[i], lightTex.z).r;
 	return percentLit / 9.0f;
 }
 float ShadowFactor5x5(float3 lightTex)
@@ -318,12 +324,14 @@ float ShadowFactor5x5(float3 lightTex)
 	};
 	[unroll]
 	for (int i = 0; i < 25; i++)
-		percentLit += texture_shadowMap.SampleCmpLevelZero(shadowMapSampler, lightTex.xy + offsets[i], lightTex.z).r;
+		percentLit += texture_shadowMap.SampleCmpLevelZero(sampler_shadowMap, lightTex.xy + offsets[i], lightTex.z).r;
 	return percentLit / 25.0f;
 }
 
 float4 main(PixelInputType input) : SV_TARGET
 {
+	float2 texCoords = input.wndpos.xy / light_screenSize;
+	//return texture_ambientMap.Sample(sampler_texture, texCoords);
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 pixelColor = PixelColor(input.texcoord);
 	float3 pixelNormal = PixelNormal(input.normal, input.tangent, input.texcoord);
@@ -334,10 +342,11 @@ float4 main(PixelInputType input) : SV_TARGET
 	input.lightTex.x = input.lightTex.x / input.lightTex.w * 0.5f + 0.5f;
 	input.lightTex.y = input.lightTex.y / input.lightTex.w * (-0.5f) + 0.5f;
 	input.lightTex.z = input.lightTex.z / input.lightTex.w;
-	float shadowFactor = ShadowFactor3x3(input.lightTex.xyz);
+	float shadowFactor = ShadowFactor5x5(input.lightTex.xyz);
 	float intensity = shadowFactor * saturate(dot(pixelNormal, lightDirection));
 
-	float4 color = light_ambientColor;
+	float occlusionFactor = texture_ambientMap.Sample(sampler_texture, texCoords).r;
+	float4 color = light_ambientColor * (occlusionFactor * 0.5f + 0.5f);
 
 	if (intensity > 0.0f)
 	{
@@ -371,9 +380,7 @@ float4 main(PixelInputType input) : SV_TARGET
 				target = "ps_4_0";
 			}
 			Microsoft::WRL::ComPtr<ID3DBlob> byteCode = CompileShader(code, "main", target);
-			HRESULT hr = m_device3D->CreatePixelShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_pixelShader);
-			if (FAILED(hr))
-				throw std::exception("Failed to create pixel shader.");
+			ThrowIfFailed(m_device3D->CreatePixelShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_pixelShader));
 		}
 		void Graphics::CreateShaderBuffers()
 		{
@@ -392,19 +399,13 @@ float4 main(PixelInputType input) : SV_TARGET
 			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 			bufferDesc.ByteWidth = m_vsMatrixBufferSize;
-			hr = m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_vsMatrixBuffer);
-			if (FAILED(hr))
-				throw std::exception("Failed to create constant buffer");
+			ThrowIfFailed(m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_vsMatrixBuffer));
 
 			bufferDesc.ByteWidth = m_psLightBufferSize;
-			hr = m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psLightBuffer);
-			if (FAILED(hr))
-				throw std::exception("Failed to create constant buffer");
+			ThrowIfFailed(m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psLightBuffer));
 
 			bufferDesc.ByteWidth = m_psMaterialBufferSize;
-			hr = m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psMaterialBuffer);
-			if (FAILED(hr))
-				throw std::exception("Failed to create constant buffer");
+			ThrowIfFailed(m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psMaterialBuffer));
 		}
 		void Graphics::WriteShaderBuffer(ID3D11Buffer* buffer, void* data, unsigned size)
 		{
@@ -486,7 +487,7 @@ float4 main(PixelInputType input) : SV_TARGET
 			m_context3D->RSSetState(m_rasterizerState.Get());
 			m_context3D->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 			m_context3D->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-			m_context3D->IASetInputLayout(m_inputLayout.Get());
+			//m_context3D->IASetInputLayout(m_inputLayout.Get());
 			m_context3D->RSSetViewports(1, &m_viewport);
 			m_context3D->OMSetRenderTargets(1, rendeTargets, m_depthStencilView.Get());
 			m_context3D->PSSetSamplers(0, 1, m_textureSampler.GetAddressOf());

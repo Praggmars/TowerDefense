@@ -13,6 +13,8 @@ namespace Converter
 			mth::float2 texcoord;
 			mth::float3 normal;
 			mth::float3 tangent;
+			mth::float3 boneWeights;
+			mth::vec4<unsigned> boneIndices;
 		};
 
 		class Model

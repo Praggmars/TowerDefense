@@ -31,4 +31,15 @@ namespace mth
 		s2 = -b + dis;
 		return 2;
 	}
+
+	template <typename T>
+	T Random(T minimum, T maximum)
+	{
+		return (static_cast<T>(rand()) / static_cast<T>(RAND_MAX))* (maximum - minimum) + minimum;
+	}
+	template <typename T>
+	T Random()
+	{
+		return Random(0, 1);
+	}
 }
