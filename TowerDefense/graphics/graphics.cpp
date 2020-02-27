@@ -243,11 +243,11 @@ PixelInputType main(VertexInputType input)
 		void Graphics::CreatePixelShader()
 		{
 			static const char* code = R"(
-Texture2D texture_diffuse : register(t0);
-Texture2D texture_normal : register(t1);
-Texture2D texture_shadowMap : register(t2);
-Texture2D texture_ambientMap : register(t3);
-SamplerState sampler_texture : register(s0);
+Texture2D texture_diffuse                : register(t0);
+Texture2D texture_normal                 : register(t1);
+Texture2D texture_shadowMap              : register(t2);
+Texture2D texture_ambientMap             : register(t3);
+SamplerState sampler_texture             : register(s0);
 SamplerComparisonState sampler_shadowMap : register(s1);
 
 cbuffer LightBuffer
@@ -331,7 +331,6 @@ float ShadowFactor5x5(float3 lightTex)
 float4 main(PixelInputType input) : SV_TARGET
 {
 	float2 texCoords = input.wndpos.xy / light_screenSize;
-	//return texture_ambientMap.Sample(sampler_texture, texCoords);
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 pixelColor = PixelColor(input.texcoord);
 	float3 pixelNormal = PixelNormal(input.normal, input.tangent, input.texcoord);
@@ -385,7 +384,6 @@ float4 main(PixelInputType input) : SV_TARGET
 		void Graphics::CreateShaderBuffers()
 		{
 			D3D11_BUFFER_DESC bufferDesc;
-			HRESULT hr;
 
 			m_vsMatrixBufferSize = sizeof(CB_MatrixBuffer);
 			m_psLightBufferSize = sizeof(CB_LightBuffer);
@@ -444,7 +442,8 @@ float4 main(PixelInputType input) : SV_TARGET
 			m_viewport(),
 			m_featureLevel(D3D_FEATURE_LEVEL_9_1),
 			m_width(0),
-			m_height(0)
+			m_height(0),
+			m_appDirectory((Windows::ApplicationModel::Package::Current->InstalledLocation->Path + L'\\')->Data())
 		{
 			CreateDevice();
 			CreateRasterizerState();

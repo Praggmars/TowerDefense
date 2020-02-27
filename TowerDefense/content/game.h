@@ -10,6 +10,13 @@ namespace TowerDefense
 {
 	namespace content
 	{
+		enum class TurretType
+		{
+			LIGHT,
+			HEAVY,
+			LAUNCHER
+		};
+
 		class Game
 		{
 		public:
@@ -45,9 +52,10 @@ namespace TowerDefense
 			void MouseDown(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
 			void MouseMove(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
 			void MouseUp(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown);
+			void MouseWheel(int delta);
 			void WindowSizeChanged(mth::float2 size);
 
-			void PlaceTurret();
+			void PlaceTurret(TurretType turretType);
 		};
 	}
 }

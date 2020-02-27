@@ -112,25 +112,25 @@ namespace mth
 	template <typename T>
 	std::ostream& operator<<(std::ostream& os, const vec4<T> v)
 	{
-		os << v.x << ' ' << v.y << ' ' << v.z;
+		os << v.x << ' ' << v.y << ' ' << v.z << ' ' << v.w;
 		return os;
 	}
 	template <typename T>
 	std::istream& operator>>(std::istream& is, vec4<T>& v)
 	{
-		is >> v.x >> v.y >> v.z;
+		is >> v.x >> v.y >> v.z >> v.w;
 		return is;
 	}
 	template <typename T>
 	std::wostream& operator<<(std::wostream& os, const vec4<T> v)
 	{
-		os << v.x << ' ' << v.y << ' ' << v.z;
+		os << v.x << ' ' << v.y << ' ' << v.z << ' ' << v.w;
 		return os;
 	}
 	template <typename T>
 	std::wistream& operator>>(std::wistream& is, vec4<T>& v)
 	{
-		is >> v.x >> v.y >> v.z;
+		is >> v.x >> v.y >> v.z >> v.w;
 		return is;
 	}
 }

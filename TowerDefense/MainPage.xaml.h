@@ -13,7 +13,9 @@ namespace TowerDefense
 		content::Game::U m_game;
 
 	private:
-		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void LightTurret_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void HeavyTurret_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void Launcher_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void OnPointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 		void OnPointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 		void OnPointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
@@ -22,5 +24,6 @@ namespace TowerDefense
 
 	public:
 		MainPage();
+		void OnPointerWheelChanged(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 }

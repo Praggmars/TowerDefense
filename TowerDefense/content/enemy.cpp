@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "enemy.h"
+#include "level.h"
 
 namespace TowerDefense
 {
@@ -19,11 +19,11 @@ namespace TowerDefense
 		{
 			return std::make_unique<Enemy>(resources);
 		}
-		void Enemy::Update(float deltaTime)
+		void Enemy::Update(float deltaTime, Level& level)
 		{
-			while (m_pathFinder.PathLength() > -1 && m_pathProgress < m_pathFinder.PathLength() && deltaTime > 0.0f)
+			while (m_pathFinder.PathLength() > -1 && static_cast<int>(m_pathProgress) < m_pathFinder.PathLength() && deltaTime > 0.0f)
 			{
-				alg::Point nextPoint = m_pathFinder.Path()[m_pathProgress];
+				mth::float2 nextPoint = level.CoordTransform(m_pathFinder.Path()[m_pathProgress]);
 				mth::float3 to(nextPoint.x, position.y, nextPoint.y);
 				mth::float3 dir = to - position;
 				float distance = dir.Length();
@@ -35,7 +35,7 @@ namespace TowerDefense
 				position = to;
 				deltaTime -= distance / m_speed;
 				m_pathProgress++;
-				m_current = nextPoint;
+				m_current = level.CoordTransform(nextPoint);
 			}
 		}
 		void Enemy::StartPath(alg::Point start, alg::Point end)
@@ -50,7 +50,7 @@ namespace TowerDefense
 		}
 		bool Enemy::Finished()
 		{
-			return m_pathProgress >= m_pathFinder.PathLength();
+			return static_cast<int>(m_pathProgress) >= m_pathFinder.PathLength();
 		}
 		void Enemy::Damage(unsigned dmg)
 		{

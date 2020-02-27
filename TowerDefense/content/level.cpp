@@ -5,26 +5,25 @@ namespace TowerDefense
 {
 	namespace content
 	{
-		Level::Level(GameResources& gameResources, int width, int height) :
-			m_levelMap(GameObject::CreateP(gameResources.area)),
+		Level::Level(gfx::Graphics& graphics, GameResources& gameResources, int width, int height) :
 			m_places(width, height),
 			m_enemyStartPoint{ 0, height / 2 },
-			m_enemyEndPoint{ width - 1, height / 2 } 
+			m_enemyEndPoint{ width - 1, height / 2 }
 		{
-			AddRenderedEntity(*m_levelMap);
+			CreateLevelMap(graphics, gameResources, width, height);
 		}
-		Level::P Level::CreateP(GameResources& gameResources, int width, int height)
+		Level::P Level::CreateP(gfx::Graphics& graphics, GameResources& gameResources, int width, int height)
 		{
-			return std::make_shared<Level>(gameResources, width, height);
+			return std::make_shared<Level>(graphics, gameResources, width, height);
 		}
-		Level::U Level::CreateU(GameResources& gameResources, int width, int height)
+		Level::U Level::CreateU(gfx::Graphics& graphics, GameResources& gameResources, int width, int height)
 		{
-			return std::make_unique<Level>(gameResources, width, height);
+			return std::make_unique<Level>(graphics, gameResources, width, height);
 		}
 		void Level::Update(float delta)
 		{
 			for (auto& e : m_enemies)
-				e->Update(delta);
+				e->Update(delta, *this);
 
 			for (auto& a : m_places)
 			{
@@ -56,11 +55,7 @@ namespace TowerDefense
 			if (distance == NAN || distance == INFINITY || distance == -INFINITY)
 				return {};
 			mth::float3 groundPoint = origin + distance * direction;
-			alg::Point p = {
-				static_cast<int>(floor(groundPoint.x)),
-				static_cast<int>(floor(groundPoint.z))
-			};
-			return p;
+			return CoordTransform(mth::float2(groundPoint.x, groundPoint.z));
 		}
 		Turret::P Level::PointedTurret(mth::float3 origin, mth::float3 direction)
 		{
@@ -151,17 +146,42 @@ namespace TowerDefense
 				RegeneratePaths();
 			}
 		}
+		void Level::CreateLevelMap(gfx::Graphics& graphics, GameResources& gameResources, int width, int height)
+		{
+			Image map((graphics.AppDirectory() + L"resources\\map.png").c_str());
+			m_places.resize(map.Width(), map.Height());
+
+			m_levelMap = GameObject::CreateP(gameResources.map);
+			m_base = GameObject::CreateP(gameResources.base);
+
+			AddRenderedEntity(*m_levelMap);
+			AddRenderedEntity(*m_base);
+		}
+		alg::Point Level::CoordTransform(mth::float2 p)
+		{
+			return alg::Point{
+				static_cast<int>(p.x + static_cast<float>(m_places.width()) * 0.5f),
+				static_cast<int>(p.y + static_cast<float>(m_places.height()) * 0.5f)
+			};
+		}
+		mth::float2 Level::CoordTransform(alg::Point p)
+		{
+			return mth::float2(
+				static_cast<float>(p.x) - static_cast<float>(m_places.width()) * 0.5f + 0.5f,
+				static_cast<float>(p.y) - static_cast<float>(m_places.height()) * 0.5f + 0.5f
+			);
+		}
 		void Level::AddRenderedEntity(gfx::Entity& entity)
 		{
 			m_renderedEntities.push_back(&entity);
 		}
 		void Level::RemoveRenderedEntity(gfx::Entity& entity)
 		{
-			void* toRemove = &entity;
+			gfx::Entity* toRemove = &entity;
 			auto iter = m_renderedEntities.begin();
 			while (iter != m_renderedEntities.end())
 			{
-				void* current = *iter;
+				gfx::Entity* current = *iter;
 				if (toRemove == current)
 				{
 					m_renderedEntities.erase(iter);
@@ -180,9 +200,9 @@ namespace TowerDefense
 		}
 		void Level::UpdatePathFinder(alg::PathFinder& pathFinder)
 		{
-			for (size_t y = 0; y < m_places.height(); y++)
+			for (int y = 0; y < m_places.height(); y++)
 			{
-				for (size_t x = 0; x < m_places.width(); x++)
+				for (int x = 0; x < m_places.width(); x++)
 				{
 					if (m_places(x, y).turret)
 						pathFinder.Block(x, y);
@@ -193,8 +213,9 @@ namespace TowerDefense
 		}
 		void Level::SpawnEnemy(Enemy::P enemy)
 		{
-			enemy->position = mth::float3(m_enemyStartPoint.x, 0.0f, m_enemyStartPoint.y);
-			enemy->PathFinder().Resize(m_places.width(), m_places.height());
+			auto p = CoordTransform(m_enemyStartPoint);
+			enemy->position = mth::float3(p.x, 0.5f, p.y);
+			enemy->PathFinder().Resize(static_cast<unsigned>(m_places.width()), static_cast<unsigned>(m_places.height()));
 			UpdatePathFinder(enemy->PathFinder());
 			enemy->StartPath(m_enemyStartPoint, m_enemyEndPoint);
 			m_enemies.push_back(enemy);

@@ -21,28 +21,28 @@ namespace TowerDefense
 				mth::float3(0.0f, 1.0f, 0.0f),
 				mth::float3(0.0f, 0.0f, 1.0f),
 				mth::float3(),
-				{ 0, 0, 0, 0 } };
+				mth::vec4<unsigned>() };
 			m_vertices[1] = {
 				mth::float3(position.x + size.x, y, position.y),
 				mth::float2(0.0f, 1.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
 				mth::float3(0.0f, 0.0f, 1.0f),
 				mth::float3(),
-				{ 0, 0, 0, 0 } };
+				mth::vec4<unsigned>() };
 			m_vertices[2] = {
 				mth::float3(position.x + size.x, y, position.y + size.y),
 				mth::float2(1.0f, 1.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
 				mth::float3(0.0f, 0.0f, 1.0f),
 				mth::float3(),
-				{ 0, 0, 0, 0 } };
+				mth::vec4<unsigned>() };
 			m_vertices[3] = {
 				mth::float3(position.x, y, position.y + size.y),
 				mth::float2(1.0f, 0.0f),
 				mth::float3(0.0f, 1.0f, 0.0f),
 				mth::float3(0.0f, 0.0f, 1.0f),
 				mth::float3(),
-				{ 0, 0, 0, 0 } };
+				mth::vec4<unsigned>() };
 			m_indices.resize(6);
 			m_indices[0] = 0;
 			m_indices[1] = 2;
@@ -51,41 +51,41 @@ namespace TowerDefense
 			m_indices[4] = 2;
 			m_indices[5] = 0;
 			m_groups.push_back({ 0, 6, 0 });
-			m_materials.push_back({ L"", L"" });
+			m_materials.push_back({ L"quad", L"", L"", { mth::float4(1.0f), mth::float4(), 1.0f, 1.0f } });
 		}
 		void ModelLoader::CreateCube(mth::float3 p, mth::float3 s)
 		{
 			Clear();
 			m_vertices.reserve(24);
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
-			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z),       mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z),       mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y + s.y, p.z + s.z), mth::float2(0.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x + s.x, p.y,       p.z + s.z), mth::float2(0.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y,       p.z + s.z), mth::float2(1.0f, 1.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
+			m_vertices.push_back(Vertex{ mth::float3(p.x,       p.y + s.y, p.z + s.z), mth::float2(1.0f, 0.0f), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() });
 			unsigned indices[] = { 0, 2, 1, 0, 3, 2, 4, 6, 5, 4, 7, 6, 8, 10, 9, 8, 11, 10, 12, 14, 13, 12, 15, 14, 16, 18, 17, 16, 19, 18, 20, 22, 21, 20, 23, 22 };
 			m_indices.resize(36);
 			memcpy(m_indices.data(), indices, sizeof(indices));
 			m_groups.push_back({ 0, 36, 0 });
-			m_materials.push_back({ L"", L"" });
+			m_materials.push_back({ L"cube", L"", L"", { mth::float4(1.0f), mth::float4(), 1.0f, 1.0f } });
 			CalculateNormals();
 			CalculateTangents();
 		}
@@ -143,62 +143,124 @@ namespace TowerDefense
 				if (!infile.good()) throw Exception::FileRead(filename);
 			}
 		}
+		bool ScanStream(std::wistream& s, const wchar_t* expected)
+		{
+			wchar_t sch, ech; //stream char, expected char
+			ech = *expected++;
+			do
+			{
+				s.get(sch);
+				if (!s.good()) return false;
+			} while (sch != ech);
+			do
+			{
+				ech = *expected++;
+				if (ech == 0) return true;
+				s.get(sch);
+			} while (s.good() && ech == sch);
+			return false;
+		}
+		bool ScanTill(std::wistream& s, wchar_t expected)
+		{
+			wchar_t ch;
+			for (s.get(ch); s.good(); s.get(ch))
+				if (ch == expected)
+					return true;
+			return false;
+		}
+		std::wstring ScanStringAfterWhiteSpacesToLineEnd(std::wifstream& s)
+		{
+			std::wstring str;
+			wchar_t ch;
+			for (s.get(ch); ch == L' '; s.get(ch))
+				if (!s.good()) return str;
+			if (ch == L'\n') return str;
+			str += ch;
+			for (s.get(ch); ch != L'\n'; s.get(ch))
+			{
+				if (!s.good()) return std::wstring();
+				str += ch;
+			}
+			return str;
+		}
 		void ModelLoader::LoadText(const wchar_t* filename)
 		{
 			Clear();
 			std::wifstream infile(filename, std::ios::in | std::ios::binary);
 			if (!infile.is_open())
 				throw Exception::FileOpen(filename);
-			m_filename = filename;
+			size_t vertexCount;
+			size_t indexCount;
+			size_t groupCount;
+			size_t materialCount;
 
-			unsigned vertexCount;
-			unsigned indexCount;
-			unsigned groupCount;
-			unsigned materialCount;
-			unsigned stringSize;
+			if (!ScanStream(infile, L"Vertex count:")) throw Exception::FileRead(filename);
+			infile >> vertexCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
 
-			infile >> vertexCount >> indexCount >> groupCount >> materialCount;
-			if (!infile.good()) throw Exception::FileRead(filename);
+			if (!ScanStream(infile, L"Index count:")) throw Exception::FileRead(filename);
+			infile >> indexCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
 
+			if (!ScanStream(infile, L"Group count:")) throw Exception::FileRead(filename);
+			infile >> groupCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Material count:")) throw Exception::FileRead(filename);
+			infile >> materialCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Vertices:")) throw Exception::FileRead(filename);
 			m_vertices.resize(vertexCount);
-			for (auto& v : m_vertices)
-				infile >> v.position >> v.texcoord >> v.normal >> v.tangent;
-			if (!infile.good()) throw Exception::FileRead(filename);
-
-			m_indices.resize(indexCount);
-			for (auto& i : m_indices)
-				infile >> i;
-			if (!infile.good()) throw Exception::FileRead(filename);
-
-			m_groups.resize(groupCount);
-			for (auto& g : m_groups)
-				infile >> g.startIndex >> g.indexCount >> g.materialIndex;
-			if (!infile.good()) throw Exception::FileRead(filename);
-
-			m_materials.resize(materialCount);
-			for (unsigned i = 0; i < materialCount; i++)
+			vertexCount = 0;
+			for (Vertex& v : m_vertices)
 			{
-				infile >> stringSize;
+				vertexCount++;
+				infile >> v.position;
+				infile >> v.texcoord;
+				infile >> v.normal;
+				infile >> v.tangent;
+				infile >> v.boneWeights;
+				infile >> v.boneIndices;
 				if (!infile.good()) throw Exception::FileRead(filename);
-				m_materials[i].texture.reserve(stringSize + 1);
-				for (size_t i = 0; i < stringSize; i++)
-				{
-					wchar_t ch;
-					infile >> ch;
-					m_materials[i].texture += ch;
-				}
-				if (!infile.good()) throw Exception::FileRead(filename);
+			}
 
-				infile >> stringSize;
+			if (!ScanStream(infile, L"Indices:")) throw Exception::FileRead(filename);
+			m_indices.resize(indexCount);
+			for (unsigned& i : m_indices)
+			{
+				infile >> i;
 				if (!infile.good()) throw Exception::FileRead(filename);
-				m_materials[i].normalmap.reserve(stringSize + 1);
-				for (size_t i = 0; i < stringSize; i++)
-				{
-					wchar_t ch;
-					infile >> ch;
-					m_materials[i].normalmap += ch;
-				}
+			}
+
+			if (!ScanStream(infile, L"Groups:")) throw Exception::FileRead(filename);
+			m_groups.resize(groupCount);
+			for (gfx::VertexGroup& g : m_groups)
+			{
+				infile >> g.startIndex;
+				infile >> g.indexCount;
+				infile >> g.materialIndex;
 				if (!infile.good()) throw Exception::FileRead(filename);
+			}
+
+			if (!ScanStream(infile, L"Materials:")) throw Exception::FileRead(filename);
+			m_materials.resize(materialCount);
+			for (MaterialLoader& m : m_materials)
+			{
+				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
+				m.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Texture:")) throw Exception::FileRead(filename);
+				m.texture = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Normalmap:")) throw Exception::FileRead(filename);
+				m.normalmap = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Diffuse color:")) throw Exception::FileRead(filename);
+				infile >> m.data.diffuseColor;
+				if (!ScanStream(infile, L"Texture weight:")) throw Exception::FileRead(filename);
+				infile >> m.data.textureWeight;
+				if (!ScanStream(infile, L"Specular color:")) throw Exception::FileRead(filename);
+				infile >> m.data.specularColor;
+				if (!ScanStream(infile, L"Specular power:")) throw Exception::FileRead(filename);
+				infile >> m.data.specularPower;
 			}
 		}
 		void ModelLoader::Clear()

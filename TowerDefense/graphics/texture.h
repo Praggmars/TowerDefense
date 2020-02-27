@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics.h"
+#include "common/image.h"
 
 namespace TowerDefense
 {

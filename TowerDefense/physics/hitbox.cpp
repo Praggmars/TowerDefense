@@ -7,7 +7,7 @@ namespace TowerDefense
 	namespace phy
 	{
 		Hitbox::Hitbox(gfx::ModelLoader& loader) :
-			Hitbox(loader.Vertices().data(), loader.Vertices().size(), loader.Indices().data(), loader.Indices().size()) {}
+			Hitbox(loader.Vertices().data(), static_cast<unsigned>(loader.Vertices().size()), loader.Indices().data(), static_cast<unsigned>(loader.Indices().size())) {}
 		Hitbox::Hitbox(mth::float3 vertices[], unsigned vertexCount, unsigned indices[], unsigned indexCount) :
 			m_vertices(vertexCount),
 			m_indices(indexCount)

@@ -49,7 +49,8 @@ namespace TowerDefense
 			unsigned m_blurPSBufferSize;
 
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_randomVectors;
-			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_wrapSampler;
+			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_clampSampler;
 			Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vsScreenQuad;
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_screenQuadVSBuffer;
 			unsigned m_screenQuadVSBufferSize;
@@ -74,7 +75,7 @@ namespace TowerDefense
 			void CreateRandomVectors(ID3D11Device3* device);
 			void CreateDepthBuffer(ID3D11Device3* device);
 			void CreateRasterizerState(ID3D11Device3* device);
-			void CreateSampler(ID3D11Device3* device);
+			void CreateSamplers(ID3D11Device3* device);
 			void CreateScreenQuadModel(Graphics& graphics);
 			void CreateScreenQuadVertexShader(Graphics& graphics);
 			void CreateShaderBuffers(ID3D11Device3* device);

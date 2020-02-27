@@ -7,31 +7,66 @@ namespace TowerDefense
 	{
 		GameResources::GameResources(gfx::Graphics& graphics)
 		{
+			auto texture = gfx::Texture::CreateColoredTexture(graphics, { 100, 125, 225, 255 }, 16);
+			auto normalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
+			gfx::MaterialData materialData = { mth::float4(1.0f), mth::float4(), 1.0f, 1.0f };
+			gfx::Material::P material = gfx::Material::CreateP(texture, normalmap, materialData);
 			gfx::ModelLoader ml;
-			ml.CreateCube(mth::float3(0.05f), mth::float3(0.9f));
-			turret.texture = gfx::Texture::CreateColoredTexture(graphics, { 200, 255, 200, 255 }, 16);
-			turret.normalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
-			turret.model = gfx::Model::CreateP(graphics, ml);
-			turret.hitbox = phy::Hitbox::CreateP(ml);
 
-			ml.CreateCube(mth::float3(0.25f), mth::float3(0.5f));
-			enemy.texture = gfx::Texture::CreateColoredTexture(graphics, { 255, 200, 200, 255 }, 16);
-			enemy.normalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
+			ml.CreateCube(mth::float3(-0.25f), mth::float3(0.5f));
 			enemy.model = gfx::Model::CreateP(graphics, ml);
+			enemy.materials.push_back(
+				gfx::Material::CreateP(
+					gfx::Texture::CreateColoredTexture(graphics, { 225, 125, 125, 255 }, 16),
+					normalmap,
+					materialData));
 			enemy.hitbox = phy::Hitbox::CreateP(ml);
 
-			ml.CreateQuad(mth::float2(), mth::float2(11.0f, 9.0f), 0.0f);
-			area.texture = gfx::Texture::CreateColoredTexture(graphics, { 200, 200, 255, 255 }, 16);
-			area.normalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
-			area.model = gfx::Model::CreateP(graphics, ml);
-			area.hitbox = phy::Hitbox::CreateP(ml);
+			ml.LoadText((graphics.AppDirectory() + L"resources\\map.ttdm").c_str());
+			map.model = gfx::Model::CreateP(graphics, ml);
+			map.materials.push_back(
+				gfx::Material::CreateP(
+					gfx::Texture::CreateColoredTexture(graphics, { 55, 225, 55, 255 }, 16),
+					normalmap,
+					materialData));
+			map.hitbox = phy::Hitbox::CreateP(ml);
+
+			ml.LoadText((graphics.AppDirectory() + L"resources\\base.ttdm").c_str());
+			base.model = gfx::Model::CreateP(graphics, ml);
+			base.materials.push_back(
+				gfx::Material::CreateP(
+					gfx::Texture::CreateColoredTexture(graphics, { 225, 55, 225, 255 }, 16),
+					normalmap,
+					materialData));
+			base.hitbox = phy::Hitbox::CreateP(ml);
+
+			ml.LoadText((graphics.AppDirectory() + L"resources\\heavy.ttdm").c_str());
+			turret_heavy.model = gfx::Model::CreateP(graphics, ml);
+			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
+				turret_heavy.materials.push_back(material);
+			turret_heavy.hitbox = phy::Hitbox::CreateP(ml);
+
+			ml.LoadText((graphics.AppDirectory() + L"resources\\launcher.ttdm").c_str());
+			turret_launcher.model = gfx::Model::CreateP(graphics, ml);
+			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
+				turret_launcher.materials.push_back(material);
+			turret_launcher.hitbox = phy::Hitbox::CreateP(ml);
+
+			ml.LoadText((graphics.AppDirectory() + L"resources\\light.ttdm").c_str());
+			turret_light.model = gfx::Model::CreateP(graphics, ml);
+			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
+				turret_light.materials.push_back(material);
+			turret_light.hitbox = phy::Hitbox::CreateP(ml);
 		}
 
 		GameObject::GameObject(GameResources::GameModel& gameModel) :
 			gfx::Entity(
 				gameModel.model,
-				gfx::Material::CreateP(gameModel.texture, gameModel.normalmap),
+				gameModel.materials.data(),
+				static_cast<unsigned>(gameModel.materials.size()),
 				gameModel.hitbox) {}
+		GameObject::GameObject(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox) :
+			gfx::Entity(model, material, hitbox) {}
 		GameObject::P GameObject::CreateP(GameResources::GameModel& gameModel)
 		{
 			return std::make_shared<GameObject>(gameModel);
@@ -39,6 +74,14 @@ namespace TowerDefense
 		GameObject::U GameObject::CreateU(GameResources::GameModel& gameModel)
 		{
 			return std::make_unique<GameObject>(gameModel);
+		}
+		GameObject::P GameObject::CreateP(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox)
+		{
+			return std::make_shared<GameObject>(model, material, hitbox);
+		}
+		GameObject::U GameObject::CreateU(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox)
+		{
+			return std::make_unique<GameObject>(model, material, hitbox);
 		}
 	}
 }

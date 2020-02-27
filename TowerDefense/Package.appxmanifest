@@ -4,7 +4,12 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  IgnorableNamespaces="uap mp">
+  xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10"
+  xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2"
+  xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
+  IgnorableNamespaces="uap mp iot uap4 uap3 uap2 uap6">
 
   <Identity
     Name="efe18666-ef36-4bd1-8a15-caaa5142d02d"
@@ -42,10 +47,4 @@
       </uap:VisualElements>
     </Application>
   </Applications>
-
-  <Capabilities>
-    <Capability Name="internetClient" />
-    <uap:Capability Name="objects3D"/>
-    <uap:Capability Name="picturesLibrary"/>
-  </Capabilities>
 </Package>

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>ss
 #include <vector>
 
 template <typename T>
@@ -212,22 +213,26 @@ Array2D<Int> CreateArray()
 	return a;
 }
 
+bool ScanStream(std::wistream& s, const wchar_t* expected)
+{
+	wchar_t sch, ech; //stream char, expected char
+	size_t extPos = 0;
+	do
+	{
+		ech = expected[extPos++];
+		if (ech == 0) return true;
+		s >> sch;
+	} while (!s.eof() && ech == sch);
+	return false;
+}
+
 int main()
 {
-	/*Area<10, 10> area;
-	area.FindPath({ 5, 2 }, { 2, 9 });
-	area.Print();*/
-
-	Array2D<Int> a(2, 2), a2 = CreateArray();
-	a = a2;
-	for (int y = 0; y < a.height(); y++)
-	{
-		for (int x = 0; x < a.width(); x++)
-		{
-			std::cout << a(x, y);
-		}
-		std::cout << '\n';
-	}
+	std::wstringstream ss;
+	const wchar_t* str = L"asdfgh";
+	ss << str;
+	wchar_t ch;
+	for (ss >> ch; std::isspace(ch); ss >> ch);
 
 	std::cin.get();
 	return 0;

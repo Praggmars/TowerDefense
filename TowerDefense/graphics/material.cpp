@@ -5,17 +5,17 @@ namespace TowerDefense
 {
 	namespace gfx
 	{
-		Material::Material(Texture::P texture, Texture::P normalmap) :
+		Material::Material(Texture::P texture, Texture::P normalmap, MaterialData& data) :
 			m_texture(texture),
 			m_normalmap(normalmap),
-			m_materialBuffer{ mth::float4(1.0f), mth::float4(), 0.0f, 1.0f,{ 0.0f, 0.0f } } {}
-		Material::P Material::CreateP(Texture::P texture, Texture::P normalmap)
+			m_materialBuffer{ data.diffuseColor, data.specularColor, data.textureWeight, data.specularPower, { 0.0f, 0.0f } } {}
+		Material::P Material::CreateP(Texture::P texture, Texture::P normalmap, MaterialData& data)
 		{
-			return std::make_shared<Material>(texture, normalmap);
+			return std::make_shared<Material>(texture, normalmap, data);
 		}
-		Material::U Material::CreateU(Texture::P texture, Texture::P normalmap)
+		Material::U Material::CreateU(Texture::P texture, Texture::P normalmap, MaterialData& data)
 		{
-			return std::make_unique<Material>(texture, normalmap);
+			return std::make_unique<Material>(texture, normalmap, data);
 		}
 		void Material::SetToRender(Graphics& graphics)
 		{

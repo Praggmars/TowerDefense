@@ -22,9 +22,9 @@ namespace TowerDefense
 			float m_range;
 
 		public:
-			Turret(GameResources& resources);
-			static Turret::P CreateP(GameResources& resources);
-			static Turret::U CreateU(GameResources& resources);
+			Turret(GameResources::GameModel& gameModel);
+			static Turret::P CreateP(GameResources::GameModel& gameModel);
+			static Turret::U CreateU(GameResources::GameModel& gameModel);
 
 			void Update(float deltaTime);
 			void Shoot(std::shared_ptr<Enemy> enemies[], size_t enemyCount);

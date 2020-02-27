@@ -64,6 +64,7 @@ namespace TowerDefense
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_textureSampler;
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowSampler;
 
+			std::wstring m_appDirectory;
 			Concurrency::critical_section m_lock;
 
 		private:
@@ -106,6 +107,7 @@ namespace TowerDefense
 			inline D3D_FEATURE_LEVEL FeatureLevel() { return m_featureLevel; }
 			inline unsigned Width() { return m_width; }
 			inline unsigned Height() { return m_height; }
+			inline const std::wstring& AppDirectory() { return m_appDirectory; }
 			inline auto& GetLock() { return m_lock; }
 		};
 	}

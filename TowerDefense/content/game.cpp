@@ -6,6 +6,7 @@ namespace TowerDefense
 {
 	namespace content
 	{
+#if false
 		void Game::Update(float deltaTime)
 		{
 			m_timeCounter += deltaTime;
@@ -25,7 +26,8 @@ namespace TowerDefense
 				if (auto mapPos = m_level->PointedArea(origin, dir))
 				{
 					m_movingTurret->Visible(true);
-					m_movingTurret->position = mth::float3(mapPos->x, 0.0f, mapPos->y);
+					auto coord = m_level->CoordTransform(*mapPos);
+					m_movingTurret->position = mth::float3(coord.x, 0.0f, coord.y);
 				}
 			}
 			else
@@ -33,10 +35,27 @@ namespace TowerDefense
 				if (auto turret = m_level->PointedTurret(origin, dir))
 				{
 					for (auto& m : turret->Materials())
-						m->MaterialBuffer().textureWeight = 0.25f;
+						m->MaterialBuffer().textureWeight = 0.5f;
 				}
 			}
 		}
+#else
+		void Game::Update(float deltaTime)
+		{
+			if (m_movingTurret)
+			{
+				mth::float3 origin = m_camera.position;
+				mth::float3 dir = m_camera.DirectionFromPoint(m_cursor, m_windowSize);
+				m_movingTurret->Visible(false);
+				if (auto mapPos = m_level->PointedArea(origin, dir))
+				{
+					m_movingTurret->Visible(true);
+					auto coord = m_level->CoordTransform(*mapPos);
+					m_movingTurret->position = mth::float3(coord.x, 0.0f, coord.y);
+				}
+			}
+		}
+#endif
 		void Game::Render()
 		{
 			m_camera.Update();
@@ -45,6 +64,7 @@ namespace TowerDefense
 			matrixBuffer.worldMatrix = mth::float4x4::Identity();
 			matrixBuffer.cameraMatrix = m_camera.CameraMatrix();
 			matrixBuffer.lightMatrix = m_light.LightMatrix();
+			//matrixBuffer.cameraMatrix = matrixBuffer.lightMatrix;
 
 			gfx::CB_LightBuffer lightBuffer;
 			lightBuffer.ambientColor = 0.3f;
@@ -90,15 +110,15 @@ namespace TowerDefense
 			m_shadowMap(shadowMap),
 			m_ambeintOcclusion(ambeintOcclusion),
 			m_gameResources(graphics),
-			m_level(Level::CreateP(m_gameResources, 11, 9)),
+			m_level(Level::CreateP(graphics, m_gameResources, 11, 9)),
 			m_cameraController(m_camera),
 			m_timeCounter(0.0f),
 			m_secondCounter(0)
 		{
-			m_cameraController.SetControllerData(mth::float3(-5.5f, 0.0f, -4.5f), 15.0f, mth::float3(0.3f, -0.3f, 0.0f));
+			m_cameraController.SetControllerData(mth::float3(), 15.0f, mth::float3(0.3f, -0.3f, 0.0f));
 			m_cameraController.UpdateTarget();
-			m_light.position = mth::float3(12.0f, 13.0f, -3.0f);
-			m_light.rotation = mth::float3(1.0f, -1.0f, 0.0f);
+			m_light.position = mth::float3(5.75f, 11.0f, -8.0f);
+			m_light.rotation = mth::float3(0.9f, -0.67f, 1.0f);
 
 			auto workItemHandler = ref new Windows::System::Threading::WorkItemHandler(
 				[this](Windows::Foundation::IAsyncAction^ action)
@@ -160,17 +180,36 @@ namespace TowerDefense
 				}
 			}
 		}
+		void Game::MouseWheel(int delta)
+		{
+			m_cameraController.Zoom(delta > 0 ? 1.1f : 1.0f / 1.1f);
+		}
 		void Game::WindowSizeChanged(mth::float2 size)
 		{
 			m_windowSize = size;
 			m_camera.SetScreenAspect(gfx::Camera::ToScreenAspect(size.x, size.y));
 		}
-		void Game::PlaceTurret()
+		void Game::PlaceTurret(TurretType turretType)
 		{
 			Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
 
 			if (!m_movingTurret)
-				m_movingTurret = Turret::CreateP(m_gameResources);
+			{
+				GameResources::GameModel* model = nullptr;
+				switch (turretType)
+				{
+				case TurretType::LIGHT:
+					model = &m_gameResources.turret_light;
+					break;
+				case TurretType::HEAVY:
+					model = &m_gameResources.turret_heavy;
+					break;
+				case TurretType::LAUNCHER:
+					model = &m_gameResources.turret_launcher;
+					break;
+				}
+				m_movingTurret = Turret::CreateP(*model);
+			}
 		}
 	}
 }

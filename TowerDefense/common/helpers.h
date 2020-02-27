@@ -9,14 +9,6 @@ namespace TowerDefense
 {
 	void ThrowIfFailed(HRESULT hr);
 
-	struct Color
-	{
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
-		unsigned char a;
-	};
-
 	Microsoft::WRL::ComPtr<ID3DBlob> CompileShader(const std::string& shaderCode, const char* entry, const char* target);
 
 	class Exception

@@ -242,6 +242,7 @@
     <ClInclude Include="algorithm\pathfinder.h" />
     <ClInclude Include="common\array2d.hpp" />
     <ClInclude Include="common\helpers.h" />
+    <ClInclude Include="common\image.h" />
     <ClInclude Include="common\resourceloadingmanager.h" />
     <ClInclude Include="content\contentcommon.h" />
     <ClInclude Include="content\enemy.h" />
@@ -258,13 +259,9 @@
     <ClInclude Include="graphics\material.h" />
     <ClInclude Include="graphics\model.h" />
     <ClInclude Include="graphics\modelloader.h" />
-    <ClInclude Include="graphics\pixelshader.h" />
     <ClInclude Include="graphics\pointlight.h" />
-    <ClInclude Include="graphics\scene.h" />
-    <ClInclude Include="graphics\shaderbuffer.h" />
     <ClInclude Include="graphics\shadowmap.h" />
     <ClInclude Include="graphics\texture.h" />
-    <ClInclude Include="graphics\vertexshader.h" />
     <ClInclude Include="math\formulas.hpp" />
     <ClInclude Include="math\geometry.hpp" />
     <ClInclude Include="math\linalg.hpp" />
@@ -310,6 +307,7 @@
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Image Include="Assets\StoreLogo.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Image Include="resources\map.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="algorithm\pathfinder.cpp" />
@@ -317,6 +315,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="common\helpers.cpp" />
+    <ClCompile Include="common\image.cpp" />
     <ClCompile Include="common\resourceloadingmanager.cpp" />
     <ClCompile Include="content\contentcommon.cpp" />
     <ClCompile Include="content\enemy.cpp" />
@@ -332,13 +331,9 @@
     <ClCompile Include="graphics\material.cpp" />
     <ClCompile Include="graphics\model.cpp" />
     <ClCompile Include="graphics\modelloader.cpp" />
-    <ClCompile Include="graphics\pixelshader.cpp" />
     <ClCompile Include="graphics\pointlight.cpp" />
-    <ClCompile Include="graphics\scene.cpp" />
-    <ClCompile Include="graphics\shaderbuffer.cpp" />
     <ClCompile Include="graphics\shadowmap.cpp" />
     <ClCompile Include="graphics\texture.cpp" />
-    <ClCompile Include="graphics\vertexshader.cpp" />
     <ClCompile Include="MainPage.xaml.cpp">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
@@ -384,6 +379,26 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\map.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\base.ttdm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\heavy.ttdm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\launcher.ttdm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\light.ttdm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\map.ttdm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

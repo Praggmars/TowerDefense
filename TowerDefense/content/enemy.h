@@ -8,6 +8,8 @@ namespace TowerDefense
 {
 	namespace content
 	{
+		class Level;
+
 		class Enemy :public GameObject
 		{
 		public:
@@ -24,7 +26,7 @@ namespace TowerDefense
 			static Enemy::P CreateP(GameResources& resources);
 			static Enemy::U CreateU(GameResources& resources);
 
-			void Update(float deltaTime);
+			void Update(float deltaTime, Level& level);
 			void StartPath(alg::Point start, alg::Point end);
 			void RestartPath(alg::Point end);
 			bool Finished();

@@ -20,7 +20,8 @@ namespace TowerDefense
 
 		public:
 			Camera(float screenAspect = 16.0f / 9.0f, float fov = mth::PI / 4.0f, float screenNear = 0.1f, float screenDepth = 1000.0f);
-			inline static float ToScreenAspect(int width, int height) { return static_cast<float>(width) / static_cast<float>(height); }
+			template <typename T>
+			inline static float ToScreenAspect(T width, T height) { return static_cast<float>(width) / static_cast<float>(height); }
 			void SetScreenAspect(float screenAspect);
 			void SetParams(float screenAspect, float fov, float screenNear = 0.1f, float screenDepth = 1000.0f);
 

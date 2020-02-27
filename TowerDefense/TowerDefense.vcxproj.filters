@@ -32,6 +32,9 @@
     <Filter Include="algorithm">
       <UniqueIdentifier>{5a4bc727-9250-40e3-bc4c-c55fcf8eef63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resourses">
+      <UniqueIdentifier>{7b739f75-b3ae-4fea-81fb-40594eb9dde2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -47,16 +50,7 @@
     <ClCompile Include="graphics\model.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\vertexshader.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\pixelshader.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\texture.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\shaderbuffer.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="graphics\material.cpp">
@@ -70,9 +64,6 @@
     </ClCompile>
     <ClCompile Include="common\helpers.cpp">
       <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\scene.cpp">
-      <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="common\resourceloadingmanager.cpp">
       <Filter>common</Filter>
@@ -115,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="graphics\pointlight.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="common\image.cpp">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,15 +155,6 @@
     <ClInclude Include="graphics\modelloader.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\vertexshader.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\pixelshader.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\shaderbuffer.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\texture.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -180,9 +165,6 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics\camera.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\scene.h">
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="common\resourceloadingmanager.h">
@@ -236,6 +218,9 @@
     <ClInclude Include="graphics\pointlight.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="common\image.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -268,6 +253,9 @@
     <Image Include="Assets\media\test_diffuse.png">
       <Filter>Assets\media</Filter>
     </Image>
+    <Image Include="resources\map.png">
+      <Filter>resourses</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -282,5 +270,27 @@
     <FxCompile Include="shaders\PixelShader.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\map.txt">
+      <Filter>resourses</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\map.ttdm">
+      <Filter>resourses</Filter>
+    </None>
+    <None Include="resources\base.ttdm">
+      <Filter>resourses</Filter>
+    </None>
+    <None Include="resources\heavy.ttdm">
+      <Filter>resourses</Filter>
+    </None>
+    <None Include="resources\launcher.ttdm">
+      <Filter>resourses</Filter>
+    </None>
+    <None Include="resources\light.ttdm">
+      <Filter>resourses</Filter>
+    </None>
   </ItemGroup>
 </Project>

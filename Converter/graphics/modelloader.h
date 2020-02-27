@@ -70,7 +70,8 @@ namespace Converter
 			void LoadImages();
 			TextureData LoadTexture(std::wstring& filename);
 
-			void LoadTDM(const wchar_t* filename);
+			void LoadBTDM(const wchar_t* filename);
+			void LoadTTDM(const wchar_t* filename);
 			void LoadAssimp();
 
 			Texture::P FetchTexture(std::wstring& filename, bool image);
@@ -85,7 +86,8 @@ namespace Converter
 			void Clear();
 
 			void Export(const wchar_t* filename);
-			std::vector<unsigned char> WriteToMemory();
+			std::vector<unsigned char> WriteToMemoryBinary();
+			std::wstring WriteToMemoryText();
 
 			void FlipInsideOut();
 			void Transform(mth::float4x4 transform);

@@ -6,20 +6,20 @@ namespace TowerDefense
 {
 	namespace content
 	{
-		Turret::Turret(GameResources& resources) :
-			GameObject(resources.turret),
+		Turret::Turret(GameResources::GameModel& gameModel) :
+			GameObject(gameModel),
 			m_mapPosition{ -1, -1 },
 			m_damage(34),
 			m_timeToShoot(0.0f),
 			m_reloadTime(0.8f),
 			m_range(2.5f) {}
-		Turret::P Turret::CreateP(GameResources& resources)
+		Turret::P Turret::CreateP(GameResources::GameModel& gameModel)
 		{
-			return std::make_shared<Turret>(resources);
+			return std::make_shared<Turret>(gameModel);
 		}
-		Turret::U Turret::CreateU(GameResources& resources)
+		Turret::U Turret::CreateU(GameResources::GameModel& gameModel)
 		{
-			return std::make_unique<Turret>(resources);
+			return std::make_unique<Turret>(gameModel);
 		}
 		void Turret::Update(float deltaTime)
 		{

@@ -13,7 +13,8 @@ namespace TowerDefense
 			for (unsigned i = 0; i < modelLoader.Materials().size(); i++)
 				m_materials[i] = Material::CreateP(
 					Texture::CreateP(graphics, modelLoader.Materials()[i].texture.c_str()),
-					Texture::CreateP(graphics, modelLoader.Materials()[i].normalmap.c_str()));
+					Texture::CreateP(graphics, modelLoader.Materials()[i].normalmap.c_str()),
+					modelLoader.Materials()[i].data);
 			if (makeHitbox)
 				m_hitbox = phy::Hitbox::CreateP(modelLoader);
 		}

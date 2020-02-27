@@ -5,7 +5,9 @@
 namespace mth
 {
 	constexpr double PI = 3.1415926535897932;
+	constexpr float pi = 3.1415927f;
 	constexpr double EPS = 1e-6;
+	constexpr float eps = 1e-6f;
 
 	template <typename T>
 	bool isNear(T a, T b, T eps = EPS)

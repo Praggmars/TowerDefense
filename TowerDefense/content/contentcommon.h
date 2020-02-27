@@ -12,13 +12,15 @@ namespace TowerDefense
 			struct GameModel
 			{
 				gfx::Model::P model;
-				gfx::Texture::P texture;
-				gfx::Texture::P normalmap;
+				std::vector<gfx::Material::P> materials;
 				phy::Hitbox::P hitbox;
 			};
-			GameModel turret;
+			GameModel turret_light;
+			GameModel turret_heavy;
+			GameModel turret_launcher;
+			GameModel map;
+			GameModel base;
 			GameModel enemy;
-			GameModel area;
 
 			GameResources(gfx::Graphics& graphics);
 		};
@@ -31,8 +33,11 @@ namespace TowerDefense
 
 		public:
 			GameObject(GameResources::GameModel& gameModel);
+			GameObject(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
 			static GameObject::P CreateP(GameResources::GameModel& gameModel);
 			static GameObject::U CreateU(GameResources::GameModel& gameModel);
+			static GameObject::P CreateP(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
+			static GameObject::U CreateU(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
 		};
 	}
 }

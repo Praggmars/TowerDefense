@@ -38,7 +38,7 @@ namespace TowerDefense
 			static Model::U CreateU(Graphics& graphics, ModelLoader& loader);
 			static Model::U CreateU(Graphics& graphics, Vertex* vertices, unsigned vertexCount, unsigned* indices, unsigned indexCount);
 
-			inline unsigned GroupCount() { return (unsigned)m_groups.size(); }
+			inline unsigned GroupCount() { return static_cast<unsigned>(m_groups.size()); }
 
 			void SetBuffersToRender(Graphics& graphics);
 			void RenderGroup(Graphics& graphics, unsigned index);

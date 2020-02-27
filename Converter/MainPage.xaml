@@ -26,7 +26,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Export bin" Margin="10,10,10,10" Click="ExportBinButton_Click"/>
-                    <Button Content="Export text" Margin="10,10,10,10" Click="ExportTextButton_Click" IsEnabled="False"/>
+                    <Button Content="Export text" Margin="10,10,10,10" Click="ExportTextButton_Click"/>
                 </StackPanel>
                 <TextBlock Text="Material" FontSize="20" Margin="10,10,10,0"/>
                 <ComboBox x:Name="m_materialList" HorizontalAlignment="Stretch" Margin="10,10,10,10" DropDownOpened="MaterialList_DropDownOpened" SelectionChanged="MaterialList_SelectionChanged"/>

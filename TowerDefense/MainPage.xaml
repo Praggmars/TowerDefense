@@ -8,7 +8,16 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <SwapChainPanel x:Name="m_swapChainPanel">
-        <Button Content="Turret" Margin="28,28,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.244,-0.646" Click="Button_Click"/>
-    </SwapChainPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+        <SwapChainPanel x:Name="m_swapChainPanel" Grid.Column="0"/>
+        <StackPanel Grid.Column="1">
+            <Button Content="Light turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="LightTurret_ButtonClick"/>
+            <Button Content="Heavy turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="HeavyTurret_ButtonClick"/>
+            <Button Content="Launcher" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="Launcher_ButtonClick"/>
+        </StackPanel>
+    </Grid>
 </Page>

@@ -14,13 +14,22 @@ namespace TowerDefense
 			mth::float3 normal;
 			mth::float3 tangent;
 			mth::float3 boneWeights;
-			unsigned boneIndices[4];
+			mth::vec4<unsigned> boneIndices;
 		};
 
+		struct MaterialData
+		{
+			mth::float4 diffuseColor;
+			mth::float4 specularColor;
+			float textureWeight;
+			float specularPower;
+		};
 		struct MaterialLoader
 		{
+			std::wstring name;
 			std::wstring texture;
 			std::wstring normalmap;
+			MaterialData data;
 		};
 
 		struct VertexGroup

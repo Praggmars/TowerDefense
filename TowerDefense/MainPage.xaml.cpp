@@ -6,19 +6,30 @@ namespace TowerDefense
 	MainPage::MainPage()
 	{
 		InitializeComponent();
-		Windows::UI::Core::CoreWindow^ window = Windows::UI::Xaml::Window::Current->CoreWindow;
 
-		m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &TowerDefense::MainPage::OnSwapChainPanelSizeChanged);
-		m_swapChainPanel->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerPressed);
-		m_swapChainPanel->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerReleased);
-		m_swapChainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerMoved);
+		try
+		{
+			m_graphics = gfx::Graphics::CreateU();
+			m_graphics->SetSwapChainPanel(m_swapChainPanel);
+			m_shadowMap = gfx::ShadowMap::CreateU(*m_graphics, 2048);
+			m_ambientOcclusion = gfx::AmbientOcclusion::CreateU(*m_graphics);
 
-		m_graphics = gfx::Graphics::CreateU();
-		m_graphics->SetSwapChainPanel(m_swapChainPanel);
-		m_shadowMap = gfx::ShadowMap::CreateU(*m_graphics, 2048);
-		m_ambientOcclusion = gfx::AmbientOcclusion::CreateU(*m_graphics);
+			m_game = content::Game::CreateU(*m_graphics, *m_shadowMap, *m_ambientOcclusion);
 
-		m_game = content::Game::CreateU(*m_graphics, *m_shadowMap, *m_ambientOcclusion);
+			m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &TowerDefense::MainPage::OnSwapChainPanelSizeChanged);
+			m_swapChainPanel->PointerWheelChanged += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerWheelChanged);
+			m_swapChainPanel->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerPressed);
+			m_swapChainPanel->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerReleased);
+			m_swapChainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerMoved);
+		}
+		catch (Exception& ex)
+		{
+			std::wstring error(ex.What());
+		}
+		catch (Platform::Exception^ ex)
+		{
+			std::wstring error(ex->Message->Data());
+		}
 	}
 
 	void MainPage::OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
@@ -56,8 +67,21 @@ namespace TowerDefense
 			p->Properties->IsMiddleButtonPressed,
 			p->Properties->IsRightButtonPressed);
 	}
-	void MainPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+	void MainPage::OnPointerWheelChanged(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 	{
-		m_game->PlaceTurret();
+		auto p = e->GetCurrentPoint(nullptr);
+		m_game->MouseWheel(p->Properties->MouseWheelDelta);
+	}
+	void MainPage::LightTurret_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+	{
+		m_game->PlaceTurret(content::TurretType::LIGHT);
+	}
+	void MainPage::HeavyTurret_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+	{
+		m_game->PlaceTurret(content::TurretType::HEAVY);
+	}
+	void MainPage::Launcher_ButtonClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+	{
+		m_game->PlaceTurret(content::TurretType::LAUNCHER);
 	}
 }

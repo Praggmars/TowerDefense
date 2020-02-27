@@ -24,11 +24,11 @@ namespace TowerDefense
 				m_cursor = cursor;
 				m_target.rotation.x += delta.y;
 				m_target.rotation.y += delta.x;
-				if (m_target.rotation.x < -mth::PI * 0.5f)
-					m_target.rotation.x = -mth::PI * 0.5f;
-				if (m_target.rotation.x > mth::PI * 0.5f)
-					m_target.rotation.x = mth::PI * 0.5f;
-				m_target.rotation.y = fmodf(m_target.rotation.y + mth::PI, 2.0f * mth::PI) - mth::PI;
+				if (m_target.rotation.x < -mth::pi * 0.5f)
+					m_target.rotation.x = -mth::pi * 0.5f;
+				if (m_target.rotation.x > mth::pi * 0.5f)
+					m_target.rotation.x = mth::pi * 0.5f;
+				m_target.rotation.y = std::fmodf(m_target.rotation.y + mth::pi, 2.0f * mth::pi) - mth::pi;
 			}
 		}
 		void FirstPersonController::MouseUp()

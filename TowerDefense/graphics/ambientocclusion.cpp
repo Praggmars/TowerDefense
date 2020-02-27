@@ -96,8 +96,8 @@ PixelInputType main(VertexInputType input)
 		void AmbientOcclusion::CreateNormalDepthMapPixelShader(Graphics& graphics)
 		{
 			static const char* code = R"(
-Texture2D texture_diffuse;
-SamplerState textureSampler;
+//Texture2D texture_diffuse;
+//SamplerState textureSampler;
 
 struct PixelInputType
 {
@@ -168,7 +168,8 @@ float4 main(PixelInputType input) : SV_TARGET
 			static const char* code = R"(
 Texture2D texture_normalDepthMap : register(t0);
 Texture2D texture_randomVectors  : register(t1);
-SamplerState textureSampler;
+SamplerState wrapSampler         : register(s0);
+SamplerState clampSampler        : register(s1);
 
 cbuffer OcclusionData
 {
@@ -204,10 +205,9 @@ float4 main(PixelInputType input) : SV_TARGET
 	//return float4(input.position.xyz, 1.0f);
 	//clip(color.a - 0.15f);
 	float2 texCoords = input.wndpos.xy / screenSize;
-	float4 normalDepth = texture_normalDepthMap.Sample(textureSampler, texCoords);
+	float4 normalDepth = texture_normalDepthMap.Sample(clampSampler, texCoords);
 	float3 position = input.position * normalDepth.w;
-	//return float4(mul(float4(position, 1.0f), viewToTexSpace).xyz, 1.0f);
-	float3 randVec = texture_randomVectors.Sample(textureSampler, input.wndpos.xy / randVecTexSize);
+	float3 randVec = texture_randomVectors.Sample(wrapSampler, input.wndpos.xy / randVecTexSize);
 	float occlusionSum = 0.0f;
 	[unroll]
 	for (int i = 0; i < 14; i++)
@@ -219,7 +219,7 @@ float4 main(PixelInputType input) : SV_TARGET
 		qProj /= qProj.w;
 		qProj.x = qProj.x * 0.5f + 0.5f;
 		qProj.y = qProj.y * (-0.5f) + 0.5f;
-		float rz = texture_normalDepthMap.Sample(textureSampler, qProj.xy).a;
+		float rz = texture_normalDepthMap.Sample(clampSampler, qProj.xy).a;
 		float3 r = (rz / q.z) * q;
 		float distZ = position.z - r.z;
 		float dp = max(dot(normalDepth.xyz, normalize(r - position)), 0.0f);
@@ -310,7 +310,8 @@ float4 main(PixelInputType input) : SV_TARGET
 			static const char* code = R"(
 Texture2D texture_occlusionMap   : register(t0);
 Texture2D texture_normalDepthMap : register(t1);
-SamplerState textureSampler;
+SamplerState wrapSampler         : register(s0);
+SamplerState clampSampler        : register(s1);
 
 cbuffer OcclusionData
 {
@@ -328,21 +329,21 @@ float4 main(PixelInputType input) : SV_TARGET
 {
 	static float weights[] = { 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f };
 	float2 texCoords = input.wndpos.xy / screenSize;
-	float4 color = weights[5] * texture_occlusionMap.Sample(textureSampler, texCoords);
+	float4 color = weights[5] * texture_occlusionMap.Sample(clampSampler, texCoords);
 	float totalWeight = weights[5];
-	float4 centerNormalDepth = texture_normalDepthMap.Sample(textureSampler, texCoords);
+	float4 centerNormalDepth = texture_normalDepthMap.Sample(clampSampler, texCoords);
 
 	[unroll]
 	for (float i = -5.0f; i <= 5.0f; i++)
 	{
 		if (i == 0.0f) continue;
 		float2 tex = texCoords + pixelDelta * i;
-		float4 neighborNormalDepth = texture_normalDepthMap.Sample(textureSampler, tex);
+		float4 neighborNormalDepth = texture_normalDepthMap.Sample(clampSampler, tex);
 		if (dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f &&
 			abs(neighborNormalDepth.w - centerNormalDepth.w) <= 0.2f)
 		{
 			float weight = weights[i + 5];
-			color += weight * texture_occlusionMap.Sample(textureSampler, tex);
+			color += weight * texture_occlusionMap.Sample(clampSampler, tex);
 			totalWeight += weight;
 		}
 	}
@@ -440,7 +441,7 @@ float4 main(PixelInputType input) : SV_TARGET
 			rasterizerDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 			ThrowIfFailed(device->CreateRasterizerState2(&rasterizerDesc, &m_rasterizerState));
 		}
-		void AmbientOcclusion::CreateSampler(ID3D11Device3* device)
+		void AmbientOcclusion::CreateSamplers(ID3D11Device3* device)
 		{
 			D3D11_SAMPLER_DESC samplerDesc{};
 			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -456,15 +457,20 @@ float4 main(PixelInputType input) : SV_TARGET
 			samplerDesc.BorderColor[3] = 1.0f;
 			samplerDesc.MinLOD = 0.0f;
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-			ThrowIfFailed(device->CreateSamplerState(&samplerDesc, &m_sampler));
+			ThrowIfFailed(device->CreateSamplerState(&samplerDesc, &m_wrapSampler));
+
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			ThrowIfFailed(device->CreateSamplerState(&samplerDesc, &m_clampSampler));
 		}
 		void AmbientOcclusion::CreateScreenQuadModel(Graphics& graphics)
 		{
 			Vertex vertices[] = {
-				{ mth::float3(-1.0f, -1.0f, 1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } },
-				{ mth::float3(1.0f, -1.0f, 1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } },
-				{ mth::float3(1.0f, 1.0f,  1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } },
-				{ mth::float3(-1.0f, 1.0f,  1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), { 0, 0, 0, 0 } }
+				{ mth::float3(-1.0f, -1.0f, 1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() },
+				{ mth::float3(1.0f, -1.0f, 1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() },
+				{ mth::float3(1.0f, 1.0f,  1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() },
+				{ mth::float3(-1.0f, 1.0f,  1.0f), mth::float2(), mth::float3(), mth::float3(), mth::float3(), mth::vec4<unsigned>() }
 			};
 			unsigned indices[] = {
 				0, 3, 2, 2, 1, 0
@@ -624,7 +630,7 @@ PixelInputType main(VertexInputType input)
 			CreateRandomVectors(device);
 			CreateDepthBuffer(device);
 			CreateRasterizerState(device);
-			CreateSampler(device);
+			CreateSamplers(device);
 			CreateScreenQuadModel(graphics);
 			CreateScreenQuadVertexShader(graphics);
 			CreateShaderBuffers(device);
@@ -687,7 +693,8 @@ PixelInputType main(VertexInputType input)
 			context->VSSetShader(m_vsScreenQuad.Get(), nullptr, 0);
 			context->PSSetShader(m_psOcclusionMap.Get(), nullptr, 0);
 			context->VSSetConstantBuffers(0, 1, m_screenQuadVSBuffer.GetAddressOf());
-			context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+			context->PSSetSamplers(0, 1, m_wrapSampler.GetAddressOf());
+			context->PSSetSamplers(1, 1, m_clampSampler.GetAddressOf());
 			context->PSSetConstantBuffers(0, 1, m_occlusionMapPSBuffer.GetAddressOf());
 
 			mth::float4x4 matrixBuffer[] = {
@@ -700,7 +707,6 @@ PixelInputType main(VertexInputType input)
 
 			context->PSSetShaderResources(0, 1, m_normalDepthMapSRV.GetAddressOf());
 			context->PSSetShaderResources(1, 1, m_randomVectors.GetAddressOf());
-			context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
 			m_screenQuad->SetBuffersToRender(graphics);
 			m_screenQuad->RenderAll(graphics);
 

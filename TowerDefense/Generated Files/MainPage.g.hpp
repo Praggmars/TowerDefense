@@ -39,7 +39,21 @@ void ::TowerDefense::MainPage::Connect(int __connectionId, ::Platform::Object^ _
         {
             ::Windows::UI::Xaml::Controls::Button^ element3 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
             (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element3))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::TowerDefense::MainPage::*)
-                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::Button_Click);
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::LightTurret_ButtonClick);
+        }
+        break;
+    case 4:
+        {
+            ::Windows::UI::Xaml::Controls::Button^ element4 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element4))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::TowerDefense::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::HeavyTurret_ButtonClick);
+        }
+        break;
+    case 5:
+        {
+            ::Windows::UI::Xaml::Controls::Button^ element5 = safe_cast<::Windows::UI::Xaml::Controls::Button^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Button^>(element5))->Click += ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::TowerDefense::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::Launcher_ButtonClick);
         }
         break;
     }

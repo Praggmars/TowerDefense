@@ -1,7 +1,7 @@
 #pragma once
 
 #include "texture.h"
-#include "shaderbuffer.h"
+#include "modelloader.h"
 #include "math/linalg.hpp"
 
 namespace TowerDefense
@@ -20,9 +20,9 @@ namespace TowerDefense
 			CB_MaterialBuffer m_materialBuffer;
 
 		public:
-			Material(Texture::P texture, Texture::P normalmap);
-			static Material::P CreateP(Texture::P texture, Texture::P normalmap);
-			static Material::U CreateU(Texture::P texture, Texture::P normalmap);
+			Material(Texture::P texture, Texture::P normalmap, MaterialData& data);
+			static Material::P CreateP(Texture::P texture, Texture::P normalmap, MaterialData& data);
+			static Material::U CreateU(Texture::P texture, Texture::P normalmap, MaterialData& data);
 
 			void SetToRender(Graphics& graphics);
 

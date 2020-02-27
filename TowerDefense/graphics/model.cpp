@@ -39,8 +39,8 @@ namespace TowerDefense
 		}
 		Model::Model(Graphics& graphics, ModelLoader& loader)
 		{
-			CreateVertexBuffer(graphics, loader.Vertices().data(), loader.Vertices().size());
-			CreateIndexBuffer(graphics, loader.Indices().data(), loader.Indices().size());
+			CreateVertexBuffer(graphics, loader.Vertices().data(), static_cast<unsigned>(loader.Vertices().size()));
+			CreateIndexBuffer(graphics, loader.Indices().data(), static_cast<unsigned>(loader.Indices().size()));
 
 			for (UINT i = 0; i < loader.VertexGroups().size(); i++)
 			{

@@ -132,7 +132,7 @@ namespace Converter
 			return data;
 		}
 
-		void ModelLoader::LoadTDM(const wchar_t* filename)
+		void ModelLoader::LoadBTDM(const wchar_t* filename)
 		{
 			std::ifstream infile(filename, std::ios::in | std::ios::binary);
 			if (!infile.is_open())
@@ -186,6 +186,119 @@ namespace Converter
 				m_materials[i].normalmap.resize(stringSize + 1);
 				infile.read(reinterpret_cast<char*>(&m_materials[i].normalmap[0]), sizeof(wchar_t)* (stringSize + 1));
 				if (!infile.good()) throw Exception::FileRead(filename);
+			}
+		}
+		bool ScanStream(std::wistream& s, const wchar_t* expected)
+		{
+			wchar_t sch, ech; //stream char, expected char
+			ech = *expected++;
+			do
+			{
+				s.get(sch);
+				if (s.eof()) return false;
+			} while (sch != ech);
+			do
+			{
+				ech = *expected++;
+				if (ech == 0) return true;
+				s.get(sch);
+			} while (!s.eof() && ech == sch);
+			return false;
+		}
+		bool ScanTill(std::wistream& s, wchar_t expected)
+		{
+			wchar_t ch;
+			for (s.get(ch); !s.eof(); s.get(ch))
+				if (ch == expected)
+					return true;
+			return false;
+		}
+		std::wstring ScanStringAfterWhiteSpacesToLineEnd(std::wifstream& s)
+		{
+			std::wstring str;
+			wchar_t ch;
+			for (s.get(ch); ch == L' '; s.get(ch));
+			if (ch == L'\n') return str;
+			str += ch;
+			for (s.get(ch); ch != L'\n'; s.get(ch))
+				str += ch;
+			return str;
+		}
+		void ModelLoader::LoadTTDM(const wchar_t* filename)
+		{
+			std::wifstream infile(filename, std::ios::in | std::ios::binary);
+			if (!infile.is_open())
+				throw Exception::FileOpen(filename);
+			size_t vertexCount;
+			size_t indexCount;
+			size_t groupCount;
+			size_t materialCount;
+
+			if (!ScanStream(infile, L"Vertex count:")) throw Exception::FileRead(filename);
+			infile >> vertexCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Index count:")) throw Exception::FileRead(filename);
+			infile >> indexCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Group count:")) throw Exception::FileRead(filename);
+			infile >> groupCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Material count:")) throw Exception::FileRead(filename);
+			infile >> materialCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Vertices:")) throw Exception::FileRead(filename);
+			m_vertices.resize(vertexCount);
+			for (Vertex& v : m_vertices)
+			{
+				infile >> v.position;
+				infile >> v.texcoord;
+				infile >> v.normal;
+				infile >> v.tangent;
+				infile >> v.boneWeights;
+				infile >> v.boneIndices;
+				if (infile.eof()) throw Exception::FileRead(filename);
+			}
+
+			if (!ScanStream(infile, L"Indices:")) throw Exception::FileRead(filename);
+			m_indices.resize(indexCount);
+			for (unsigned& i : m_indices)
+			{
+				infile >> i;
+				if (infile.eof()) throw Exception::FileRead(filename);
+			}
+
+			if (!ScanStream(infile, L"Groups:")) throw Exception::FileRead(filename);
+			m_vertexGroups.resize(groupCount);
+			for (gfx::VertexGroup& g : m_vertexGroups)
+			{
+				infile >> g.startIndex;
+				infile >> g.indexCount;
+				infile >> g.materialIndex;
+				if (infile.eof()) throw Exception::FileRead(filename);
+			}
+
+			if (!ScanStream(infile, L"Materials:")) throw Exception::FileRead(filename);
+			m_materials.resize(materialCount);
+			for (MaterialData& m : m_materials)
+			{
+				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
+				m.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Texture:")) throw Exception::FileRead(filename);
+				m.texture = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Normalmap:")) throw Exception::FileRead(filename);
+				m.normalmap = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"Diffuse color:")) throw Exception::FileRead(filename);
+				infile >> m.diffuseColor;
+				if (!ScanStream(infile, L"Texture weight:")) throw Exception::FileRead(filename);
+				infile >> m.textureWeight;
+				if (!ScanStream(infile, L"Specular color:")) throw Exception::FileRead(filename);
+				infile >> m.specularColor;
+				if (!ScanStream(infile, L"Specular power:")) throw Exception::FileRead(filename);
+				infile >> m.specularPower;
 			}
 		}
 
@@ -366,8 +479,10 @@ namespace Converter
 			StoreFilePath(filename);
 
 			CreateDefaultTextures();
-			if (m_extension == L".tdm")
-				LoadTDM(filename);
+			if (m_extension == L".btdm")
+				LoadBTDM(filename);
+			else if (m_extension == L".ttdm")
+				LoadTTDM(filename);
 			else
 				LoadAssimp();
 
@@ -437,7 +552,7 @@ namespace Converter
 				}
 			}
 		}
-		std::vector<unsigned char> ModelLoader::WriteToMemory()
+		std::vector<unsigned char> ModelLoader::WriteToMemoryBinary()
 		{
 			size_t size = 0;
 			unsigned vertexCount = m_vertices.size();;
@@ -504,6 +619,55 @@ namespace Converter
 				size += sizeof(wchar_t) * (stringSize + 1);
 			}
 			return std::move(out);
+		}
+		std::wstring ModelLoader::WriteToMemoryText()
+		{
+			std::wstringstream ss;
+			ss << L"Vertex count: " << m_vertices.size() << '\n';
+			ss << L"Index count: " << m_indices.size() << '\n';
+			ss << L"Group count: " << m_vertexGroups.size() << '\n';
+			ss << L"Material count: " << m_materials.size() << '\n';
+
+			ss << L"\nVertices:\n";
+			for (Vertex& v : m_vertices)
+			{
+				ss << v.position << ' ';
+				ss << v.texcoord << ' ';
+				ss << v.normal << ' ';
+				ss << v.tangent << ' ';
+				ss << v.boneWeights << ' ';
+				ss << v.boneIndices << '\n';
+			}
+
+			ss << L"\nIndices:\n";
+			for (size_t i = 0; i < m_indices.size(); i += 3)
+			{
+				ss << m_indices[i + 0] << ' ';
+				ss << m_indices[i + 1] << ' ';
+				ss << m_indices[i + 2] << '\n';
+			}
+
+			ss << L"\nGroups:\n";
+			for (gfx::VertexGroup& g : m_vertexGroups)
+			{
+				ss << g.startIndex << ' ';
+				ss << g.indexCount << ' ';
+				ss << g.materialIndex << '\n';
+			}
+
+			ss << L"\n\nMaterials:\n";
+			for (MaterialData& m : m_materials)
+			{
+				ss << L"\nName: " << m.name << '\n';
+				ss << L"Texture: " << m.texture << '\n';
+				ss << L"Normalmap: " << m.normalmap << '\n';
+				ss << L"Diffuse color: " << m.diffuseColor << '\n';
+				ss << L"Texture weight: " << m.textureWeight << '\n';
+				ss << L"Specular color: " << m.specularColor << '\n';
+				ss << L"Specular power: " << m.specularPower << '\n';
+			}
+
+			return ss.str();
 		}
 		void ModelLoader::FlipInsideOut()
 		{

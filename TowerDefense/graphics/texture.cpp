@@ -1,8 +1,6 @@
 #include "pch.h"
+#include "common/image.h"
 #include "common/resourceloadingmanager.h"
-#include <wincodec.h>
-
-#pragma comment (lib, "windowscodecs.lib")
 
 namespace TowerDefense
 {
@@ -42,22 +40,8 @@ namespace TowerDefense
 		}
 		void Texture::LoadFromFile(Graphics& graphics, const wchar_t* filename)
 		{
-			Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
-			Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
-			Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
-			Microsoft::WRL::ComPtr<IWICFormatConverter> converter;
-			unsigned width, height;
-			std::vector<unsigned char> pixels;
-
-			ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&factory));
-			ThrowIfFailed(factory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder));
-			ThrowIfFailed(decoder->GetFrame(0, &frame));
-			ThrowIfFailed(factory->CreateFormatConverter(&converter));
-			ThrowIfFailed(converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPRGBA, WICBitmapDitherTypeNone, NULL, 0.0, WICBitmapPaletteTypeCustom));
-			ThrowIfFailed(converter->GetSize(&width, &height));
-			pixels.resize(width * height * 4);
-			ThrowIfFailed(converter->CopyPixels(nullptr, width * 4, pixels.size(), pixels.data()));
-			CreateTexture(graphics, pixels.data(), width, height);
+			Image img(filename);
+			CreateTexture(graphics, img.Pixels(), img.Width(), img.Height());
 		}
 		Texture::Texture(Graphics& graphics, void* data, unsigned width, unsigned height)
 		{

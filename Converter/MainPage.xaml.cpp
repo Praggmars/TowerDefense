@@ -35,8 +35,8 @@ namespace Converter
 		m_ssao = gfx::AmbientOcclusion::CreateU(*m_graphics);
 		m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &Converter::MainPage::OnSizeChanged);
 
-		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
-		LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
+		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\plain.obj)");
+		//LoadModel(LR"(F:\Study\TowerDefense\Bin\x64\Debug\Converter\AppX\res\monkey.obj)");
 		//m_modelLoaders[1]->Transform(mth::float4x4::Translation(mth::float3(0.0f, 2.0f, 0.0f)));
 		//m_modelLoaders[1]->CreateResources(*m_graphics);
 
@@ -269,13 +269,13 @@ namespace Converter
 			FileSavePicker^ filePicker = ref new FileSavePicker;
 			filePicker->SuggestedFileName = ref new String(ml.ModelName().c_str());
 			auto types = ref new Platform::Collections::Vector<String^>();
-			types->Append(".tdm");
-			filePicker->FileTypeChoices->Insert("Tower Defense Model", types);
+			types->Append(".btdm");
+			filePicker->FileTypeChoices->Insert("Binary Tower Defense Model", types);
 			auto task = create_task(filePicker->PickSaveFileAsync());
 			task.then([&ml](Windows::Storage::StorageFile^ file) {
 				if (file)
 				{
-					std::vector<unsigned char> data = std::move(ml.WriteToMemory());
+					std::vector<unsigned char> data = std::move(ml.WriteToMemoryBinary());
 					Array<unsigned char>^ buffer = ref new Array<unsigned char>(data.data(), data.size());
 					FileIO::WriteBytesAsync(file, buffer);
 				}
@@ -284,6 +284,24 @@ namespace Converter
 	}
 	void MainPage::ExportTextButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 	{
+		int modelIndex = m_modelList->SelectedIndex;
+		if (modelIndex >= 0)
+		{
+			gfx::ModelLoader& ml = *m_modelLoaders[modelIndex];
+			FileSavePicker^ filePicker = ref new FileSavePicker;
+			filePicker->SuggestedFileName = ref new String(ml.ModelName().c_str());
+			auto types = ref new Platform::Collections::Vector<String^>();
+			types->Append(".ttdm");
+			filePicker->FileTypeChoices->Insert("Text Tower Defense Model", types);
+			auto task = create_task(filePicker->PickSaveFileAsync());
+			task.then([&ml](Windows::Storage::StorageFile^ file) {
+				if (file)
+				{
+					String^ data = ref new String(ml.WriteToMemoryText().c_str());
+					FileIO::WriteTextAsync(file, data);
+				}
+				});
+		}
 	}
 	void MainPage::MaterialDataChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e)
 	{

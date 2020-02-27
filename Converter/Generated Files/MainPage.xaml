@@ -26,7 +26,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button x:ConnectionId='18' Content="Export bin" Margin="10,10,10,10"                              />
-                    <Button x:ConnectionId='19' Content="Export text" Margin="10,10,10,10"                                IsEnabled="False"/>
+                    <Button x:ConnectionId='19' Content="Export text" Margin="10,10,10,10"                               />
                 </StackPanel>
                 <TextBlock Text="Material" FontSize="20" Margin="10,10,10,0"/>
                 <ComboBox x:ConnectionId='5' x:Name="m_materialList" HorizontalAlignment="Stretch" Margin="10,10,10,10"                                                                                              />
