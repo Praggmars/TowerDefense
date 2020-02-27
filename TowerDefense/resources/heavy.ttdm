@@ -2087,5 +2087,5 @@ Texture:
 Normalmap: 
 Diffuse color: 1 1 1 1
 Texture weight: 1
-Specular color: 0 0 0 0
-Specular power: 1
+Specular color: 1 1 1 1
+Specular power: 10
