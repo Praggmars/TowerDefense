@@ -15,6 +15,10 @@ namespace TowerDefense
 			m_ambientOcclusion = gfx::AmbientOcclusion::CreateU(*m_graphics);
 
 			m_game = content::Game::CreateU(*m_graphics, *m_shadowMap, *m_ambientOcclusion);
+			m_game->setCoords = [this](alg::Point p) {
+				m_tbXCoord->Text = ref new Platform::String(L"X: ") + p.x;
+				m_tbYCoord->Text = ref new Platform::String(L"Y: ") + p.y;
+			};
 
 			m_swapChainPanel->SizeChanged += ref new Windows::UI::Xaml::SizeChangedEventHandler(this, &TowerDefense::MainPage::OnSwapChainPanelSizeChanged);
 			m_swapChainPanel->PointerWheelChanged += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &TowerDefense::MainPage::OnPointerWheelChanged);

@@ -56,6 +56,16 @@ void ::TowerDefense::MainPage::Connect(int __connectionId, ::Platform::Object^ _
                 (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::Launcher_ButtonClick);
         }
         break;
+    case 6:
+        {
+            this->m_tbXCoord = safe_cast<::Windows::UI::Xaml::Controls::TextBlock^>(__target);
+        }
+        break;
+    case 7:
+        {
+            this->m_tbYCoord = safe_cast<::Windows::UI::Xaml::Controls::TextBlock^>(__target);
+        }
+        break;
     }
     _contentLoaded = true;
 }

@@ -17,6 +17,11 @@ namespace TowerDefense
 			mth::vec4<unsigned> boneIndices;
 		};
 
+		struct AABB
+		{
+			mth::float3 p1, p2;
+		};
+
 		struct MaterialData
 		{
 			mth::float4 diffuseColor;
@@ -45,7 +50,12 @@ namespace TowerDefense
 			std::vector<unsigned> m_indices;
 			std::vector<VertexGroup> m_groups;
 			std::vector<MaterialLoader> m_materials;
+			AABB m_boundingBox;
 			std::wstring m_filename;
+			std::wstring m_foldername;
+
+		private:
+			void StoreFolderName();
 
 		public:
 			ModelLoader();
@@ -60,12 +70,15 @@ namespace TowerDefense
 
 			void CalculateNormals();
 			void CalculateTangents();
+			void CalculateBoundingBox();
 
 			inline std::vector<Vertex>& Vertices() { return m_vertices; }
 			inline std::vector<unsigned>& Indices() { return m_indices; }
 			inline std::vector<VertexGroup>& VertexGroups() { return m_groups; }
 			inline std::vector<MaterialLoader>& Materials() { return m_materials; }
 			inline const wchar_t* Filename() { return m_filename.c_str(); }
+			inline const wchar_t* Foldername() { return m_foldername.c_str(); }
+			inline AABB BoundingBox() { return m_boundingBox; }
 		};
 	}
 }

@@ -27,8 +27,8 @@ namespace TowerDefense
 			static Enemy::U CreateU(GameResources& resources);
 
 			void Update(float deltaTime, Level& level);
-			void StartPath(alg::Point start, alg::Point end);
-			void RestartPath(alg::Point end);
+			void StartPath(alg::Point start, alg::Point* end, unsigned endCount);
+			void RestartPath(alg::Point* end, unsigned endCount);
 			bool Finished();
 
 			void Damage(unsigned dmg);

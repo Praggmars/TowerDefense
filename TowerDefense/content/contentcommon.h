@@ -12,7 +12,7 @@ namespace TowerDefense
 			struct GameModel
 			{
 				gfx::Model::P model;
-				std::vector<gfx::Material::P> materials;
+				std::vector<gfx::Material> materials;
 				phy::Hitbox::P hitbox;
 			};
 			GameModel turret_light;
@@ -33,11 +33,11 @@ namespace TowerDefense
 
 		public:
 			GameObject(GameResources::GameModel& gameModel);
-			GameObject(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
+			GameObject(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox = nullptr);
 			static GameObject::P CreateP(GameResources::GameModel& gameModel);
 			static GameObject::U CreateU(GameResources::GameModel& gameModel);
-			static GameObject::P CreateP(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
-			static GameObject::U CreateU(gfx::Model::P model, gfx::Material::P material, phy::Hitbox::P hitbox = nullptr);
+			static GameObject::P CreateP(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox = nullptr);
+			static GameObject::U CreateU(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox = nullptr);
 		};
 	}
 }

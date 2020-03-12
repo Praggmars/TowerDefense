@@ -104,11 +104,14 @@
     <ClCompile Include="graphics\shadowmap.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\pointlight.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="common\image.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\light.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="content\levelpathfinder.cpp">
+      <Filter>content</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +185,6 @@
     <ClInclude Include="physics\hitbox.h">
       <Filter>physics</Filter>
     </ClInclude>
-    <ClInclude Include="math\geometry.hpp">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="content\level.h">
       <Filter>content</Filter>
     </ClInclude>
@@ -215,11 +215,23 @@
     <ClInclude Include="graphics\shadowmap.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\pointlight.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="common\image.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\light.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="math\graph.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\geometry3d.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\geometry2d.hpp">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="content\levelpathfinder.h">
+      <Filter>content</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +266,9 @@
       <Filter>Assets\media</Filter>
     </Image>
     <Image Include="resources\map.png">
+      <Filter>resourses</Filter>
+    </Image>
+    <Image Include="resources\ground.png">
       <Filter>resourses</Filter>
     </Image>
   </ItemGroup>

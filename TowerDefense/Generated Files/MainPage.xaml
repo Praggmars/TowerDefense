@@ -18,6 +18,8 @@
             <Button x:ConnectionId='3' Content="Light turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top"                                />
             <Button x:ConnectionId='4' Content="Heavy turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top"                                />
             <Button x:ConnectionId='5' Content="Launcher" Width="100" Margin="10,10,0,0" VerticalAlignment="Top"                             />
+            <TextBlock x:ConnectionId='6' x:Name="m_tbXCoord" Text="X: " Width="100" Margin="10,10,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:ConnectionId='7' x:Name="m_tbYCoord" Text="Y: " Width="100" Margin="10,10,0,0" TextWrapping="Wrap"/>
         </StackPanel>
     </Grid>
 </Page>

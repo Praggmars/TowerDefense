@@ -42,6 +42,15 @@ namespace TowerDefense
 #else
 		void Game::Update(float deltaTime)
 		{
+			m_timeCounter += deltaTime;
+			while (m_timeCounter >= 1.0f)
+			{
+				m_timeCounter -= 1.0f;
+				m_secondCounter++;
+				m_level->SpawnEnemy(Enemy::CreateP(m_gameResources));
+			}
+			m_level->Update(deltaTime);
+
 			if (m_movingTurret)
 			{
 				mth::float3 origin = m_camera.position;
@@ -50,7 +59,21 @@ namespace TowerDefense
 				if (auto mapPos = m_level->PointedArea(origin, dir))
 				{
 					m_movingTurret->Visible(true);
-					auto coord = m_level->CoordTransform(*mapPos);
+					bool canPlace = m_level->CanPlace2x2(*mapPos);
+					for (auto& m : m_movingTurret->Materials())
+					{
+						if (canPlace)
+						{
+							m.MaterialBuffer().diffuseColor = mth::float4(0.25f, 1.0f, 0.25f, 0.0f);
+							m.MaterialBuffer().textureWeight = 0.25f;
+						}
+						else
+						{
+							m.MaterialBuffer().diffuseColor = mth::float4(1.0f, 0.25f, 0.25f, 0.0f);
+							m.MaterialBuffer().textureWeight = 0.25f;
+						}
+					}
+					auto coord = m_level->TurretCoordTransform(*mapPos);
 					m_movingTurret->position = mth::float3(coord.x, 0.0f, coord.y);
 				}
 			}
@@ -59,6 +82,8 @@ namespace TowerDefense
 		void Game::Render()
 		{
 			m_camera.Update();
+			//m_light.position = m_camera.position;
+			//m_light.rotation = m_camera.rotation;
 
 			gfx::CB_MatrixBuffer matrixBuffer;
 			matrixBuffer.worldMatrix = mth::float4x4::Identity();
@@ -69,7 +94,7 @@ namespace TowerDefense
 			gfx::CB_LightBuffer lightBuffer;
 			lightBuffer.ambientColor = 0.3f;
 			lightBuffer.diffuseColor = 0.7f;
-			lightBuffer.sourcePosition = m_light.position;
+			lightBuffer.sourceDirection = mth::float3x3::Rotation(m_light.rotation) * mth::float3(0.0f, 0.0f, 1.0f);
 			lightBuffer.shadowMapDelta = 1.0f / m_shadowMap.Size();
 			lightBuffer.eyePosition = m_camera.position;
 			lightBuffer.screenSize = mth::float2(static_cast<float>(m_graphics.Width()), static_cast<float>(m_graphics.Height()));
@@ -110,15 +135,18 @@ namespace TowerDefense
 			m_shadowMap(shadowMap),
 			m_ambeintOcclusion(ambeintOcclusion),
 			m_gameResources(graphics),
+			m_light(40.0f),
 			m_level(Level::CreateP(graphics, m_gameResources, 11, 9)),
 			m_cameraController(m_camera),
 			m_timeCounter(0.0f),
 			m_secondCounter(0)
 		{
-			m_cameraController.SetControllerData(mth::float3(), 15.0f, mth::float3(0.3f, -0.3f, 0.0f));
+			m_cameraController.SetControllerData(mth::float3(7.0f, -2.0f, -4.0f), 36.0f, mth::float3(mth::pi * 0.5f, 0.0f, 0.0f));
 			m_cameraController.UpdateTarget();
-			m_light.position = mth::float3(5.75f, 11.0f, -8.0f);
-			m_light.rotation = mth::float3(0.9f, -0.67f, 1.0f);
+			//m_light.position = mth::float3(5.75f, 11.0f, -8.0f);
+			//m_light.rotation = mth::float3(0.9f, -0.67f, 0.0f);
+			m_light.position = mth::float3(-0.25f, 23.0f, -9.0f);
+			m_light.rotation = mth::float3(0.98f, -0.42f, 0.0f);
 
 			auto workItemHandler = ref new Windows::System::Threading::WorkItemHandler(
 				[this](Windows::Foundation::IAsyncAction^ action)
@@ -165,6 +193,12 @@ namespace TowerDefense
 		{
 			m_cameraController.MouseMove(cursor, rButtonDown, mButtonDown);
 			m_cursor = cursor;
+
+			m_camera.Update();
+			mth::float3 origin = m_camera.position;
+			mth::float3 dir = m_camera.DirectionFromPoint(m_cursor, m_windowSize);
+			if (auto mapPos = m_level->PointedArea(origin, dir))
+				setCoords(*mapPos);
 		}
 		void Game::MouseUp(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown)
 		{
@@ -174,10 +208,16 @@ namespace TowerDefense
 				mth::float3 dir = m_camera.DirectionFromPoint(m_cursor, m_windowSize);
 				Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
 				if (auto mapPos = m_level->PointedArea(origin, dir))
-				{
-					m_level->PlaceTurret(*mapPos, m_movingTurret);
-					m_movingTurret = nullptr;
-				}
+					if (m_level->CanPlace2x2(*mapPos))
+					{
+						for (auto& m : m_movingTurret->Materials())
+						{
+							m.MaterialBuffer().diffuseColor = 1.0f;
+							m.MaterialBuffer().textureWeight = 1.0f;
+						}
+						m_level->PlaceTurret(*mapPos, m_movingTurret);
+					}
+				m_movingTurret = nullptr;
 			}
 		}
 		void Game::MouseWheel(int delta)

@@ -17,7 +17,7 @@ namespace TowerDefense
 		{
 			mth::float4 diffuseColor;
 			mth::float4 ambientColor;
-			mth::float3 sourcePosition;
+			mth::float3 sourceDirection;
 			float shadowMapDelta;
 			mth::float3 eyePosition;
 			float padding1;

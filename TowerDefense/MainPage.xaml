@@ -18,6 +18,8 @@
             <Button Content="Light turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="LightTurret_ButtonClick"/>
             <Button Content="Heavy turret" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="HeavyTurret_ButtonClick"/>
             <Button Content="Launcher" Width="100" Margin="10,10,0,0" VerticalAlignment="Top" Click="Launcher_ButtonClick"/>
+            <TextBlock x:Name="m_tbXCoord" Text="X: " Width="100" Margin="10,10,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="m_tbYCoord" Text="Y: " Width="100" Margin="10,10,0,0" TextWrapping="Wrap"/>
         </StackPanel>
     </Grid>
 </Page>

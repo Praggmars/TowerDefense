@@ -17,16 +17,25 @@ namespace TowerDefense
 		private:
 			struct MapElement
 			{
-				Turret::P turret;
+				enum class Obstacle
+				{
+					FREE,
+					WALL,
+					SPAWN,
+					GOAL
+				};
 				alg::Point mapPosition;
+				Obstacle obstacle;
 			};
 			GameObject::P m_levelMap;
 			GameObject::P m_base;
-			Array2D<MapElement> m_places;
-			std::vector<Enemy::P> m_enemies;
 
-			alg::Point m_enemyStartPoint;
-			alg::Point m_enemyEndPoint;
+			std::vector<alg::Point> m_enemyStartPoints;
+			std::vector<alg::Point> m_enemyEndPoints;
+			std::vector<alg::Point> m_corners;
+			Array2D<MapElement> m_places;
+			std::vector<Turret::P> m_turrets;
+			std::vector<Enemy::P> m_enemies;
 
 			std::vector<gfx::Entity*> m_renderedEntities;
 
@@ -49,14 +58,19 @@ namespace TowerDefense
 			void DestroyTurret(alg::Point mapPosition);
 			void SpawnEnemy(Enemy::P enemy);
 
-			alg::Point CoordTransform(mth::float2 p);
-			mth::float2 CoordTransform(alg::Point p);
+			alg::Point TurretCoordTransform(mth::float2 p);
+			mth::float2 TurretCoordTransform(alg::Point p);
+			alg::Point EnemyCoordTransform(mth::float2 p);
+			mth::float2 EnemyCoordTransform(alg::Point p);
 			std::optional<alg::Point> PointedArea(mth::float3 origin, mth::float3 direction);
+			std::optional<mth::float2> PointedPosition(mth::float3 origin, mth::float3 direction);
+			bool CanPlace2x2(alg::Point mapPosition);
 			Turret::P PointedTurret(mth::float3 origin, mth::float3 direction);
 			Enemy::P PointedEnemy(mth::float3 origin, mth::float3 direction);
 			GameObject::P PointedTurretOrEnemy(mth::float3 origin, mth::float3 direction);
 
 			inline std::vector<gfx::Entity*>& RenderedEntities() { return m_renderedEntities; }
+			inline alg::Point MapSize() { return { static_cast<int>(m_places.width()), static_cast<int>(m_places.height()) }; }
 		};
 	}
 }

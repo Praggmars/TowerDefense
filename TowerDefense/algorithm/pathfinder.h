@@ -26,7 +26,8 @@ namespace TowerDefense
 			Array2D<Node> m_nodes;
 			std::vector<Point> m_path;
 			Point m_start;
-			Point m_end;
+			std::vector<Point> m_end;
+			Point m_bestEnd;
 			int m_pathLength;
 
 		private:
@@ -42,6 +43,7 @@ namespace TowerDefense
 			void Resize(unsigned width, unsigned height);
 
 			bool FindPath(Point start, Point end);
+			bool FindPath(Point start, Point* end, unsigned endCount);
 			void Block(int x, int y);
 			void Unblock(int x, int y);
 			void RemoveBlocks();

@@ -248,6 +248,7 @@
     <ClInclude Include="content\enemy.h" />
     <ClInclude Include="content\game.h" />
     <ClInclude Include="content\level.h" />
+    <ClInclude Include="content\levelpathfinder.h" />
     <ClInclude Include="content\player.h" />
     <ClInclude Include="content\turret.h" />
     <ClInclude Include="graphics\ambientocclusion.h" />
@@ -256,14 +257,16 @@
     <ClInclude Include="graphics\firstpersoncontroller.h" />
     <ClInclude Include="graphics\entity.h" />
     <ClInclude Include="graphics\graphics.h" />
+    <ClInclude Include="graphics\light.h" />
     <ClInclude Include="graphics\material.h" />
     <ClInclude Include="graphics\model.h" />
     <ClInclude Include="graphics\modelloader.h" />
-    <ClInclude Include="graphics\pointlight.h" />
     <ClInclude Include="graphics\shadowmap.h" />
     <ClInclude Include="graphics\texture.h" />
     <ClInclude Include="math\formulas.hpp" />
-    <ClInclude Include="math\geometry.hpp" />
+    <ClInclude Include="math\geometry2d.hpp" />
+    <ClInclude Include="math\geometry3d.hpp" />
+    <ClInclude Include="math\graph.hpp" />
     <ClInclude Include="math\linalg.hpp" />
     <ClInclude Include="math\matrix2x2.hpp" />
     <ClInclude Include="math\matrix3x3.hpp" />
@@ -307,6 +310,7 @@
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Image Include="Assets\StoreLogo.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Image Include="resources\ground.png" />
     <Image Include="resources\map.png" />
   </ItemGroup>
   <ItemGroup>
@@ -321,6 +325,7 @@
     <ClCompile Include="content\enemy.cpp" />
     <ClCompile Include="content\game.cpp" />
     <ClCompile Include="content\level.cpp" />
+    <ClCompile Include="content\levelpathfinder.cpp" />
     <ClCompile Include="content\turret.cpp" />
     <ClCompile Include="graphics\ambientocclusion.cpp" />
     <ClCompile Include="graphics\camera.cpp" />
@@ -328,10 +333,10 @@
     <ClCompile Include="graphics\entity.cpp" />
     <ClCompile Include="graphics\firstpersoncontroller.cpp" />
     <ClCompile Include="graphics\graphics.cpp" />
+    <ClCompile Include="graphics\light.cpp" />
     <ClCompile Include="graphics\material.cpp" />
     <ClCompile Include="graphics\model.cpp" />
     <ClCompile Include="graphics\modelloader.cpp" />
-    <ClCompile Include="graphics\pointlight.cpp" />
     <ClCompile Include="graphics\shadowmap.cpp" />
     <ClCompile Include="graphics\texture.cpp" />
     <ClCompile Include="MainPage.xaml.cpp">

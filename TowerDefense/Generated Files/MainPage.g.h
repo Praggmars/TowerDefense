@@ -12,6 +12,7 @@ namespace Windows {
         namespace Xaml {
             namespace Controls {
                 ref class SwapChainPanel;
+                ref class TextBlock;
             }
         }
     }
@@ -39,6 +40,8 @@ namespace TowerDefense
         class MainPage_obj1_Bindings;
     
         private: ::Windows::UI::Xaml::Controls::SwapChainPanel^ m_swapChainPanel;
+        private: ::Windows::UI::Xaml::Controls::TextBlock^ m_tbXCoord;
+        private: ::Windows::UI::Xaml::Controls::TextBlock^ m_tbYCoord;
     };
 }
 

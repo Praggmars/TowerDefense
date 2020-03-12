@@ -254,7 +254,7 @@ cbuffer LightBuffer
 {
 	float4 light_diffuseColor;
 	float4 light_ambientColor;
-	float3 light_sourcePosition;
+	float3 light_sourceDirection; //light_sourcePosition
 	float  light_shadowMapDelta;
 	float3 light_eyePosition;
 	float  light_padding1;
@@ -336,7 +336,7 @@ float4 main(PixelInputType input) : SV_TARGET
 	float3 pixelNormal = PixelNormal(input.normal, input.tangent, input.texcoord);
 
 	float3 viewDirection = normalize(light_eyePosition - input.position);
-	float3 lightDirection = normalize(light_sourcePosition - input.position);
+	float3 lightDirection = -light_sourceDirection; //normalize(light_sourcePosition - input.position);
 
 	input.lightTex.x = input.lightTex.x / input.lightTex.w * 0.5f + 0.5f;
 	input.lightTex.y = input.lightTex.y / input.lightTex.w * (-0.5f) + 0.5f;

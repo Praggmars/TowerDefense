@@ -6,9 +6,7 @@ namespace TowerDefense
 	namespace content
 	{
 		Level::Level(gfx::Graphics& graphics, GameResources& gameResources, int width, int height) :
-			m_places(width, height),
-			m_enemyStartPoint{ 0, height / 2 },
-			m_enemyEndPoint{ width - 1, height / 2 }
+			m_places(width, height)
 		{
 			CreateLevelMap(graphics, gameResources, width, height);
 		}
@@ -25,15 +23,10 @@ namespace TowerDefense
 			for (auto& e : m_enemies)
 				e->Update(delta, *this);
 
-			for (auto& a : m_places)
+			for (auto& t : m_turrets)
 			{
-				if (a.turret)
-				{
-					for (auto& m : a.turret->Materials())
-						m->MaterialBuffer().textureWeight = 1.0f;
-					a.turret->Update(delta);
-					a.turret->Shoot(m_enemies.data(), m_enemies.size());
-				}
+				t->Update(delta);
+				t->Shoot(m_enemies.data(), m_enemies.size());
 			}
 
 			auto iter = m_enemies.begin();
@@ -55,16 +48,31 @@ namespace TowerDefense
 			if (distance == NAN || distance == INFINITY || distance == -INFINITY)
 				return {};
 			mth::float3 groundPoint = origin + distance * direction;
-			return CoordTransform(mth::float2(groundPoint.x, groundPoint.z));
+			return TurretCoordTransform(mth::float2(groundPoint.x, groundPoint.z));
+		}
+		std::optional<mth::float2> Level::PointedPosition(mth::float3 origin, mth::float3 direction)
+		{
+			float distance = m_levelMap->Hitbox()->DistanceInDirection(origin, direction, m_levelMap->WorldMatrix());
+			if (distance == NAN || distance == INFINITY || distance == -INFINITY)
+				return {};
+			mth::float3 groundPoint = origin + distance * direction;
+			return mth::float2(groundPoint.x, groundPoint.z);
+		}
+		bool Level::CanPlace2x2(alg::Point mapPosition)
+		{
+			return
+				m_places(mapPosition.x + 0, mapPosition.y + 0).obstacle == MapElement::Obstacle::FREE &&
+				m_places(mapPosition.x + 0, mapPosition.y + 1).obstacle == MapElement::Obstacle::FREE &&
+				m_places(mapPosition.x + 1, mapPosition.y + 0).obstacle == MapElement::Obstacle::FREE &&
+				m_places(mapPosition.x + 1, mapPosition.y + 1).obstacle == MapElement::Obstacle::FREE;
 		}
 		Turret::P Level::PointedTurret(mth::float3 origin, mth::float3 direction)
 		{
 			Turret::P turret;
 			float minDistance = INFINITY;
-			for (auto& a : m_places)
+			for (auto& t : m_turrets)
 			{
-				Turret::P t = a.turret;
-				if (t && t->Hitbox())
+				if (t->Hitbox())
 				{
 					float distance = t->Hitbox()->DistanceInDirection(origin, direction, t->WorldMatrix());
 					if (distance < minDistance)
@@ -98,10 +106,9 @@ namespace TowerDefense
 		{
 			GameObject::P ret;
 			float minDistance = INFINITY;
-			for (auto& a : m_places)
+			for (auto& t : m_turrets)
 			{
-				Turret::P t = a.turret;
-				if (t && t->Hitbox())
+				if (t->Hitbox())
 				{
 					float distance = t->Hitbox()->DistanceInDirection(origin, direction, t->WorldMatrix());
 					if (distance < minDistance)
@@ -128,47 +135,97 @@ namespace TowerDefense
 		void Level::PlaceTurret(alg::Point mapPosition, Turret::P turret)
 		{
 			auto& place = m_places(mapPosition.x, mapPosition.y);
-			if (!place.turret)
-			{
-				place.turret = turret;
-				turret->Place(mapPosition);
-				AddRenderedEntity(*turret);
-				RegeneratePaths();
-			}
+			turret->Place(mapPosition);
+			m_places(mapPosition.x + 0, mapPosition.y + 0).obstacle = MapElement::Obstacle::WALL;
+			m_places(mapPosition.x + 0, mapPosition.y + 1).obstacle = MapElement::Obstacle::WALL;
+			m_places(mapPosition.x + 1, mapPosition.y + 0).obstacle = MapElement::Obstacle::WALL;
+			m_places(mapPosition.x + 1, mapPosition.y + 1).obstacle = MapElement::Obstacle::WALL;
+			m_turrets.push_back(turret);
+			AddRenderedEntity(*turret);
+			RegeneratePaths();
 		}
 		void Level::DestroyTurret(alg::Point mapPosition)
 		{
-			auto& place = m_places(mapPosition.x, mapPosition.y);
-			if (place.turret)
+			for (auto& t : m_turrets)
 			{
-				RemoveRenderedEntity(*place.turret);
-				place.turret = nullptr;
-				RegeneratePaths();
+				if (t->MapPosition().x == mapPosition.x && t->MapPosition().y == mapPosition.y)
+				{
+					RemoveRenderedEntity(*t);
+					m_places(mapPosition.x + 0, mapPosition.y + 0).obstacle = MapElement::Obstacle::FREE;
+					m_places(mapPosition.x + 0, mapPosition.y + 1).obstacle = MapElement::Obstacle::FREE;
+					m_places(mapPosition.x + 1, mapPosition.y + 0).obstacle = MapElement::Obstacle::FREE;
+					m_places(mapPosition.x + 1, mapPosition.y + 1).obstacle = MapElement::Obstacle::FREE;
+					RegeneratePaths();
+					break;
+				}
 			}
 		}
 		void Level::CreateLevelMap(gfx::Graphics& graphics, GameResources& gameResources, int width, int height)
 		{
 			Image map((graphics.AppDirectory() + L"resources\\map.png").c_str());
 			m_places.resize(map.Width(), map.Height());
-
+			for (int y = 0; y < static_cast<int>(map.Height()); y++)
+			{
+				for (int x = 0; x < static_cast<int>(map.Width()); x++)
+				{
+					Color color = map(x, y);
+					if (color == Color::Green())
+					{
+						m_places(x, y).obstacle = MapElement::Obstacle::FREE;
+					}
+					else if (color == Color::Red())
+					{
+						m_places(x, y).obstacle = MapElement::Obstacle::SPAWN;
+						m_enemyStartPoints.push_back(alg::Point{ x, y });
+					}
+					else if (color == Color::Blue())
+					{
+						m_places(x, y).obstacle = MapElement::Obstacle::GOAL;
+						m_enemyEndPoints.push_back(alg::Point{ x, y });
+					}
+					else if (color == Color::Yellow())
+					{
+						m_places(x, y).obstacle = MapElement::Obstacle::FREE;
+						m_corners.push_back(alg::Point{ x, y });
+					}
+					else
+					{
+						m_places(x, y).obstacle = MapElement::Obstacle::WALL;
+					}
+				}
+			}
 			m_levelMap = GameObject::CreateP(gameResources.map);
 			m_base = GameObject::CreateP(gameResources.base);
 
 			AddRenderedEntity(*m_levelMap);
 			AddRenderedEntity(*m_base);
 		}
-		alg::Point Level::CoordTransform(mth::float2 p)
+		alg::Point Level::TurretCoordTransform(mth::float2 p)
 		{
 			return alg::Point{
-				static_cast<int>(p.x + static_cast<float>(m_places.width()) * 0.5f),
-				static_cast<int>(p.y + static_cast<float>(m_places.height()) * 0.5f)
+				static_cast<int>(p.x + 24.5f),
+				static_cast<int>(-p.y + 18.5f)
 			};
 		}
-		mth::float2 Level::CoordTransform(alg::Point p)
+		mth::float2 Level::TurretCoordTransform(alg::Point p)
 		{
 			return mth::float2(
-				static_cast<float>(p.x) - static_cast<float>(m_places.width()) * 0.5f + 0.5f,
-				static_cast<float>(p.y) - static_cast<float>(m_places.height()) * 0.5f + 0.5f
+				static_cast<float>(p.x) - 24.0f,
+				static_cast<float>(-p.y) + 18.0f
+			);
+		}
+		alg::Point Level::EnemyCoordTransform(mth::float2 p)
+		{
+			return alg::Point{
+				static_cast<int>(p.x + 23.5f),
+				static_cast<int>(-p.y + 18.5f)
+			};
+		}
+		mth::float2 Level::EnemyCoordTransform(alg::Point p)
+		{
+			return mth::float2(
+				static_cast<float>(p.x) - 24.5f,
+				static_cast<float>(-p.y) + 18.5f
 			);
 		}
 		void Level::AddRenderedEntity(gfx::Entity& entity)
@@ -195,7 +252,7 @@ namespace TowerDefense
 			for (auto& e : m_enemies)
 			{
 				UpdatePathFinder(e->PathFinder());
-				e->RestartPath(m_enemyEndPoint);
+				e->RestartPath(m_enemyEndPoints.data(), static_cast<unsigned>(m_enemyEndPoints.size()));
 			}
 		}
 		void Level::UpdatePathFinder(alg::PathFinder& pathFinder)
@@ -204,7 +261,7 @@ namespace TowerDefense
 			{
 				for (int x = 0; x < m_places.width(); x++)
 				{
-					if (m_places(x, y).turret)
+					if (m_places(x, y).obstacle == MapElement::Obstacle::WALL)
 						pathFinder.Block(x, y);
 					else
 						pathFinder.Unblock(x, y);
@@ -213,11 +270,12 @@ namespace TowerDefense
 		}
 		void Level::SpawnEnemy(Enemy::P enemy)
 		{
-			auto p = CoordTransform(m_enemyStartPoint);
+			alg::Point enemyStartPoint = m_enemyStartPoints[rand() % m_enemyStartPoints.size()];
+			mth::float2 p = EnemyCoordTransform(enemyStartPoint);
 			enemy->position = mth::float3(p.x, 0.5f, p.y);
 			enemy->PathFinder().Resize(static_cast<unsigned>(m_places.width()), static_cast<unsigned>(m_places.height()));
 			UpdatePathFinder(enemy->PathFinder());
-			enemy->StartPath(m_enemyStartPoint, m_enemyEndPoint);
+			enemy->StartPath(enemyStartPoint, m_enemyEndPoints.data(), static_cast<unsigned>(m_enemyEndPoints.size()));
 			m_enemies.push_back(enemy);
 			AddRenderedEntity(*enemy);
 		}

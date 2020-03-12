@@ -10,9 +10,6 @@ namespace TowerDefense
 	{
 		class Material
 		{
-		public:
-			SMART_PTR(Material)
-
 		private:
 			Texture::P m_texture;
 			Texture::P m_normalmap;
@@ -20,9 +17,8 @@ namespace TowerDefense
 			CB_MaterialBuffer m_materialBuffer;
 
 		public:
+			Material() = default;
 			Material(Texture::P texture, Texture::P normalmap, MaterialData& data);
-			static Material::P CreateP(Texture::P texture, Texture::P normalmap, MaterialData& data);
-			static Material::U CreateU(Texture::P texture, Texture::P normalmap, MaterialData& data);
 
 			void SetToRender(Graphics& graphics);
 

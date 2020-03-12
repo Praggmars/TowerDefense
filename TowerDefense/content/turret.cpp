@@ -9,7 +9,7 @@ namespace TowerDefense
 		Turret::Turret(GameResources::GameModel& gameModel) :
 			GameObject(gameModel),
 			m_mapPosition{ -1, -1 },
-			m_damage(34),
+			m_damage(0),
 			m_timeToShoot(0.0f),
 			m_reloadTime(0.8f),
 			m_range(2.5f) {}

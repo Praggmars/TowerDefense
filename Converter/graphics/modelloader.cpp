@@ -318,8 +318,10 @@ namespace Converter
 			const aiScene* scene = importer.ReadFile(filename.c_str(),
 				aiProcess_CalcTangentSpace |
 				aiProcess_JoinIdenticalVertices |
+				aiProcess_RemoveRedundantMaterials |
 				aiProcess_Triangulate |
-				aiProcess_SortByPType);
+				aiProcess_SortByPType |
+				aiProcess_LimitBoneWeights);
 			if (scene == NULL)
 			{
 				auto error = importer.GetErrorString();
@@ -430,7 +432,8 @@ namespace Converter
 					}
 				}
 
-				/*for (unsigned b = 0; b < mesh->mNumBones; b++)
+				//std::vector<std::vector<float>> boneWeights(m_vertices.size());
+				for (unsigned b = 0; b < mesh->mNumBones; b++)
 				{
 					auto& bone = *mesh->mBones[b];
 					m_bones[boneCount + b].name.reserve(bone.mName.length + 1);
@@ -441,10 +444,10 @@ namespace Converter
 					for (unsigned w = 0; w < bone.mNumWeights; w++)
 					{
 						Vertex& vert = m_vertices[vertexCount + bone.mWeights[w].mVertexId];
-						unsigned index = vert.boneWeights(0)
+						unsigned index = vert.boneWeights(0);
 						m_vertices[vertexCount + bone.mWeights[w].mVertexId];
 					}
-				}*/
+				}
 				vertexCount += mesh->mNumVertices;
 				boneCount += mesh->mNumBones;
 			}

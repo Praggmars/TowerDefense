@@ -6,6 +6,16 @@ namespace TowerDefense
 {
 	namespace gfx
 	{
+		void ModelLoader::StoreFolderName()
+		{
+			size_t lastSlash = m_filename.length();
+			for (wchar_t ch = m_filename[--lastSlash]; ch != '\\' && ch != '/'; ch = m_filename[--lastSlash])
+				if (lastSlash == 0)
+					return;
+			m_foldername.reserve(lastSlash + 1);
+			for (size_t i = 0; i <= lastSlash; i++)
+				m_foldername += m_filename[i];
+		}
 		ModelLoader::ModelLoader() {}
 		ModelLoader::ModelLoader(const wchar_t* filename, bool binary)
 		{
@@ -96,6 +106,7 @@ namespace TowerDefense
 			if (!infile.is_open())
 				throw Exception::FileOpen(filename);
 			m_filename = filename;
+			StoreFolderName();
 
 			unsigned vertexCount;
 			unsigned indexCount;
@@ -189,6 +200,9 @@ namespace TowerDefense
 			std::wifstream infile(filename, std::ios::in | std::ios::binary);
 			if (!infile.is_open())
 				throw Exception::FileOpen(filename);
+			m_filename = filename;
+			StoreFolderName();
+
 			size_t vertexCount;
 			size_t indexCount;
 			size_t groupCount;
@@ -304,6 +318,20 @@ namespace TowerDefense
 			}
 			for (Vertex& v : m_vertices)
 				v.tangent.Normalize();
+		}
+		void ModelLoader::CalculateBoundingBox()
+		{
+			if (m_vertices.empty()) return;
+			m_boundingBox.p1 = m_boundingBox.p2 = m_vertices[0].position;
+			for (Vertex& v : m_vertices)
+			{
+				m_boundingBox.p1.x = min(m_boundingBox.p1.x, v.position.x);
+				m_boundingBox.p1.y = min(m_boundingBox.p1.y, v.position.y);
+				m_boundingBox.p1.z = min(m_boundingBox.p1.z, v.position.z);
+				m_boundingBox.p2.x = max(m_boundingBox.p2.x, v.position.x);
+				m_boundingBox.p2.y = max(m_boundingBox.p2.y, v.position.y);
+				m_boundingBox.p2.z = max(m_boundingBox.p2.z, v.position.z);
+			}
 		}
 	}
 }

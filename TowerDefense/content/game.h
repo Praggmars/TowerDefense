@@ -2,7 +2,7 @@
 
 #include "level.h"
 #include "graphics/editorstylecontroller.h"
-#include "graphics/pointlight.h"
+#include "graphics/light.h"
 #include "graphics/ambientocclusion.h"
 #include "graphics/shadowmap.h"
 
@@ -28,7 +28,7 @@ namespace TowerDefense
 			gfx::AmbientOcclusion& m_ambeintOcclusion;
 
 			GameResources m_gameResources;
-			gfx::PointLight m_light;
+			gfx::DirectionalLight m_light;
 			gfx::Camera m_camera;
 			Level::P m_level;
 			Turret::P m_movingTurret;
@@ -56,6 +56,8 @@ namespace TowerDefense
 			void WindowSizeChanged(mth::float2 size);
 
 			void PlaceTurret(TurretType turretType);
+
+			std::function<void(alg::Point)> setCoords;
 		};
 	}
 }
