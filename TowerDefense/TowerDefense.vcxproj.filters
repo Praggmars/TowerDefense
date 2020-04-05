@@ -86,9 +86,6 @@
     <ClCompile Include="content\level.cpp">
       <Filter>content</Filter>
     </ClCompile>
-    <ClCompile Include="algorithm\pathfinder.cpp">
-      <Filter>algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="content\turret.cpp">
       <Filter>content</Filter>
     </ClCompile>
@@ -112,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="content\levelpathfinder.cpp">
       <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="algorithm\pathfindergrid.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="algorithm\pathfinderdiag.cpp">
+      <Filter>algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,9 +209,6 @@
     <ClInclude Include="content\contentcommon.h">
       <Filter>content</Filter>
     </ClInclude>
-    <ClInclude Include="algorithm\pathfinder.h">
-      <Filter>algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\ambientocclusion.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -232,6 +232,15 @@
     </ClInclude>
     <ClInclude Include="content\levelpathfinder.h">
       <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="fixarray.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm\pathfindergrid.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm\pathfinderdiag.h">
+      <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

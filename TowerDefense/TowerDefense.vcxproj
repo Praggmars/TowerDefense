@@ -239,7 +239,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="algorithm\pathfinder.h" />
+    <ClInclude Include="algorithm\pathfinderdiag.h" />
+    <ClInclude Include="algorithm\pathfindergrid.h" />
     <ClInclude Include="common\array2d.hpp" />
     <ClInclude Include="common\helpers.h" />
     <ClInclude Include="common\image.h" />
@@ -285,6 +286,7 @@
     </ClInclude>
     <ClInclude Include="physics\boundingvolume.h" />
     <ClInclude Include="physics\hitbox.h" />
+    <ClInclude Include="fixarray.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -314,7 +316,8 @@
     <Image Include="resources\map.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="algorithm\pathfinder.cpp" />
+    <ClCompile Include="algorithm\pathfinderdiag.cpp" />
+    <ClCompile Include="algorithm\pathfindergrid.cpp" />
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>

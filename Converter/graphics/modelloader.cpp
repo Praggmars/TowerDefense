@@ -157,15 +157,15 @@ namespace Converter
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_vertices.resize(vertexCount);
-			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0])* vertexCount);
+			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0]) * vertexCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_indices.resize(indexCount);
-			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0])* indexCount);
+			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0]) * indexCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_vertexGroups.resize(groupCount);
-			infile.read(reinterpret_cast<char*>(m_vertexGroups.data()), sizeof(m_vertexGroups[0])* groupCount);
+			infile.read(reinterpret_cast<char*>(m_vertexGroups.data()), sizeof(m_vertexGroups[0]) * groupCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_materials.resize(materialCount);
@@ -178,13 +178,13 @@ namespace Converter
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
 				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].texture.resize(stringSize + 1);
-				infile.read(reinterpret_cast<char*>(&m_materials[i].texture[0]), sizeof(wchar_t)* (stringSize + 1));
+				infile.read(reinterpret_cast<char*>(&m_materials[i].texture[0]), sizeof(wchar_t) * (stringSize + 1));
 				if (!infile.good()) throw Exception::FileRead(filename);
 
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
 				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].normalmap.resize(stringSize + 1);
-				infile.read(reinterpret_cast<char*>(&m_materials[i].normalmap[0]), sizeof(wchar_t)* (stringSize + 1));
+				infile.read(reinterpret_cast<char*>(&m_materials[i].normalmap[0]), sizeof(wchar_t) * (stringSize + 1));
 				if (!infile.good()) throw Exception::FileRead(filename);
 			}
 		}
@@ -233,6 +233,7 @@ namespace Converter
 			size_t indexCount;
 			size_t groupCount;
 			size_t materialCount;
+			size_t boneCount;
 
 			if (!ScanStream(infile, L"Vertex count:")) throw Exception::FileRead(filename);
 			infile >> vertexCount;
@@ -248,6 +249,10 @@ namespace Converter
 
 			if (!ScanStream(infile, L"Material count:")) throw Exception::FileRead(filename);
 			infile >> materialCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
+			if (!ScanStream(infile, L"Bone count:")) throw Exception::FileRead(filename);
+			infile >> boneCount;
 			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
 
 			if (!ScanStream(infile, L"Vertices:")) throw Exception::FileRead(filename);
@@ -300,39 +305,265 @@ namespace Converter
 				if (!ScanStream(infile, L"Specular power:")) throw Exception::FileRead(filename);
 				infile >> m.specularPower;
 			}
+
+			if (!ScanStream(infile, L"Bones:")) throw Exception::FileRead(filename);
+			m_bones.resize(boneCount);
+			for (Bone& b : m_bones)
+			{
+				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
+				b.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				mth::float3 toBoneTranslate, toBoneRotate;
+				if (!ScanStream(infile, L"To bone translate:")) throw Exception::FileRead(filename);
+				infile >> toBoneTranslate;
+				if (!ScanStream(infile, L"To bone rotate:")) throw Exception::FileRead(filename);
+				infile >> toBoneRotate;
+				b.toBoneSpace = mth::float4x4::RotationTranslation(toBoneRotate, toBoneTranslate);
+				if (!ScanStream(infile, L"Transform:")) throw Exception::FileRead(filename);
+				infile >> b.offset;
+				if (!ScanStream(infile, L"Rotation:")) throw Exception::FileRead(filename);
+				infile >> b.rotation;
+				b.transform = mth::float4x4::RotationTranslation(b.rotation, b.offset);
+				if (!ScanStream(infile, L"Parent:")) throw Exception::FileRead(filename);
+				infile >> b.parentIndex;
+				if (!ScanStream(infile, L"Children:")) throw Exception::FileRead(filename);
+				wchar_t ch;
+				int scanNumber;
+				bool sameNumber = false;
+				for (infile.get(ch); ch != '\n'; infile.get(ch))
+				{
+					if (!infile.good()) throw Exception::FileRead(filename);
+					if (ch >= '0' && ch <= '9')
+					{
+						if (sameNumber)
+						{
+							scanNumber *= 10;
+							scanNumber += ch - '0';
+						}
+						else
+						{
+							sameNumber = true;
+							scanNumber = ch - '0';
+						}
+					}
+					if (ch == ',')
+					{
+						sameNumber = false;
+						b.childIndex.push_back(scanNumber);
+					}
+				}
+			}
 		}
+
+#pragma region Test model
+
+		class TestModel
+		{
+			std::vector<Vertex>& m_vertices;
+			std::vector<unsigned>& m_indices;
+			std::vector<VertexGroup>& m_vertexGroups;
+			std::vector<MaterialData>& m_materials;
+			std::vector<Bone>& m_bones;
+
+		private:
+			void MakeCube(mth::float3 p, mth::float3 s, unsigned bone);
+			void AddBones();
+
+		public:
+			TestModel(
+				std::vector<Vertex>& vertices,
+				std::vector<unsigned>& indices,
+				std::vector<VertexGroup>& vertexGroups,
+				std::vector<MaterialData>& materials,
+				std::vector<Bone>& bones);
+
+			void Create();
+		};
+
+		void TestModel::MakeCube(mth::float3 p, mth::float3 s, unsigned bone)
+		{
+			Vertex v;
+			v.boneIndices.x = bone;
+			v.boneWeights.x = 1.0f;
+			unsigned indexOffset = m_vertices.size();
+
+			v.position = mth::float3(p.x, p.y, p.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x + s.x, p.y, p.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x + s.x, p.y, p.z + s.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x, p.y, p.z + s.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x, p.y + s.y, p.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x + s.x, p.y + s.y, p.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x + s.x, p.y + s.y, p.z + s.z);
+			m_vertices.push_back(v);
+			v.position = mth::float3(p.x, p.y + s.y, p.z + s.z);
+			m_vertices.push_back(v);
+
+			unsigned indices[] = {
+				0,1,2,2,3,0,
+				4,7,6,6,5,4,
+				0,4,5,5,1,0,
+				1,5,6,6,2,1,
+				2,6,7,7,3,2,
+				0,3,7,7,4,0
+			};
+			for (unsigned i = 0; i < 36; i++)
+				m_indices.push_back(indices[i] + indexOffset);
+		}
+
+		void TestModel::AddBones()
+		{
+			Bone b;
+
+			b.parentIndex = -1;
+			b.name = L"Bone_0";
+			b.toBoneSpace = mth::float4x4::Identity();
+			b.transform = mth::float4x4::Identity();
+			b.ownIndex = 0;
+			b.childIndex.push_back(1);
+			m_bones.push_back(b);
+
+			b.parentIndex = 0;
+			b.name = L"Bone_1";
+			b.toBoneSpace = mth::float4x4::Identity();
+			b.transform = mth::float4x4::Identity();
+			b.ownIndex = 1;
+			b.childIndex.push_back(2);
+			m_bones.push_back(b);
+
+			b.parentIndex = 1;
+			b.name = L"Bone_2";
+			b.toBoneSpace = mth::float4x4::Identity();
+			b.transform = mth::float4x4::Identity();
+			b.ownIndex = 2;
+			m_bones.push_back(b);
+		}
+
+		TestModel::TestModel(
+			std::vector<Vertex>& vertices,
+			std::vector<unsigned>& indices,
+			std::vector<VertexGroup>& vertexGroups,
+			std::vector<MaterialData>& materials,
+			std::vector<Bone>& bones) :
+			m_vertices(vertices),
+			m_indices(indices),
+			m_vertexGroups(vertexGroups),
+			m_materials(materials),
+			m_bones(bones) {}
+
+		void TestModel::Create()
+		{
+			MakeCube(mth::float3(-0.5f, 0.0f, -0.5f), mth::float3(1.0f, 2.0f, 1.0f), 0);
+			MakeCube(mth::float3(-0.5f, 2.0f, -0.5f), mth::float3(2.0f, 1.0f, 1.0f), 1);
+			MakeCube(mth::float3(0.5f, 0.0f, -0.5f), mth::float3(1.0f, 2.0f, 1.0f), 2);
+
+			AddBones();
+
+			MaterialData mat;
+			mat.name = L"Material";
+			mat.diffuseColor = 1.0f;
+			mat.textureWeight = 1.0f;
+			mat.specularColor = 0.0f;
+			mat.specularPower = 1.0f;
+			m_materials.push_back(mat);
+
+			VertexGroup vg;
+			vg.materialIndex = 0;
+			vg.startIndex = 0;
+			vg.indexCount = m_indices.size();
+			m_vertexGroups.push_back(vg);
+		}
+
+		void ModelLoader::LoadTestModel()
+		{
+			TestModel(m_vertices, m_indices, m_vertexGroups, m_materials, m_bones).Create();
+			UVMap();
+			Triangularize();
+			CalculateNormals();
+			CalculateTangents();
+		}
+
+#pragma endregion
 
 #pragma region Assimp loader
 
-		void ModelLoader::LoadAssimp()
+		class AssimpLoader
 		{
-			std::string filename;
-			for (auto ch : m_folderName)
-				filename += (char)ch;
-			for (auto ch : m_bareFileName)
-				filename += (char)ch;
-			for (auto ch : m_extension)
-				filename += (char)ch;
-
-			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(filename.c_str(),
-				aiProcess_CalcTangentSpace |
-				aiProcess_JoinIdenticalVertices |
-				aiProcess_RemoveRedundantMaterials |
-				aiProcess_Triangulate |
-				aiProcess_SortByPType |
-				aiProcess_LimitBoneWeights);
-			if (scene == NULL)
+			struct MeshedBone
 			{
-				auto error = importer.GetErrorString();
-				throw std::exception(("Importing " + filename + " failed: " + error).c_str());
-			}
+				std::wstring name;
+				mth::float4x4 toBoneSpace;
+			};
 
-			m_materials.resize(scene->mNumMaterials);
-			for (unsigned m = 0; m < scene->mNumMaterials; m++)
+			std::vector<Vertex>& m_vertices;
+			std::vector<unsigned>& m_indices;
+			std::vector<VertexGroup>& m_vertexGroups;
+			std::vector<MaterialData>& m_materials;
+			std::vector<Bone>& m_bones;
+			std::map<std::wstring, mth::float4x4> m_boneOffsets;
+
+			const aiScene* m_scene;
+
+		private:
+			void StoreMaterials();
+			void CountVerticesIndices();
+			void StoreVerticesIndices();
+
+			aiNode* BaseNode();
+			void StoreBoneOffsets();
+			int StoreNode(aiNode* node, int parent);
+			void StoreNodeChildren(aiNode* node, int parent);
+			void StoreBones();
+
+		public:
+			AssimpLoader(
+				std::vector<Vertex>& vertices,
+				std::vector<unsigned>& indices,
+				std::vector<VertexGroup>& vertexGroups,
+				std::vector<MaterialData>& materials,
+				std::vector<Bone>& bones);
+
+			void Load(std::string& filename);
+		};
+
+		unsigned CountChildNodes(aiNode* node)
+		{
+			unsigned childCount = node->mNumChildren;
+			for (unsigned c = 0; c < node->mNumChildren; c++)
+				childCount += CountChildNodes(node->mChildren[c]);
+			return childCount;
+		};
+		void StoreAiString(std::wstring& dst, aiString& src)
+		{
+			dst.clear();
+			dst.reserve(src.length + 1);
+			for (unsigned i = 0; i < src.length; i++)
+				dst += static_cast<wchar_t>(src.data[i]);
+		}
+		std::wstring StoreAiString(aiString& src)
+		{
+			std::wstring dst;
+			StoreAiString(dst, src);
+			return dst;
+		}
+		mth::float4x4 StoreAiMatrix(aiMatrix4x4& mat)
+		{
+			mth::float4x4 out;
+			memcpy(&out, &mat, sizeof(out));
+			return out;
+		}
+
+		void AssimpLoader::StoreMaterials()
+		{
+			m_materials.resize(m_scene->mNumMaterials);
+			for (unsigned m = 0; m < m_scene->mNumMaterials; m++)
 			{
 				aiString str;
-				aiMaterial& mat = *scene->mMaterials[m];
+				aiMaterial& mat = *m_scene->mMaterials[m];
 
 				if (aiReturn_SUCCESS == mat.Get(AI_MATKEY_NAME, str))
 				{
@@ -368,32 +599,32 @@ namespace Converter
 				m_materials[m].specularColor = 0.0f;
 				m_materials[m].specularPower = 1.0f;
 			}
-
-			m_vertexGroups.resize(scene->mNumMeshes);
+		}
+		void AssimpLoader::CountVerticesIndices()
+		{
 			unsigned vertexCount = 0;
 			unsigned indexCount = 0;
-			unsigned boneCount = 0;
-			for (unsigned m = 0; m < scene->mNumMeshes; m++)
+			m_vertexGroups.resize(m_scene->mNumMeshes);
+			for (unsigned m = 0; m < m_scene->mNumMeshes; m++)
 			{
-				aiMesh* mesh = scene->mMeshes[m];
+				aiMesh* mesh = m_scene->mMeshes[m];
 				m_vertexGroups[m].startIndex = indexCount;
 				m_vertexGroups[m].materialIndex = mesh->mMaterialIndex;
-				vertexCount += scene->mMeshes[m]->mNumVertices;
-				for (unsigned i = 0; i < scene->mMeshes[m]->mNumFaces; i++)
-					indexCount += scene->mMeshes[m]->mFaces[i].mNumIndices;
+				vertexCount += m_scene->mMeshes[m]->mNumVertices;
+				for (unsigned i = 0; i < m_scene->mMeshes[m]->mNumFaces; i++)
+					indexCount += m_scene->mMeshes[m]->mFaces[i].mNumIndices;
 				m_vertexGroups[m].indexCount = indexCount - m_vertexGroups[m].startIndex;
-				boneCount += mesh->mNumBones;
 			}
 			m_vertices.resize(vertexCount);
 			m_indices.resize(indexCount);
-			m_bones.resize(boneCount);
-
-			vertexCount = 0;
-			indexCount = 0;
-			boneCount = 0;
-			for (unsigned m = 0; m < scene->mNumMeshes; m++)
+		}
+		void AssimpLoader::StoreVerticesIndices()
+		{
+			unsigned vertexCount = 0;
+			unsigned indexCount = 0;
+			for (unsigned m = 0; m < m_scene->mNumMeshes; m++)
 			{
-				aiMesh* mesh = scene->mMeshes[m];
+				aiMesh* mesh = m_scene->mMeshes[m];
 
 				for (unsigned v = 0; v < mesh->mNumVertices; v++)
 				{
@@ -401,7 +632,7 @@ namespace Converter
 					{
 						m_vertices[vertexCount + v].position.x = mesh->mVertices[v].x;
 						m_vertices[vertexCount + v].position.y = mesh->mVertices[v].y;
-						m_vertices[vertexCount + v].position.z = -mesh->mVertices[v].z;
+						m_vertices[vertexCount + v].position.z = mesh->mVertices[v].z;
 					}
 					if (mesh->HasTextureCoords(0))
 					{
@@ -412,13 +643,13 @@ namespace Converter
 					{
 						m_vertices[vertexCount + v].normal.x = mesh->mNormals[v].x;
 						m_vertices[vertexCount + v].normal.y = mesh->mNormals[v].y;
-						m_vertices[vertexCount + v].normal.z = -mesh->mNormals[v].z;
+						m_vertices[vertexCount + v].normal.z = mesh->mNormals[v].z;
 					}
 					if (mesh->HasTangentsAndBitangents())
 					{
 						m_vertices[vertexCount + v].tangent.x = mesh->mTangents[v].x;
 						m_vertices[vertexCount + v].tangent.y = mesh->mTangents[v].y;
-						m_vertices[vertexCount + v].tangent.z = -mesh->mTangents[v].z;
+						m_vertices[vertexCount + v].tangent.z = mesh->mTangents[v].z;
 					}
 				}
 
@@ -427,31 +658,185 @@ namespace Converter
 					for (unsigned i = 2; i < mesh->mFaces[f].mNumIndices; i++)
 					{
 						m_indices[indexCount++] = mesh->mFaces[f].mIndices[0] + vertexCount;
-						m_indices[indexCount++] = mesh->mFaces[f].mIndices[i] + vertexCount;
 						m_indices[indexCount++] = mesh->mFaces[f].mIndices[i - 1] + vertexCount;
+						m_indices[indexCount++] = mesh->mFaces[f].mIndices[i] + vertexCount;
 					}
 				}
+				vertexCount += mesh->mNumVertices;
+			}
+		}
 
-				//std::vector<std::vector<float>> boneWeights(m_vertices.size());
+		aiNode* FindNode(aiNode* node, const char* name)
+		{
+			if (std::strcmp(node->mName.C_Str(), name) == 0)
+				return node;
+			for (unsigned i = 0; i < node->mNumChildren; i++)
+				if (aiNode* ret = FindNode(node->mChildren[i], name))
+					return ret;
+			return nullptr;
+		}
+		aiNode* AssimpLoader::BaseNode()
+		{
+			//return m_scene->mRootNode->mChildren[0]->mChildren[0];
+			//aiNode* node = FindNode(m_scene->mRootNode, "Armature");
+			aiNode* node = m_scene->mRootNode;
+			return node ? node->mNumChildren ? node->mChildren[0] : node : m_scene->mRootNode;
+		}
+		void AssimpLoader::StoreBoneOffsets()
+		{
+			for (unsigned m = 0; m < m_scene->mNumMeshes; m++)
+			{
+				aiMesh* mesh = m_scene->mMeshes[m];
 				for (unsigned b = 0; b < mesh->mNumBones; b++)
 				{
-					auto& bone = *mesh->mBones[b];
-					m_bones[boneCount + b].name.reserve(bone.mName.length + 1);
-					for (int i = 0; i < bone.mName.length; i++)
-						m_bones[boneCount + b].name += bone.mName.data[i];
-					auto matrix = bone.mOffsetMatrix;
-					memcpy(&m_bones[boneCount + b].offset, &matrix, sizeof(matrix));
-					for (unsigned w = 0; w < bone.mNumWeights; w++)
+					auto& bone_ai = *mesh->mBones[b];
+					m_boneOffsets[StoreAiString(bone_ai.mName)] = StoreAiMatrix(bone_ai.mOffsetMatrix);
+				}
+			}
+		}
+		int AssimpLoader::StoreNode(aiNode* node, int parent)
+		{
+			Bone b;
+			StoreAiString(b.name, node->mName);
+			b.parentIndex = parent;
+			b.transform = StoreAiMatrix(node->mTransformation);
+			b.offset.x = b.transform(0, 3);
+			b.offset.y = b.transform(1, 3);
+			b.offset.z = b.transform(2, 3);
+			b.rotation = static_cast<mth::float3x3>(b.transform).ToRotationAngles();
+			b.transform = mth::float4x4::RotationTranslation(b.rotation, b.offset);
+
+			auto offset = m_boneOffsets.find(b.name);
+			if (offset != m_boneOffsets.end())
+			{
+				b.toBoneSpace = offset->second;
+				//if (b.parentIndex >= 0) b.toBoneSpace = m_bones[b.parentIndex].toBoneSpace * b.toBoneSpace;
+			}
+			else
+			{
+				b.toBoneSpace = mth::float4x4::Identity();
+			}
+
+			b.ownIndex = m_bones.size();
+			m_bones.push_back(b);
+			return b.ownIndex;
+		}
+		void AssimpLoader::StoreNodeChildren(aiNode* node, int parent)
+		{
+			for (unsigned c = 0; c < node->mNumChildren; c++)
+			{
+				int index = StoreNode(node, parent);
+				if (parent >= 0)
+					m_bones[parent].childIndex.push_back(index);
+				StoreNodeChildren(node->mChildren[c], index);
+			}
+		}
+
+		void AssimpLoader::StoreBones()
+		{
+			aiNode* baseBone = BaseNode();
+			if (baseBone->mNumChildren) baseBone = baseBone->mChildren[0];
+
+			StoreBoneOffsets();
+			StoreNodeChildren(baseBone, -1);
+
+			unsigned boneCount = 0;
+			unsigned vertexCount = 0;
+
+			for (unsigned m = 0; m < m_scene->mNumMeshes; m++)
+			{
+				aiMesh* mesh = m_scene->mMeshes[m];
+
+				for (unsigned b = 0; b < mesh->mNumBones; b++)
+				{
+					auto& bone_ai = *mesh->mBones[b];
+					unsigned boneIndex = 0;
+					std::wstring boneName = StoreAiString(bone_ai.mName);
+					for (Bone& b : m_bones)
 					{
-						Vertex& vert = m_vertices[vertexCount + bone.mWeights[w].mVertexId];
-						unsigned index = vert.boneWeights(0);
-						m_vertices[vertexCount + bone.mWeights[w].mVertexId];
+						if (b.name == boneName)
+						{
+							boneIndex = b.ownIndex;
+							break;
+						}
+					}
+					for (unsigned w = 0; w < bone_ai.mNumWeights; w++)
+					{
+						Vertex& vert = m_vertices[vertexCount + bone_ai.mWeights[w].mVertexId];
+						unsigned index = 3;
+						if (vert.boneWeights.x == 0.0f)
+							index = 0;
+						else if (vert.boneWeights.y == 0.0f)
+							index = 1;
+						else if (vert.boneWeights.z == 0.0f)
+							index = 2;
+						vert.boneIndices(index) = boneIndex;
+						if (index < 3)
+							vert.boneWeights(index) = bone_ai.mWeights[w].mWeight;
 					}
 				}
 				vertexCount += mesh->mNumVertices;
 				boneCount += mesh->mNumBones;
 			}
+
+			if (boneCount == 0)
+			{
+				Bone bone;
+				bone.name = L"Bone";
+				bone.parentIndex = -1;
+				bone.ownIndex = 0;
+				bone.toBoneSpace = mth::float4x4::Identity();
+				bone.transform = mth::float4x4::Identity();
+				m_bones.push_back(bone);
+			}
 		}
+		AssimpLoader::AssimpLoader(
+			std::vector<Vertex>& vertices,
+			std::vector<unsigned>& indices,
+			std::vector<VertexGroup>& vertexGroups,
+			std::vector<MaterialData>& materials,
+			std::vector<Bone>& bones) :
+			m_vertices(vertices),
+			m_indices(indices),
+			m_vertexGroups(vertexGroups),
+			m_materials(materials),
+			m_bones(bones),
+			m_scene(nullptr) {}
+		void AssimpLoader::Load(std::string& filename)
+		{
+			Assimp::Importer importer;
+			m_scene = importer.ReadFile(filename.c_str(),
+				aiProcess_CalcTangentSpace |
+				//aiProcess_JoinIdenticalVertices |
+				aiProcess_RemoveRedundantMaterials |
+				aiProcess_Triangulate |
+				aiProcess_SortByPType |
+				aiProcess_LimitBoneWeights);
+			if (m_scene == NULL)
+			{
+				auto error = importer.GetErrorString();
+				throw std::exception(("Importing " + filename + " failed: " + error).c_str());
+			}
+			StoreMaterials();
+			CountVerticesIndices();
+			StoreVerticesIndices();
+			StoreBones();
+		}
+
+		void ModelLoader::LoadAssimp()
+		{
+			std::string filename;
+			for (auto ch : m_folderName)
+				filename += (char)ch;
+			for (auto ch : m_bareFileName)
+				filename += (char)ch;
+			for (auto ch : m_extension)
+				filename += (char)ch;
+
+			AssimpLoader(m_vertices, m_indices, m_vertexGroups, m_materials, m_bones).Load(filename);
+		}
+
+#pragma endregion
 
 		Texture::P ModelLoader::FetchTexture(std::wstring& filename, bool image)
 		{
@@ -464,8 +849,6 @@ namespace Converter
 			}
 			return image ? (m_loadedTextures[L"defaulttexture"].texture) : (m_loadedTextures[L"defaultnormal"].texture);
 		}
-
-#pragma endregion
 
 		ModelLoader::ModelLoader() : m_visible(true) {}
 		ModelLoader::ModelLoader(const wchar_t* filename) : m_visible(true)
@@ -486,6 +869,8 @@ namespace Converter
 				LoadBTDM(filename);
 			else if (m_extension == L".ttdm")
 				LoadTTDM(filename);
+			else if (m_extension == L".test")
+				LoadTestModel();
 			else
 				LoadAssimp();
 
@@ -537,21 +922,21 @@ namespace Converter
 
 				outfile.write(reinterpret_cast<char*>(&materialCount), sizeof(materialCount));
 
-				outfile.write(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0])* vertexCount);
+				outfile.write(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0]) * vertexCount);
 
-				outfile.write(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0])* indexCount);
+				outfile.write(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0]) * indexCount);
 
-				outfile.write(reinterpret_cast<char*>(m_vertexGroups.data()), sizeof(m_vertexGroups[0])* groupCount);
+				outfile.write(reinterpret_cast<char*>(m_vertexGroups.data()), sizeof(m_vertexGroups[0]) * groupCount);
 
 				for (unsigned i = 0; i < materialCount; i++)
 				{
 					stringSize = m_materials[i].texture.length();
 					outfile.write(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
-					outfile.write(reinterpret_cast<const char*>(m_materials[i].texture.data()), sizeof(wchar_t)* (stringSize + 1));
+					outfile.write(reinterpret_cast<const char*>(m_materials[i].texture.data()), sizeof(wchar_t) * (stringSize + 1));
 
 					stringSize = m_materials[i].normalmap.length();
 					outfile.write(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
-					outfile.write(reinterpret_cast<const char*>(m_materials[i].normalmap.data()), sizeof(wchar_t)* (stringSize + 1));
+					outfile.write(reinterpret_cast<const char*>(m_materials[i].normalmap.data()), sizeof(wchar_t) * (stringSize + 1));
 				}
 			}
 		}
@@ -630,6 +1015,7 @@ namespace Converter
 			ss << L"Index count: " << m_indices.size() << '\n';
 			ss << L"Group count: " << m_vertexGroups.size() << '\n';
 			ss << L"Material count: " << m_materials.size() << '\n';
+			ss << L"Bone count: " << m_bones.size() << '\n';
 
 			ss << L"\nVertices:\n";
 			for (Vertex& v : m_vertices)
@@ -668,6 +1054,25 @@ namespace Converter
 				ss << L"Texture weight: " << m.textureWeight << '\n';
 				ss << L"Specular color: " << m.specularColor << '\n';
 				ss << L"Specular power: " << m.specularPower << '\n';
+			}
+
+			ss << L"\n\nBones:\n";
+			for (Bone& b : m_bones)
+			{
+				ss << L"\nName: " << b.name << '\n';
+				ss << L"To bone translate: " << mth::float3(b.toBoneSpace(0, 3), b.toBoneSpace(1, 3), b.toBoneSpace(2, 3)) << '\n';
+				ss << L"To bone rotate: " << static_cast<mth::float3x3>(b.toBoneSpace).ToRotationAngles() << '\n';
+				ss << L"Transform: " << b.offset << '\n';
+				ss << L"Rotation: " << b.rotation << '\n';
+				ss << L"Parent: " << b.parentIndex << '\n';
+				ss << L"Children: ";
+				if (!b.childIndex.empty())
+				{
+					ss << b.childIndex[0];
+					for (size_t i = 1; i < b.childIndex.size(); i++)
+						ss << ", " << b.childIndex[i];
+				}
+				ss << '\n';
 			}
 
 			return ss.str();
@@ -742,7 +1147,9 @@ namespace Converter
 				mth::float3 v2 = m_vertices[m_indices[i + 2]].position - vertex;
 				mth::float2 t1 = m_vertices[m_indices[i + 1]].texcoord - texcoord;
 				mth::float2 t2 = m_vertices[m_indices[i + 2]].texcoord - texcoord;
-				float den = 1.0f / (t1.x * t2.y - t1.y * t2.x);
+				float den = (t1.x * t2.y - t1.y * t2.x);
+				if (den != 0.0f)
+					den = 1.0f / den;
 				m_vertices[m_indices[i + 0]].tangent += (t1.x * v1 - t1.y * v2) * den;
 				m_vertices[m_indices[i + 1]].tangent += (t1.x * v1 - t1.y * v2) * den;
 				m_vertices[m_indices[i + 2]].tangent += (t1.x * v1 - t1.y * v2) * den;
@@ -755,8 +1162,8 @@ namespace Converter
 			std::vector<Vertex> vertices(m_indices.size());
 			for (size_t i = 0; i < m_indices.size(); i++)
 				vertices[i] = m_vertices[m_indices[i]];
-			m_vertices.swap(vertices);
-			for (unsigned i = 0; i < m_indices[i]; i++)
+			m_vertices = std::move(vertices);
+			for (unsigned i = 0; i < m_indices.size(); i++)
 				m_indices[i] = i;
 		}
 		void ModelLoader::RenderMesh(Graphics& graphics)

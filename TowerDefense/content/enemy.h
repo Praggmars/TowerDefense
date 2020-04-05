@@ -2,7 +2,7 @@
 
 #include "graphics/entity.h"
 #include "contentcommon.h"
-#include "algorithm/pathfinder.h"
+#include "algorithm/pathfinderdiag.h"
 
 namespace TowerDefense
 {
@@ -15,9 +15,8 @@ namespace TowerDefense
 		public:
 			SMART_PTR(Enemy)
 		private:
-			alg::PathFinder m_pathFinder;
+			alg::PathFinderDiag m_pathFinder;
 			float m_speed;
-			alg::Point m_current;
 			unsigned m_pathProgress;
 			unsigned m_health;
 
@@ -27,14 +26,13 @@ namespace TowerDefense
 			static Enemy::U CreateU(GameResources& resources);
 
 			void Update(float deltaTime, Level& level);
-			void StartPath(alg::Point start, alg::Point* end, unsigned endCount);
-			void RestartPath(alg::Point* end, unsigned endCount);
+			void StartPath();
 			bool Finished();
 
 			void Damage(unsigned dmg);
 			bool Alive();
 
-			inline alg::PathFinder& PathFinder() { return m_pathFinder; }
+			inline alg::PathFinderDiag& PathFinder() { return m_pathFinder; }
 		};
 	}
 }

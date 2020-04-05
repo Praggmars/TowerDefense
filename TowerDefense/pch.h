@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 #include <string>
 #include <collection.h>
 #include <ppltasks.h>

@@ -2,7 +2,7 @@
 
 #include "graphics/entity.h"
 #include "contentcommon.h"
-#include "algorithm/pathfinder.h"
+#include "algorithm/pathfindergrid.h"
 
 namespace TowerDefense
 {
@@ -20,6 +20,9 @@ namespace TowerDefense
 			float m_timeToShoot;
 			float m_reloadTime;
 			float m_range;
+
+		private:
+			virtual void Face(mth::Positionf& target);
 
 		public:
 			Turret(GameResources::GameModel& gameModel);

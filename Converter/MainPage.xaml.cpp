@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "MainPage.xaml.h"
 #include <ppltasks.h>
+#include <sstream>
 using namespace concurrency;
 using namespace Windows::Devices::Enumeration;
 
@@ -21,7 +22,7 @@ using namespace Windows::UI::Xaml::Navigation;
 
 namespace Converter
 {
-	MainPage::MainPage():
+	MainPage::MainPage() :
 		m_shadowMapSize(2048.0f)
 	{
 		InitializeComponent();
@@ -86,11 +87,24 @@ namespace Converter
 
 	void MainPage::LoadModel(const wchar_t* filename)
 	{
-		std::unique_ptr<gfx::ModelLoader> ml = std::make_unique<gfx::ModelLoader>();
-		ml->LoadModel(*m_graphics, filename);
-		m_modelList->Items->Append(ref new String(ml->ModelName().c_str()));
-		m_modelLoaders.push_back(std::move(ml));
-		m_modelList->SelectedIndex = m_modelLoaders.size() - 1;
+		try
+		{
+			std::unique_ptr<gfx::ModelLoader> ml = std::make_unique<gfx::ModelLoader>();
+			ml->LoadModel(*m_graphics, filename);
+			m_modelList->Items->Append(ref new String(ml->ModelName().c_str()));
+			m_modelLoaders.push_back(std::move(ml));
+			m_modelList->SelectedIndex = m_modelLoaders.size() - 1;
+		}
+		catch (std::exception& ex)
+		{
+			std::string error = ex.what();
+			std::wstring werror(error.begin(), error.end());
+			Windows::UI::Popups::MessageDialog(ref new String(werror.c_str(), werror.length()));
+		}
+		catch (Exception& ex)
+		{
+			Windows::UI::Popups::MessageDialog(ref new String(ex.What()));
+		}
 	}
 
 	void MainPage::FillMaterialControls()
@@ -160,6 +174,98 @@ namespace Converter
 		}
 	}
 
+	void MainPage::FillBoneControls()
+	{
+		int modelIndex = m_modelList->SelectedIndex;
+		int boneIndex = m_boneList->SelectedIndex;
+		if (modelIndex < 0 || boneIndex < 0)
+		{
+			m_toBoneTxTextBox->Text = "";
+			m_toBoneTyTextBox->Text = "";
+			m_toBoneTzTextBox->Text = "";
+			m_toBoneRxSlider->Value = 0.0;
+			m_toBoneRySlider->Value = 0.0;
+			m_toBoneRzSlider->Value = 0.0;
+
+			m_transformTxTextBox->Text = "";
+			m_transformTyTextBox->Text = "";
+			m_transformTzTextBox->Text = "";
+			m_transformRxSlider->Value = 0.0;
+			m_transformRySlider->Value = 0.0;
+			m_transformRzSlider->Value = 0.0;
+		}
+		else
+		{
+			auto& boneData = m_modelLoaders[modelIndex]->Bones(boneIndex);
+			mth::float3 toBoneT = mth::float3(boneData.toBoneSpace(0, 3), boneData.toBoneSpace(1, 3), boneData.toBoneSpace(2, 3));
+			mth::float3 toBoneR = static_cast<mth::float3x3>(boneData.toBoneSpace).ToRotationAngles();
+			String^ toBoneTx = ref new String(std::to_wstring(toBoneT.x).c_str());
+			String^ toBoneTy = ref new String(std::to_wstring(toBoneT.y).c_str());
+			String^ toBoneTz = ref new String(std::to_wstring(toBoneT.z).c_str());
+			double toBoneRx = toBoneR.x;
+			double toBoneRy = toBoneR.y;
+			double toBoneRz = toBoneR.z;
+
+			String^ transformTx = ref new String(std::to_wstring(boneData.offset.x).c_str());
+			String^ transformTy = ref new String(std::to_wstring(boneData.offset.y).c_str());
+			String^ transformTz = ref new String(std::to_wstring(boneData.offset.z).c_str());
+			double transformRx = boneData.rotation.x;
+			double transformRy = boneData.rotation.y;
+			double transformRz = boneData.rotation.z;
+
+			m_toBoneTxTextBox->Text = toBoneTx;
+			m_toBoneTyTextBox->Text = toBoneTy;
+			m_toBoneTzTextBox->Text = toBoneTz;
+			m_toBoneRxSlider->Value = toBoneRx;
+			m_toBoneRySlider->Value = toBoneRy;
+			m_toBoneRzSlider->Value = toBoneRz;
+
+			m_transformTxTextBox->Text = transformTx;
+			m_transformTyTextBox->Text = transformTy;
+			m_transformTzTextBox->Text = transformTz;
+			m_transformRxSlider->Value = transformRx;
+			m_transformRySlider->Value = transformRy;
+			m_transformRzSlider->Value = transformRz;
+		}
+	}
+
+	void MainPage::ReadBoneControls()
+	{
+		int modelIndex = m_modelList->SelectedIndex;
+		int boneIndex = m_boneList->SelectedIndex;
+		if (modelIndex >= 0 && boneIndex >= 0)
+		{
+			auto& boneData = m_modelLoaders[modelIndex]->Bones(boneIndex);
+			{
+				mth::float3 toBoneT;
+				mth::float3 toBoneR;
+				std::wstringstream x(m_toBoneTxTextBox->Text->Data());
+				std::wstringstream y(m_toBoneTyTextBox->Text->Data());
+				std::wstringstream z(m_toBoneTzTextBox->Text->Data());
+				x >> toBoneT.x;
+				y >> toBoneT.y;
+				z >> toBoneT.z;
+				toBoneR.x = static_cast<float>(m_toBoneRxSlider->Value);
+				toBoneR.y = static_cast<float>(m_toBoneRySlider->Value);
+				toBoneR.z = static_cast<float>(m_toBoneRzSlider->Value);
+				boneData.toBoneSpace = mth::float4x4::RotationTranslation(toBoneR, toBoneT);
+			}
+			{
+				std::wstringstream x(m_transformTxTextBox->Text->Data());
+				std::wstringstream y(m_transformTyTextBox->Text->Data());
+				std::wstringstream z(m_transformTzTextBox->Text->Data());
+				x >> boneData.offset.x;
+				y >> boneData.offset.y;
+				z >> boneData.offset.z;
+				boneData.rotation.x = static_cast<float>(m_transformRxSlider->Value);
+				boneData.rotation.y = static_cast<float>(m_transformRySlider->Value);
+				boneData.rotation.z = static_cast<float>(m_transformRzSlider->Value);
+				boneData.transform = mth::float4x4::RotationTranslation(boneData.rotation, boneData.offset);
+			}
+			Draw();
+		}
+	}
+
 	void MainPage::Draw()
 	{
 		gfx::CB_MatrixBuffer matrixBuffer;
@@ -179,9 +285,7 @@ namespace Converter
 		m_shadowMap->SetAsRenderTarget(*m_graphics);
 		m_shadowMap->WriteBuffer(*m_graphics, &lightMatrix);
 		for (auto& ml : m_modelLoaders)
-		{
 			ml->RenderMesh(*m_graphics);
-		}
 
 		m_ssao->SetAsRenderTarget(*m_graphics, m_camera);
 		for (auto& ml : m_modelLoaders)
@@ -197,7 +301,16 @@ namespace Converter
 
 		m_graphics->Clear(0.2f, 0.3f, 0.5f);
 		for (auto& ml : m_modelLoaders)
+		{
+			ml->Bones(0).boneMatrix = ml->Bones(0).transform;
+			for (unsigned i = 1; i < ml->BoneCount(); i++)
+				ml->Bones(i).boneMatrix = ml->Bones(ml->Bones(i).parentIndex).boneMatrix * ml->Bones(i).transform;
+			std::vector<mth::float4x4> bones(ml->BoneCount());
+			for (unsigned i = 0; i < ml->BoneCount(); i++)
+				bones[i] = ml->Bones(i).boneMatrix * ml->Bones(i).toBoneSpace;
+			m_graphics->WriteBoneBuffer(bones.data(), bones.size());
 			ml->RenderModel(*m_graphics);
+		}
 		m_graphics->Present();
 	}
 
@@ -307,4 +420,32 @@ namespace Converter
 	{
 		ReadMaterialControls();
 	}
+
+	void MainPage::BoneList_DropDownOpened(Platform::Object^ sender, Platform::Object^ e)
+	{
+		m_boneList->Items->Clear();
+		int modelIndex = m_modelList->SelectedIndex;
+		if (modelIndex < 0) return;
+		gfx::ModelLoader& ml = *m_modelLoaders[modelIndex];
+		for (unsigned i = 0; i < ml.BoneCount(); i++)
+		{
+			auto& b = ml.Bones(i);
+			m_boneList->Items->Append(ref new String(b.name.c_str(), b.name.length()));
+		}
+	}
+
+	void MainPage::BoneList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+	{
+		FillBoneControls();
+	}
+	void MainPage::BoneData_TextChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e)
+	{
+		ReadBoneControls();
+	}
+	void MainPage::BoneData_ValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e)
+	{
+		ReadBoneControls();
+	}
 }
+
+

@@ -8,7 +8,7 @@ namespace TowerDefense
 		Enemy::Enemy(GameResources& resources) :
 			GameObject(resources.enemy),
 			m_pathFinder(),
-			m_speed(20.0f),
+			m_speed(2.0f),
 			m_pathProgress(0),
 			m_health(100) {}
 		Enemy::P Enemy::CreateP(GameResources& resources)
@@ -21,9 +21,9 @@ namespace TowerDefense
 		}
 		void Enemy::Update(float deltaTime, Level& level)
 		{
-			while (m_pathFinder.PathLength() > -1 && static_cast<int>(m_pathProgress) < m_pathFinder.PathLength() && deltaTime > 0.0f)
+			while (m_pathProgress < m_pathFinder.Path().size() && deltaTime > 0.0f)
 			{
-				mth::float2 nextPoint = level.EnemyCoordTransform(m_pathFinder.Path()[m_pathProgress]);
+				mth::float2 nextPoint = level.MapToWorld(m_pathFinder.Path()[m_pathProgress]->position);
 				mth::float3 to(nextPoint.x, position.y, nextPoint.y);
 				mth::float3 dir = to - position;
 				float distance = dir.Length();
@@ -35,24 +35,18 @@ namespace TowerDefense
 				position = to;
 				deltaTime -= distance / m_speed;
 				m_pathProgress++;
-				m_current = level.EnemyCoordTransform(nextPoint);
 			}
 		}
-		void Enemy::StartPath(alg::Point start, alg::Point* end, unsigned endCount)
+		void Enemy::StartPath()
 		{
-			m_current = start;
-			RestartPath(end, endCount);
-		}
-		void Enemy::RestartPath(alg::Point* end, unsigned endCount)
-		{
-			m_pathProgress = 1;
-			m_pathFinder.FindPath(m_current, end, endCount);
+			m_pathProgress = 0;
+			m_pathFinder.ReplaceStart(position.x, position.z);
+			m_pathFinder.FindPath();
 		}
 		bool Enemy::Finished()
 		{
-			if (m_pathFinder.PathLength() < 0)
-				return false;
-			return static_cast<int>(m_pathProgress) >= m_pathFinder.PathLength();
+			if (m_pathFinder.Path().empty()) return false;
+			return m_pathProgress >= m_pathFinder.Path().size();
 		}
 		void Enemy::Damage(unsigned dmg)
 		{

@@ -64,6 +64,8 @@ namespace Converter
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_textureSampler;
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowSampler;
 
+			Microsoft::WRL::ComPtr<ID3D11Buffer> m_boneBuffer;
+
 			Concurrency::critical_section m_lock;
 
 		private:
@@ -97,6 +99,7 @@ namespace Converter
 			void WriteVSMatrixBuffer(void* data);
 			void WritePSLightBuffer(void* data);
 			void WritePSMaterialBuffer(void* data);
+			void WriteBoneBuffer(mth::float4x4 bones[], unsigned count);
 
 			void SetSwapChainPanel(Windows::UI::Xaml::Controls::SwapChainPanel^ panel);
 			void Resize(unsigned width, unsigned height);

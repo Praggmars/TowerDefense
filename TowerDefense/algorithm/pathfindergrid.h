@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "common/array2d.hpp"
+#include "math/linalg.hpp"
 
 namespace TowerDefense
 {
@@ -12,7 +13,22 @@ namespace TowerDefense
 			int x, y;
 		};
 
-		class PathFinder
+		inline mth::float2 ToFloat2(Point p)
+		{
+			return mth::float2(
+				static_cast<float>(p.x),
+				static_cast<float>(p.y)
+				);
+		}
+		inline Point ToPoint(mth::float2 p)
+		{
+			return Point{
+				static_cast<int>(p.x),
+				static_cast<int>(p.y)
+			};
+		}
+
+		class PathFinderGrid
 		{
 			struct Node
 			{
@@ -37,8 +53,8 @@ namespace TowerDefense
 			void RecontsructPath();
 
 		public:
-			PathFinder();
-			PathFinder(unsigned width, unsigned height);
+			PathFinderGrid();
+			PathFinderGrid(unsigned width, unsigned height);
 
 			void Resize(unsigned width, unsigned height);
 

@@ -60,6 +60,20 @@ namespace Converter
         private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseBlueSlider;
         private: ::Windows::UI::Xaml::Controls::Slider^ m_diffuseAlphaSlider;
         private: ::Windows::UI::Xaml::Controls::CheckBox^ m_modelShownCheckBox;
+        private: ::Windows::UI::Xaml::Controls::StackPanel^ m_bonePanel;
+        private: ::Windows::UI::Xaml::Controls::ComboBox^ m_boneList;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_toBoneTxTextBox;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_toBoneTyTextBox;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_toBoneTzTextBox;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_toBoneRxSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_toBoneRySlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_toBoneRzSlider;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_transformTxTextBox;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_transformTyTextBox;
+        private: ::Windows::UI::Xaml::Controls::TextBox^ m_transformTzTextBox;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_transformRxSlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_transformRySlider;
+        private: ::Windows::UI::Xaml::Controls::Slider^ m_transformRzSlider;
     };
 }
 

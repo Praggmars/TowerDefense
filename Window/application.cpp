@@ -59,8 +59,8 @@ void Application::PaintConnections(HDC hdc)
 	{
 		for (auto& n : nt->neighbors)
 		{
-			MoveToEx(hdc, nt->x * m_squareSize + m_squareSize / 2, nt->y * m_squareSize + m_squareSize / 2, nullptr);
-			LineTo(hdc, n.neighbor->x * m_squareSize + m_squareSize / 2, n.neighbor->y * m_squareSize + m_squareSize / 2);
+			MoveToEx(hdc, nt->p.x * m_squareSize, nt->p.y * m_squareSize, nullptr);
+			LineTo(hdc, n.neighbor->p.x * m_squareSize, n.neighbor->p.y * m_squareSize);
 		}
 	}
 }
@@ -71,9 +71,9 @@ void Application::PaintPath(HDC hdc)
 	if (path.size() > 1)
 	{
 		SelectObject(hdc, m_redPen);
-		MoveToEx(hdc, path[0]->x * m_squareSize + m_squareSize / 2, path[0]->y * m_squareSize + m_squareSize / 2, nullptr);
+		MoveToEx(hdc, path[0]->p.x * m_squareSize, path[0]->p.y * m_squareSize, nullptr);
 		for (size_t i = 1; i < path.size(); i++)
-			LineTo(hdc, path[i]->x * m_squareSize + m_squareSize / 2, path[i]->y * m_squareSize + m_squareSize / 2);
+			LineTo(hdc, path[i]->p.x * m_squareSize, path[i]->p.y * m_squareSize);
 	}
 }
 
@@ -162,11 +162,15 @@ LRESULT Application::MessageHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 		PostQuitMessage(0);
 		return 0;
 	case WM_LBUTTONDOWN:
-		if (m_pathFinder.ToggleWall(LOWORD(lparam) / m_squareSize, HIWORD(lparam) / m_squareSize))
+		if (m_pathFinder.PutWall(LOWORD(lparam) / m_squareSize, HIWORD(lparam) / m_squareSize))
 			InvalidateRect(m_window, NULL, FALSE);
 		return 0;
 	case WM_RBUTTONDOWN:
-		if (m_pathFinder.ReplaceStart(LOWORD(lparam) / m_squareSize, HIWORD(lparam) / m_squareSize))
+		if (m_pathFinder.RemoveWall(LOWORD(lparam) / m_squareSize, HIWORD(lparam) / m_squareSize))
+			InvalidateRect(m_window, NULL, FALSE);
+		return 0;
+	case WM_MOUSEMOVE:
+		if (m_pathFinder.ReplaceStart(float(LOWORD(lparam)) / float(m_squareSize), float(HIWORD(lparam)) / float(m_squareSize)))
 			InvalidateRect(m_window, NULL, FALSE);
 		return 0;
 	case WM_PAINT:

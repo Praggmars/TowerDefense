@@ -226,13 +226,61 @@ bool ScanStream(std::wistream& s, const wchar_t* expected)
 	return false;
 }
 
+void Swap(int& a, int& b)
+{
+	int tmp = a;
+	a = b;
+	b = tmp;
+}
+void PrintArray(int* a, int size)
+{
+	for (int i = 0; i < size; i++)
+		std::cout << a[i] << ' ';
+	std::cout << std::endl;
+}
+void Shuffle(int* a, int size)
+{
+	for (int i = 0; i < size; i++)
+		Swap(a[i], a[rand() % size]);
+}
+void QuickSort(int* a, int size)
+{
+	int pivot = a[size / 2];
+	int i = 0;
+	int  j = size - 1;
+	while (i <= j)
+	{
+		while (a[i] < pivot) i++;
+		while (a[j] > pivot) j--;
+		if (i <= j)
+		{
+			Swap(a[i], a[j]);
+			i++;
+			j--;
+		}
+	}
+	if (j > 0)
+		QuickSort(a, i);
+	if (size - i > 0)
+		QuickSort(a + i, size - i);
+}
+void ShufflePrintSortPrint(int* a, int size)
+{
+	Shuffle(a, size);
+	PrintArray(a, size);
+	QuickSort(a, size);
+	PrintArray(a, size);
+	std::cout << std::endl;
+}
+
 int main()
 {
-	std::wstringstream ss;
-	const wchar_t* str = L"asdfgh";
-	ss << str;
-	wchar_t ch;
-	for (ss >> ch; std::isspace(ch); ss >> ch);
+	int a[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int size = sizeof(a) / sizeof(*a);
+
+	ShufflePrintSortPrint(a, size);
+	ShufflePrintSortPrint(a, size);
+	ShufflePrintSortPrint(a, size);
 
 	std::cin.get();
 	return 0;

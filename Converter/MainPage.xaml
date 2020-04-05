@@ -11,11 +11,34 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="256"/>
+            <ColumnDefinition Width="256"/>
         </Grid.ColumnDefinitions>
         <SwapChainPanel Grid.Column="0" x:Name="m_swapChainPanel" 
                         AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop"
                         PointerPressed="OnPointerPressed" PointerMoved="OnPointerMoved"
                         PointerWheelChanged="OnPointerWheelChanged"/>
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Visible">
+            <StackPanel x:Name="m_bonePanel" Background="#FFDDEEFF" Padding="0,0,10,0">
+                <TextBlock Text="Bone" FontSize="20" Margin="10,10,10,0"/>
+                <ComboBox x:Name="m_boneList" HorizontalAlignment="Stretch" Margin="10,10,10,10" DropDownOpened="BoneList_DropDownOpened"  SelectionChanged="BoneList_SelectionChanged"/>
+                <TextBlock Text="To bone translate" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
+                <TextBox x:Name="m_toBoneTxTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBox x:Name="m_toBoneTyTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBox x:Name="m_toBoneTzTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBlock Text="To bone rotate" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
+                <Slider x:Name="m_toBoneRxSlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+                <Slider x:Name="m_toBoneRySlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+                <Slider x:Name="m_toBoneRzSlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+                <TextBlock Text="Transform translate" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
+                <TextBox x:Name="m_transformTxTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBox x:Name="m_transformTyTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBox x:Name="m_transformTzTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,10,10,10" TextChanged="BoneData_TextChanged"/>
+                <TextBlock Text="Transform rotate" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,10,0"/>
+                <Slider x:Name="m_transformRxSlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+                <Slider x:Name="m_transformRySlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+                <Slider x:Name="m_transformRzSlider" Margin="10,10,10,10" Minimum="-3.15" Maximum="3.15" StepFrequency="0.01" ValueChanged="BoneData_ValueChanged"/>
+            </StackPanel>
+        </ScrollViewer>
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Visible">
             <StackPanel x:Name="m_menuPanel" Background="#FFFFEEDD" Padding="0,0,10,0">
                 <TextBlock Text="Model" FontSize="20" Margin="10,10,10,0"/>

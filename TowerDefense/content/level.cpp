@@ -42,13 +42,13 @@ namespace TowerDefense
 					iter++;
 			}
 		}
-		std::optional<alg::Point> Level::PointedArea(mth::float3 origin, mth::float3 direction)
+		std::optional<mth::float2> Level::PointedArea(mth::float3 origin, mth::float3 direction)
 		{
 			float distance = m_levelMap->Hitbox()->DistanceInDirection(origin, direction, m_levelMap->WorldMatrix());
 			if (distance == NAN || distance == INFINITY || distance == -INFINITY)
 				return {};
 			mth::float3 groundPoint = origin + distance * direction;
-			return TurretCoordTransform(mth::float2(groundPoint.x, groundPoint.z));
+			return WorldToMap(mth::float2(groundPoint.x, groundPoint.z));
 		}
 		std::optional<mth::float2> Level::PointedPosition(mth::float3 origin, mth::float3 direction)
 		{
@@ -200,33 +200,26 @@ namespace TowerDefense
 			AddRenderedEntity(*m_levelMap);
 			AddRenderedEntity(*m_base);
 		}
-		alg::Point Level::TurretCoordTransform(mth::float2 p)
-		{
-			return alg::Point{
-				static_cast<int>(p.x + 24.5f),
-				static_cast<int>(-p.y + 18.5f)
-			};
-		}
-		mth::float2 Level::TurretCoordTransform(alg::Point p)
+		mth::float2 Level::SnapTurret(mth::float2 coord)
 		{
 			return mth::float2(
-				static_cast<float>(p.x) - 24.0f,
-				static_cast<float>(-p.y) + 18.0f
-			);
+				std::round(coord.x),
+				std::round(coord.y)
+				);
 		}
-		alg::Point Level::EnemyCoordTransform(mth::float2 p)
-		{
-			return alg::Point{
-				static_cast<int>(p.x + 23.5f),
-				static_cast<int>(-p.y + 18.5f)
-			};
-		}
-		mth::float2 Level::EnemyCoordTransform(alg::Point p)
+		mth::float2 Level::MapToWorld(mth::float2 coord)
 		{
 			return mth::float2(
-				static_cast<float>(p.x) - 24.5f,
-				static_cast<float>(-p.y) + 18.5f
-			);
+				coord.x - 24.5f,
+				-coord.y + 18.5f
+				);
+		}
+		mth::float2 Level::WorldToMap(mth::float2 coord)
+		{
+			return mth::float2(
+				coord.x + 24.5f,
+				-coord.y + 18.5f
+				);
 		}
 		void Level::AddRenderedEntity(gfx::Entity& entity)
 		{
@@ -251,31 +244,42 @@ namespace TowerDefense
 		{
 			for (auto& e : m_enemies)
 			{
-				UpdatePathFinder(e->PathFinder());
-				e->RestartPath(m_enemyEndPoints.data(), static_cast<unsigned>(m_enemyEndPoints.size()));
+				mth::float2 currentPosition = WorldToMap(mth::float2(e->position.x, e->position.z));
+				UpdatePathFinder(e->PathFinder(), currentPosition.x, currentPosition.y);
+				e->StartPath();
 			}
 		}
-		void Level::UpdatePathFinder(alg::PathFinder& pathFinder)
+		void Level::UpdatePathFinder(alg::PathFinderDiag& pathFinder, float startX, float startY)
 		{
 			for (int y = 0; y < m_places.height(); y++)
 			{
 				for (int x = 0; x < m_places.width(); x++)
 				{
-					if (m_places(x, y).obstacle == MapElement::Obstacle::WALL)
-						pathFinder.Block(x, y);
-					else
-						pathFinder.Unblock(x, y);
+					switch (m_places(x, y).obstacle)
+					{
+					case MapElement::Obstacle::WALL:
+						pathFinder.PutWall(x, y);
+						break;
+					case MapElement::Obstacle::GOAL:
+						pathFinder.AddEnd(x, y);
+						break;
+					default:
+						pathFinder.RemoveWall(x, y);
+					}
 				}
 			}
+
+			pathFinder.ReplaceStart(startX, startY);
+			pathFinder.FindPath();
 		}
 		void Level::SpawnEnemy(Enemy::P enemy)
 		{
 			alg::Point enemyStartPoint = m_enemyStartPoints[rand() % m_enemyStartPoints.size()];
-			mth::float2 p = EnemyCoordTransform(enemyStartPoint);
+			mth::float2 p = MapToWorld(alg::ToFloat2(enemyStartPoint));
 			enemy->position = mth::float3(p.x, 0.5f, p.y);
 			enemy->PathFinder().Resize(static_cast<unsigned>(m_places.width()), static_cast<unsigned>(m_places.height()));
-			UpdatePathFinder(enemy->PathFinder());
-			enemy->StartPath(enemyStartPoint, m_enemyEndPoints.data(), static_cast<unsigned>(m_enemyEndPoints.size()));
+			UpdatePathFinder(enemy->PathFinder(), static_cast<float>(enemyStartPoint.x), static_cast<float>(enemyStartPoint.y));
+			enemy->StartPath();
 			m_enemies.push_back(enemy);
 			AddRenderedEntity(*enemy);
 		}

@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -110,7 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,7 +140,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -156,6 +156,19 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="array2d.hpp" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="math\formulas.hpp" />
+    <ClInclude Include="math\geometry2d.hpp" />
+    <ClInclude Include="math\geometry3d.hpp" />
+    <ClInclude Include="math\graph.hpp" />
+    <ClInclude Include="math\linalg.hpp" />
+    <ClInclude Include="math\matrix2x2.hpp" />
+    <ClInclude Include="math\matrix3x3.hpp" />
+    <ClInclude Include="math\matrix4x4.hpp" />
+    <ClInclude Include="math\position.hpp" />
+    <ClInclude Include="math\quaternion.hpp" />
+    <ClInclude Include="math\vector2.hpp" />
+    <ClInclude Include="math\vector3.hpp" />
+    <ClInclude Include="math\vector4.hpp" />
     <ClInclude Include="pathfinder.h" />
   </ItemGroup>
   <ItemGroup>

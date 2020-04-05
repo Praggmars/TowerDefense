@@ -178,6 +178,104 @@ void ::Converter::MainPage::Connect(int __connectionId, ::Platform::Object^ __ta
                 (::Platform::Object^, ::Windows::UI::Xaml::RoutedEventArgs^))&MainPage::DeleteButton_Click);
         }
         break;
+    case 22:
+        {
+            this->m_bonePanel = safe_cast<::Windows::UI::Xaml::Controls::StackPanel^>(__target);
+        }
+        break;
+    case 23:
+        {
+            this->m_boneList = safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_boneList))->DropDownOpened += ref new ::Windows::Foundation::EventHandler<::Platform::Object^>(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Platform::Object^))&MainPage::BoneList_DropDownOpened);
+            (safe_cast<::Windows::UI::Xaml::Controls::ComboBox^>(this->m_boneList))->SelectionChanged += ref new ::Windows::UI::Xaml::Controls::SelectionChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::SelectionChangedEventArgs^))&MainPage::BoneList_SelectionChanged);
+        }
+        break;
+    case 24:
+        {
+            this->m_toBoneTxTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_toBoneTxTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 25:
+        {
+            this->m_toBoneTyTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_toBoneTyTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 26:
+        {
+            this->m_toBoneTzTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_toBoneTzTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 27:
+        {
+            this->m_toBoneRxSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_toBoneRxSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
+    case 28:
+        {
+            this->m_toBoneRySlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_toBoneRySlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
+    case 29:
+        {
+            this->m_toBoneRzSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_toBoneRzSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
+    case 30:
+        {
+            this->m_transformTxTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_transformTxTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 31:
+        {
+            this->m_transformTyTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_transformTyTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 32:
+        {
+            this->m_transformTzTextBox = safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::TextBox^>(this->m_transformTzTextBox))->TextChanged += ref new ::Windows::UI::Xaml::Controls::TextChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::TextChangedEventArgs^))&MainPage::BoneData_TextChanged);
+        }
+        break;
+    case 33:
+        {
+            this->m_transformRxSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_transformRxSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
+    case 34:
+        {
+            this->m_transformRySlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_transformRySlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
+    case 35:
+        {
+            this->m_transformRzSlider = safe_cast<::Windows::UI::Xaml::Controls::Slider^>(__target);
+            (safe_cast<::Windows::UI::Xaml::Controls::Slider^>(this->m_transformRzSlider))->ValueChanged += ref new ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventHandler(this, (void (::Converter::MainPage::*)
+                (::Platform::Object^, ::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^))&MainPage::BoneData_ValueChanged);
+        }
+        break;
     }
     _contentLoaded = true;
 }

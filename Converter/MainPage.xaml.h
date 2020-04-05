@@ -23,6 +23,8 @@ namespace Converter
 		void LoadModel(const wchar_t* filename);
 		void FillMaterialControls();
 		void ReadMaterialControls();
+		void FillBoneControls();
+		void ReadBoneControls();
 
 	public:
 		MainPage();
@@ -46,5 +48,9 @@ namespace Converter
 		void ExportTextButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void MaterialDataChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e);
 		void ModelShownCheckBox_CheckChanged(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void BoneList_DropDownOpened(Platform::Object^ sender, Platform::Object^ e);
+		void BoneList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void BoneData_TextChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e);
+		void BoneData_ValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e);
 	};
 }

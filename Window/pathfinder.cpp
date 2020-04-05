@@ -1,33 +1,5 @@
 #include "pathfinder.h"
 #include "image.h"
-#include <cmath>
-
-class LineSection
-{
-public:
-	float point1x, point1y;
-	float point2x, point2y;
-
-	LineSection(float p1x, float p1y, float p2x, float p2y) : point1x(p1x), point1y(p1y), point2x(p2x), point2y(p2y) {}
-
-	bool Intersects(LineSection& ls)
-	{
-		float den = (point1x - point2x) * (ls.point1y - ls.point2y) - (point1y - point2y) * (ls.point1x - ls.point2x);
-		if (den < 1e-4f) return false;
-		float t = ((point1x - ls.point1x) * (ls.point1y - ls.point2y) - (point1y - ls.point1y) * (ls.point1x - ls.point2x)) / den;
-		float u = ((point1x - point2x) * (point1y - ls.point1y) - (point1y - point2y) * (ls.point1x - ls.point2y)) / den;
-
-		if (t < 0.0f || t > 1.0f || u < 0.0f || u > 1.0f)
-			return false;
-		return true;
-	}
-	float Distance(float x, float y)
-	{
-		float num = std::abs((point2y - point1y) * x - (point2x - point1x) * y + point2x * point1y - point2y * point1x);
-		float den = std::sqrt((point2y - point1y) * (point2y - point1y) + (point2x - point1x) * (point2x - point1x));
-		return num / den;
-	}
-};
 
 void PathFinder::FindCorners()
 {
@@ -46,11 +18,12 @@ void PathFinder::FindCorners()
 
 bool PathFinder::CanReach(NodeType* n1, NodeType* n2)
 {
-	LineSection ls(n1->x + 0.5f, n1->y + 0.5f, n2->x + 0.5f, n2->y + 0.5f);
-	int minx = std::floor(n1->x < n2->x ? n1->x : n2->x);
-	int miny = std::floor(n1->y < n2->y ? n1->y : n2->y);
-	int maxx = std::floor(n1->x > n2->x ? n1->x : n2->x) + 1;
-	int maxy = std::floor(n1->y > n2->y ? n1->y : n2->y) + 1;
+	constexpr float offset = 0.9f;
+	mth::LineSection2Df ls(n1->p, n2->p);
+	int minx = std::fmax(std::floor(n1->p.x < n2->p.x ? n1->p.x : n2->p.x) - 1, 0);
+	int miny = std::fmax(std::floor(n1->p.y < n2->p.y ? n1->p.y : n2->p.y) - 1, 0);
+	int maxx = std::fmin(std::floor(n1->p.x > n2->p.x ? n1->p.x : n2->p.x) + 2, m_map.width() - 1);
+	int maxy = std::fmin(std::floor(n1->p.y > n2->p.y ? n1->p.y : n2->p.y) + 2, m_map.height() - 1);
 	for (int x = minx; x < maxx; x++)
 	{
 		for (int y = miny; y < maxy; y++)
@@ -58,24 +31,14 @@ bool PathFinder::CanReach(NodeType* n1, NodeType* n2)
 			NodeType& nt = m_map(x, y);
 			if (nt.type == NodeType::WALL)
 			{
-				if (ls.Distance(x + 0, y + 0) < 0.5f)
+				if (mth::LineSection2Df(mth::float2(nt.p.x - offset, nt.p.y - offset), mth::float2(nt.p.x + offset, nt.p.y - offset)).Intersects(ls))
 					return false;
-				if (ls.Distance(x + 0, y + 1) < 0.5f)
+				if (mth::LineSection2Df(mth::float2(nt.p.x - offset, nt.p.y - offset), mth::float2(nt.p.x - offset, nt.p.y + offset)).Intersects(ls))
 					return false;
-				if (ls.Distance(x + 1, y + 0) < 0.5f)
+				if (mth::LineSection2Df(mth::float2(nt.p.x + offset, nt.p.y + offset), mth::float2(nt.p.x + offset, nt.p.y - offset)).Intersects(ls))
 					return false;
-				if (ls.Distance(x + 1, y + 1) < 0.5f)
+				if (mth::LineSection2Df(mth::float2(nt.p.x + offset, nt.p.y + offset), mth::float2(nt.p.x - offset, nt.p.y + offset)).Intersects(ls))
 					return false;
-				if (ls.Distance(x + 0.5f, y + 0.5f) < 1.0f)
-					return false;
-				/*if (LineSection(x, y, x + 1, y).Intersects(ls))
-					return false;
-				if (LineSection(x, y, x, y + 1).Intersects(ls))
-					return false;
-				if (LineSection(x + 1, y, x + 1, y + 1).Intersects(ls))
-					return false;
-				if (LineSection(x, y + 1, x + 1, y + 1).Intersects(ls))
-					return false;*/
 			}
 		}
 	}
@@ -104,20 +67,20 @@ void PathFinder::CreateGraph()
 			{
 				n.estToEnd = 0.0f;
 				m_ends.push_back(&n);
-				//m_graph.push_back(&n);
 			}
 			else if (n.isCorner)
 			{
 				m_graph.push_back(&n);
 			}
-			if (n.type == NodeType::START)
-			{
-				n.cost = 0.0f;
-				m_graph.push_back(&n);
-				m_start = &n;
-			}
 		}
 	}
+	m_start.cost = 0.0f;
+	m_start.estToEnd = INFINITY;
+	m_start.neighbors.clear();
+	m_start.prev = nullptr;
+	m_start.needsCheck = false;
+	m_start.type = NodeType::START;
+	m_graph.push_back(&m_start);
 
 	for (NodeType* v1 : m_graph)
 	{
@@ -125,15 +88,15 @@ void PathFinder::CreateGraph()
 			if ((v1 != v2) && CanReach(v1, v2))
 				v1->neighbors.push_back(
 					NodeType::Connection{ v2, std::sqrt(
-					(v2->x - v1->x) * (v2->x - v1->x) +
-					(v2->y - v1->y) * (v2->y - v1->y)) });
+					(v2->p.x - v1->p.x) * (v2->p.x - v1->p.x) +
+					(v2->p.y - v1->p.y) * (v2->p.y - v1->p.y)) });
 
 		NodeType* closestEnd = nullptr;
 		float closestEndEst = INFINITY;
 		for (NodeType* end : m_ends)
 		{
-			float est = (end->x - v1->x) * (end->x - v1->x) +
-				(end->y - v1->y) * (end->y - v1->y);
+			float est = (end->p.x - v1->p.x) * (end->p.x - v1->p.x) +
+				(end->p.y - v1->p.y) * (end->p.y - v1->p.y);
 			if (v1->estToEnd > est)
 				v1->estToEnd = est;
 			if ((closestEndEst > est) && CanReach(v1, end))
@@ -150,9 +113,7 @@ void PathFinder::CreateGraph()
 
 bool PathFinder::AStar()
 {
-	if (!m_start)
-		return false;
-	NodeType* currentNode = m_start;
+	NodeType* currentNode = &m_start;
 	do
 	{
 		currentNode->needsCheck = false;
@@ -223,8 +184,8 @@ bool PathFinder::Init()
 				m_map(x, y).type = NodeType::END;
 			else
 				m_map(x, y).type = NodeType::WALL;
-			m_map(x, y).x = x;
-			m_map(x, y).y = y;
+			m_map(x, y).p.x = x + 0.5f;
+			m_map(x, y).p.y = y + 0.5f;
 		}
 	}
 	return true;
@@ -237,18 +198,14 @@ bool PathFinder::FindPath()
 	return AStar();
 }
 
-bool PathFinder::ReplaceStart(int x, int y)
+bool PathFinder::ReplaceStart(float x, float y)
 {
 	if (x >= 0 && x < m_map.width() &&
-		y >= 0 && y < m_map.height() &&
-		m_map(x, y).type == NodeType::EMPTY)
+		y >= 0 && y < m_map.height())
 	{
-		for (NodeType& nt : m_map)
-			if (nt.type == NodeType::START)
-				nt.type = NodeType::EMPTY;
-		m_map(x, y).type = NodeType::START;
-		FindPath();
-		return true;
+		m_start.p.x = x;
+		m_start.p.y = y;
+		return FindPath();
 	}
 	return false;
 }
@@ -269,6 +226,32 @@ bool PathFinder::ToggleWall(int x, int y)
 			FindPath();
 			return true;
 		}
+	}
+	return false;
+}
+
+bool PathFinder::PutWall(int x, int y)
+{
+	if (x >= 0 && x < m_map.width() &&
+		y >= 0 && y < m_map.height() &&
+		m_map(x, y).type == NodeType::EMPTY)
+	{
+		m_map(x, y).type = NodeType::WALL;
+		FindPath();
+		return true;
+	}
+	return false;
+}
+
+bool PathFinder::RemoveWall(int x, int y)
+{
+	if (x >= 0 && x < m_map.width() &&
+		y >= 0 && y < m_map.height() &&
+		m_map(x, y).type == NodeType::WALL)
+	{
+		m_map(x, y).type = NodeType::EMPTY;
+		FindPath();
+		return true;
 	}
 	return false;
 }

@@ -47,7 +47,14 @@ namespace Converter
 		struct Bone
 		{
 			std::wstring name;
-			mth::float4x4 offset;
+			mth::float4x4 toBoneSpace;	// transform to bone space
+			mth::float4x4 transform;	// transform from parent
+			mth::float4x4 boneMatrix;	// buffer for rendering
+			mth::float3 offset;			// offset from parent
+			mth::float3 rotation;		// rotation from parent
+			int parentIndex;
+			std::vector<int> childIndex;
+			int ownIndex;
 		};
 
 		class ModelLoader
@@ -72,6 +79,7 @@ namespace Converter
 
 			void LoadBTDM(const wchar_t* filename);
 			void LoadTTDM(const wchar_t* filename);
+			void LoadTestModel();
 			void LoadAssimp();
 
 			Texture::P FetchTexture(std::wstring& filename, bool image);
@@ -111,6 +119,8 @@ namespace Converter
 			inline unsigned VertexGroupCount() { return m_vertexGroups.size(); }
 			inline unsigned MaterialCount() { return m_materials.size(); }
 			inline MaterialData& Material(unsigned index) { return m_materials[index]; }
+			inline unsigned BoneCount() { return m_bones.size(); }
+			inline Bone& Bones(unsigned index) { return m_bones[index]; }
 			inline Texture::P Image(std::wstring& filename) { return m_loadedTextures[filename].texture; }
 			inline void Visible(bool visible) { m_visible = visible; }
 			inline bool Visible() { return m_visible; }

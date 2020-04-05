@@ -45,7 +45,7 @@ namespace TowerDefense
 			void AddRenderedEntity(gfx::Entity& entity);
 			void RemoveRenderedEntity(gfx::Entity& entity);
 			void RegeneratePaths();
-			void UpdatePathFinder(alg::PathFinder& pathFinder);
+			void UpdatePathFinder(alg::PathFinderDiag& pathFinder, float startX, float startY);
 
 		public:
 			Level(gfx::Graphics& graphics, GameResources& gameResources, int width, int height);
@@ -58,11 +58,10 @@ namespace TowerDefense
 			void DestroyTurret(alg::Point mapPosition);
 			void SpawnEnemy(Enemy::P enemy);
 
-			alg::Point TurretCoordTransform(mth::float2 p);
-			mth::float2 TurretCoordTransform(alg::Point p);
-			alg::Point EnemyCoordTransform(mth::float2 p);
-			mth::float2 EnemyCoordTransform(alg::Point p);
-			std::optional<alg::Point> PointedArea(mth::float3 origin, mth::float3 direction);
+			mth::float2 SnapTurret(mth::float2 coord);
+			mth::float2 MapToWorld(mth::float2 coord);
+			mth::float2 WorldToMap(mth::float2 coord);
+			std::optional<mth::float2> PointedArea(mth::float3 origin, mth::float3 direction);
 			std::optional<mth::float2> PointedPosition(mth::float3 origin, mth::float3 direction);
 			bool CanPlace2x2(alg::Point mapPosition);
 			Turret::P PointedTurret(mth::float3 origin, mth::float3 direction);

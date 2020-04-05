@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "pathfinder.h"
+#include "pathfindergrid.h"
 
 namespace TowerDefense
 {
 	namespace alg
 	{
-		void PathFinder::Prepare()
+		void PathFinderGrid::Prepare()
 		{
 			m_pathLength = -1;
 			m_nodes(m_start.x, m_start.y).type = Node::Type::START;
@@ -19,11 +19,11 @@ namespace TowerDefense
 			}
 			m_nodes(m_start.x, m_start.y).cost = 0;
 		}
-		bool PathFinder::IsPointOnMap(Point p)
+		bool PathFinderGrid::IsPointOnMap(Point p)
 		{
 			return p.x >= 0 && p.x < m_nodes.width() && p.y >= 0 && p.y < m_nodes.height();
 		}
-		bool PathFinder::LeastCostEstimate(Point& best)
+		bool PathFinderGrid::LeastCostEstimate(Point& best)
 		{
 			unsigned least = UINT32_MAX;
 			for (int y = 0; y < m_nodes.height(); y++)
@@ -47,7 +47,7 @@ namespace TowerDefense
 			}
 			return least != UINT32_MAX;
 		}
-		void PathFinder::RecontsructPath()
+		void PathFinderGrid::RecontsructPath()
 		{
 			int pathPos = static_cast<int>(m_path.size()) - 1;
 			m_pathLength = 2;
@@ -60,23 +60,23 @@ namespace TowerDefense
 			}
 			m_path[pathPos] = m_start;
 		}
-		PathFinder::PathFinder() :
+		PathFinderGrid::PathFinderGrid() :
 			m_pathLength(-1) {}
-		PathFinder::PathFinder(unsigned width, unsigned height) :
+		PathFinderGrid::PathFinderGrid(unsigned width, unsigned height) :
 			m_nodes(width, height),
 			m_path(width * height),
 			m_pathLength(-1) {}
-		void PathFinder::Resize(unsigned width, unsigned height)
+		void PathFinderGrid::Resize(unsigned width, unsigned height)
 		{
 			m_nodes.resize(width, height);
 			m_path.resize(width * height);
 			m_pathLength = -1;
 		}
-		bool PathFinder::FindPath(Point start, Point end)
+		bool PathFinderGrid::FindPath(Point start, Point end)
 		{
 			return FindPath(start, &end, 1);
 		}
-		bool PathFinder::FindPath(Point start, Point* end, unsigned endCount)
+		bool PathFinderGrid::FindPath(Point start, Point* end, unsigned endCount)
 		{
 			m_start = start;
 			m_end.resize(endCount);
@@ -118,30 +118,30 @@ namespace TowerDefense
 			} while (LeastCostEstimate(current));
 			return false;
 		}
-		void PathFinder::Block(int x, int y)
+		void PathFinderGrid::Block(int x, int y)
 		{
 			m_nodes(x, y).type = Node::Type::BLOCK;
 		}
-		void PathFinder::Unblock(int x, int y)
+		void PathFinderGrid::Unblock(int x, int y)
 		{
 			m_nodes(x, y).type = Node::Type::EMPTY;
 		}
-		void PathFinder::RemoveBlocks()
+		void PathFinderGrid::RemoveBlocks()
 		{
 			for (auto& n : m_nodes)
 				n.type = Node::Type::EMPTY;
 		}
-		Point* PathFinder::Path()
+		Point* PathFinderGrid::Path()
 		{
 			if (m_pathLength < 0)
 				return nullptr;
 			return &m_path[m_path.size() - m_pathLength - 1];
 		}
-		Point PathFinder::Path(int index)
+		Point PathFinderGrid::Path(int index)
 		{
 			return m_path[m_path.size() - m_pathLength - 1 + index];
 		}
-		int PathFinder::PathLength()
+		int PathFinderGrid::PathLength()
 		{
 			return m_pathLength;
 		}

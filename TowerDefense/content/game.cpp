@@ -59,7 +59,7 @@ namespace TowerDefense
 				if (auto mapPos = m_level->PointedArea(origin, dir))
 				{
 					m_movingTurret->Visible(true);
-					bool canPlace = m_level->CanPlace2x2(*mapPos);
+					bool canPlace = m_level->CanPlace2x2(alg::ToPoint(*mapPos));
 					for (auto& m : m_movingTurret->Materials())
 					{
 						if (canPlace)
@@ -73,7 +73,7 @@ namespace TowerDefense
 							m.MaterialBuffer().textureWeight = 0.25f;
 						}
 					}
-					auto coord = m_level->TurretCoordTransform(*mapPos);
+					mth::float2 coord = m_level->SnapTurret(m_level->MapToWorld(*mapPos));
 					m_movingTurret->position = mth::float3(coord.x, 0.0f, coord.y);
 				}
 			}
@@ -198,7 +198,7 @@ namespace TowerDefense
 			mth::float3 origin = m_camera.position;
 			mth::float3 dir = m_camera.DirectionFromPoint(m_cursor, m_windowSize);
 			if (auto mapPos = m_level->PointedArea(origin, dir))
-				setCoords(*mapPos);
+				setCoords(alg::ToPoint(*mapPos));
 		}
 		void Game::MouseUp(mth::float2 cursor, bool lButtonDown, bool mButtonDown, bool rButtonDown)
 		{
@@ -208,14 +208,14 @@ namespace TowerDefense
 				mth::float3 dir = m_camera.DirectionFromPoint(m_cursor, m_windowSize);
 				Concurrency::critical_section::scoped_lock lock(m_graphics.GetLock());
 				if (auto mapPos = m_level->PointedArea(origin, dir))
-					if (m_level->CanPlace2x2(*mapPos))
+					if (m_level->CanPlace2x2(alg::ToPoint(*mapPos)))
 					{
 						for (auto& m : m_movingTurret->Materials())
 						{
 							m.MaterialBuffer().diffuseColor = 1.0f;
 							m.MaterialBuffer().textureWeight = 1.0f;
 						}
-						m_level->PlaceTurret(*mapPos, m_movingTurret);
+						m_level->PlaceTurret(alg::ToPoint(*mapPos), m_movingTurret);
 					}
 				m_movingTurret = nullptr;
 			}
