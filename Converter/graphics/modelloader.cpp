@@ -699,7 +699,7 @@ namespace Converter
 			Bone b;
 			StoreAiString(b.name, node->mName);
 			b.parentIndex = parent;
-			b.transform = StoreAiMatrix(node->mTransformation);
+			b.transform = parent == -1 ? mth::float4x4::Identity() : StoreAiMatrix(node->mTransformation);
 			b.offset.x = b.transform(0, 3);
 			b.offset.y = b.transform(1, 3);
 			b.offset.z = b.transform(2, 3);
@@ -723,9 +723,9 @@ namespace Converter
 		}
 		void AssimpLoader::StoreNodeChildren(aiNode* node, int parent)
 		{
+			int index = StoreNode(node, parent);
 			for (unsigned c = 0; c < node->mNumChildren; c++)
 			{
-				int index = StoreNode(node, parent);
 				if (parent >= 0)
 					m_bones[parent].childIndex.push_back(index);
 				StoreNodeChildren(node->mChildren[c], index);
@@ -735,7 +735,7 @@ namespace Converter
 		void AssimpLoader::StoreBones()
 		{
 			aiNode* baseBone = BaseNode();
-			if (baseBone->mNumChildren) baseBone = baseBone->mChildren[0];
+			//if (baseBone->mNumChildren) baseBone = baseBone->mChildren[0];
 
 			StoreBoneOffsets();
 			StoreNodeChildren(baseBone, -1);

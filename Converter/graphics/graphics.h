@@ -107,6 +107,8 @@ namespace Converter
 			inline ID3D11Device3* Device3D() { return m_device3D.Get(); }
 			inline ID3D11DeviceContext3* Context3D() { return m_context3D.Get(); }
 			inline D3D_FEATURE_LEVEL FeatureLevel() { return m_featureLevel; }
+			inline void SetVSMatrixBuffer() { m_context3D->VSSetConstantBuffers(0, 1, m_vsMatrixBuffer.GetAddressOf()); }
+			inline void SetVSBoneBuffer() { m_context3D->VSSetConstantBuffers(1, 1, m_boneBuffer.GetAddressOf()); }
 			inline unsigned Width() { return m_width; }
 			inline unsigned Height() { return m_height; }
 			inline auto& GetLock() { return m_lock; }

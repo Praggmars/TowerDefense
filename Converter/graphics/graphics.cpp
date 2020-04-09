@@ -207,7 +207,6 @@ PixelInputType main(VertexInputType input)
 		input.weights.z * bones[input.bones.z] +
 		(1.0f - input.weights.x - input.weights.y - input.weights.z) * bones[input.bones.w],
 		worldMatrix);
-	//transformMatrix = worldMatrix;
 	output.wndpos = mul(float4(input.position, 1.0f), transformMatrix);
 	output.position = output.wndpos.xyz;
 	output.lightTex = mul(output.wndpos, lightMatrix);
@@ -350,11 +349,11 @@ float4 main(PixelInputType input) : SV_TARGET
 	input.lightTex.y = input.lightTex.y / input.lightTex.w * (-0.5f) + 0.5f;
 	input.lightTex.z = input.lightTex.z / input.lightTex.w;
 	float shadowFactor = ShadowFactor5x5(input.lightTex.xyz);
-	shadowFactor = 1.0f;	//FIXME: delete line
+	//shadowFactor = 1.0f;	//FIXME: delete line
 	float intensity = shadowFactor * saturate(dot(pixelNormal, lightDirection));
 
 	float occlusionFactor = texture_ambientMap.Sample(sampler_texture, texCoords).r;
-	occlusionFactor = 1.0f;	//FIXME: delete line
+	//occlusionFactor = 1.0f;	//FIXME: delete line
 	float4 color = light_ambientColor * (occlusionFactor * 0.5f + 0.5f);
 
 	if (intensity > 0.0f)
@@ -504,8 +503,8 @@ float4 main(PixelInputType input) : SV_TARGET
 			m_context3D->OMSetRenderTargets(1, rendeTargets, m_depthStencilView.Get());
 			m_context3D->PSSetSamplers(0, 1, m_textureSampler.GetAddressOf());
 			m_context3D->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
-			m_context3D->VSSetConstantBuffers(0, 1, m_vsMatrixBuffer.GetAddressOf());
-			m_context3D->VSSetConstantBuffers(1, 1, m_boneBuffer.GetAddressOf());
+			SetVSMatrixBuffer();
+			SetVSBoneBuffer();
 			m_context3D->PSSetConstantBuffers(0, 1, m_psLightBuffer.GetAddressOf());
 			m_context3D->PSSetConstantBuffers(1, 1, m_psMaterialBuffer.GetAddressOf());
 		}

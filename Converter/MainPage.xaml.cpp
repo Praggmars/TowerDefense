@@ -272,6 +272,7 @@ namespace Converter
 		matrixBuffer.worldMatrix = mth::float4x4::Identity();
 		matrixBuffer.cameraMatrix = m_camera.CameraMatrix();
 		matrixBuffer.lightMatrix = m_light.LightMatrix();
+		m_graphics->WriteVSMatrixBuffer(&matrixBuffer);
 
 		gfx::CB_LightBuffer lightBuffer;
 		lightBuffer.ambientColor = 0.3f;
@@ -281,20 +282,37 @@ namespace Converter
 		lightBuffer.eyePosition = m_camera.position;
 		lightBuffer.screenSize = mth::float2(static_cast<float>(m_graphics->Width()), static_cast<float>(m_graphics->Height()));
 
-		mth::float4x4 lightMatrix = matrixBuffer.lightMatrix;
+		auto WriteBoneBuffer = [this](gfx::ModelLoader& ml)
+		{
+			ml.Bones(0).boneMatrix = ml.Bones(0).transform;
+			for (unsigned i = 1; i < ml.BoneCount(); i++)
+			{
+				int parentIndex = ml.Bones(i).parentIndex;
+				ml.Bones(i).boneMatrix = parentIndex >= 0 ? ml.Bones(parentIndex).boneMatrix * ml.Bones(i).transform : ml.Bones(i).transform;
+			}
+			std::vector<mth::float4x4> bones(ml.BoneCount());
+			for (unsigned i = 0; i < ml.BoneCount(); i++)
+				bones[i] = ml.Bones(i).boneMatrix * ml.Bones(i).toBoneSpace;
+			m_graphics->WriteBoneBuffer(bones.data(), bones.size());
+		};
+
 		m_shadowMap->SetAsRenderTarget(*m_graphics);
-		m_shadowMap->WriteBuffer(*m_graphics, &lightMatrix);
 		for (auto& ml : m_modelLoaders)
+		{
+			WriteBoneBuffer(*ml);
 			ml->RenderMesh(*m_graphics);
+		}
 
 		m_ssao->SetAsRenderTarget(*m_graphics, m_camera);
 		for (auto& ml : m_modelLoaders)
+		{
+			WriteBoneBuffer(*ml);
 			ml->RenderMesh(*m_graphics);
+		}
 		m_ssao->RenderOcclusionMap(*m_graphics, m_camera);
 
 		m_graphics->SetScreenAsRenderTarget();
 
-		m_graphics->WriteVSMatrixBuffer(&matrixBuffer);
 		m_graphics->WritePSLightBuffer(&lightBuffer);
 		m_shadowMap->SetTextureToRender(*m_graphics, 2);
 		m_ssao->SetTextureToRender(*m_graphics, 3);
@@ -302,13 +320,7 @@ namespace Converter
 		m_graphics->Clear(0.2f, 0.3f, 0.5f);
 		for (auto& ml : m_modelLoaders)
 		{
-			ml->Bones(0).boneMatrix = ml->Bones(0).transform;
-			for (unsigned i = 1; i < ml->BoneCount(); i++)
-				ml->Bones(i).boneMatrix = ml->Bones(ml->Bones(i).parentIndex).boneMatrix * ml->Bones(i).transform;
-			std::vector<mth::float4x4> bones(ml->BoneCount());
-			for (unsigned i = 0; i < ml->BoneCount(); i++)
-				bones[i] = ml->Bones(i).boneMatrix * ml->Bones(i).toBoneSpace;
-			m_graphics->WriteBoneBuffer(bones.data(), bones.size());
+			WriteBoneBuffer(*ml);
 			ml->RenderModel(*m_graphics);
 		}
 		m_graphics->Present();

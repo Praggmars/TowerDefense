@@ -31,8 +31,6 @@ namespace Converter
 			Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_normalDepthMapRTV;
 			Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vsNormalDepthMap;
 			Microsoft::WRL::ComPtr<ID3D11PixelShader> m_psNormalDepthMap;
-			Microsoft::WRL::ComPtr<ID3D11Buffer> m_normalDepthMapVSBuffer;
-			unsigned m_normalDepthMapVSBufferSize;
 
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> m_occlusionTex;
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_occlusionSRV;
@@ -79,7 +77,6 @@ namespace Converter
 			void CreateScreenQuadVertexShader(Graphics& graphics);
 			void CreateShaderBuffers(ID3D11Device3* device);
 
-			void WriteNormalDepthMapVSBuffer(ID3D11DeviceContext3* context, void* data);
 			void WriteScreenQuadVSBuffer(ID3D11DeviceContext3* context, void* data);
 			void WriteOcclusionMapPSBuffer(ID3D11DeviceContext3* context);
 			void WriteBlurPSBuffer(ID3D11DeviceContext3* context, void* data);

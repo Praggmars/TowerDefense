@@ -45,7 +45,14 @@ namespace Converter
 			static const char* code = R"(
 cbuffer MatrixBuffer
 {
+	matrix worldMatrix;
+	matrix cameraMatrix;
 	matrix lightMatrix;
+};
+
+cbuffer BoneBuffer
+{
+	matrix bones[96];
 };
 
 struct VertexInputType
@@ -67,7 +74,14 @@ struct PixelInputType
 PixelInputType main(VertexInputType input)
 {
 	PixelInputType output;
-	output.wndpos = mul(float4(input.position, 1.0f), lightMatrix);
+	matrix transformMatrix = mul(
+		input.weights.x * bones[input.bones.x] + 
+		input.weights.y * bones[input.bones.y] + 
+		input.weights.z * bones[input.bones.z] +
+		(1.0f - input.weights.x - input.weights.y - input.weights.z) * bones[input.bones.w],
+		worldMatrix);
+	output.wndpos = mul(float4(input.position, 1.0f), transformMatrix);
+	output.wndpos = mul(output.wndpos, lightMatrix);
 	//output.texcoord = input.texcoord;
 	return output;
 }
@@ -129,21 +143,6 @@ void main(PixelInputType input)
 			Microsoft::WRL::ComPtr<ID3DBlob> byteCode = CompileShader(code, "main", target);
 			ThrowIfFailed(graphics.Device3D()->CreatePixelShader(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), nullptr, &m_pixelShader));
 		}
-		void ShadowMap::CreateBuffer(ID3D11Device3* device)
-		{
-			D3D11_BUFFER_DESC bufferDesc;
-
-			m_bufferSize = sizeof(mth::float4x4);
-
-			bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-			bufferDesc.ByteWidth = 0;
-			bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-			bufferDesc.MiscFlags = 0;
-			bufferDesc.StructureByteStride = 0;
-			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			bufferDesc.ByteWidth = m_bufferSize;
-			ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_buffer));
-		}
 		ShadowMap::ShadowMap(Graphics& graphics, unsigned width, unsigned height) :
 			m_viewport{ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f },
 			m_width(width),
@@ -169,7 +168,6 @@ void main(PixelInputType input)
 			CreateRasterizerState(device);
 			CreateVertexShader(graphics);
 			CreatePixelShader(graphics);
-			CreateBuffer(device);
 		}
 		ShadowMap::P ShadowMap::CreateP(Graphics& graphics, unsigned width, unsigned height)
 		{
@@ -187,6 +185,8 @@ void main(PixelInputType input)
 		{
 			auto* context = graphics.Context3D();
 			ID3D11RenderTargetView* renderTargets[1] = { nullptr };
+			graphics.SetVSMatrixBuffer();
+			graphics.SetVSBoneBuffer();
 			context->RSSetState(m_rasterizerState.Get());
 			context->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 			context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
@@ -195,17 +195,6 @@ void main(PixelInputType input)
 			//context->PSSetSamplers(1, 1, m_samplerState.GetAddressOf());
 			context->RSSetViewports(1, &m_viewport);
 			context->OMSetRenderTargets(1, renderTargets, m_depthStencilView.Get());
-			context->VSSetConstantBuffers(0, 1, m_buffer.GetAddressOf());
-		}
-		void ShadowMap::WriteBuffer(Graphics& graphics, void* data)
-		{
-			D3D11_MAPPED_SUBRESOURCE resource;
-			auto* context = graphics.Context3D();
-			if (SUCCEEDED(context->Map(m_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource)))
-			{
-				memcpy(resource.pData, data, m_bufferSize);
-				context->Unmap(m_buffer.Get(), 0);
-			}
 		}
 	}
 }
