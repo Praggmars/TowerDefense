@@ -116,6 +116,12 @@
     <ClCompile Include="algorithm\pathfinderdiag.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\skeleton.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\animate.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -242,6 +248,12 @@
     <ClInclude Include="algorithm\pathfinderdiag.h">
       <Filter>algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\skeleton.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\animate.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -280,6 +292,18 @@
     <Image Include="resources\ground.png">
       <Filter>resourses</Filter>
     </Image>
+    <Image Include="resources\turret_norm.png">
+      <Filter>resourses</Filter>
+    </Image>
+    <Image Include="resources\turret_tex.png">
+      <Filter>resourses</Filter>
+    </Image>
+    <Image Include="resources\grass.norm.png">
+      <Filter>resourses</Filter>
+    </Image>
+    <Image Include="resources\feather_norm.png">
+      <Filter>resourses</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -314,6 +338,9 @@
       <Filter>resourses</Filter>
     </None>
     <None Include="resources\light.ttdm">
+      <Filter>resourses</Filter>
+    </None>
+    <None Include="resources\duck.ttdm">
       <Filter>resourses</Filter>
     </None>
   </ItemGroup>

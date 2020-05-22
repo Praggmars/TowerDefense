@@ -18,7 +18,13 @@ namespace TowerDefense
 
 		public:
 			Material() = default;
+			Material(Graphics& graphics, ModelLoader& modelLoader, unsigned materialIndex);
 			Material(Texture::P texture, Texture::P normalmap, MaterialData& data);
+
+			inline Texture::P DiffuseTexture() { return m_texture; }
+			inline Texture::P Normalmap() { return m_normalmap; }
+			inline void ChangeDiffuseTexture(Texture::P texture) { m_texture = texture; }
+			inline void ChangeNormalmap(Texture::P normalmap) { m_normalmap = normalmap; }
 
 			void SetToRender(Graphics& graphics);
 

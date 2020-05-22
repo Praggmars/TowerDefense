@@ -46,6 +46,7 @@ namespace Converter
 cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
+	matrix viewMatrix;
 	matrix cameraMatrix;
 	matrix lightMatrix;
 };

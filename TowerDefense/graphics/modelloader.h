@@ -44,12 +44,24 @@ namespace TowerDefense
 			unsigned materialIndex;
 		};
 
+		struct BoneLoader
+		{
+			std::wstring name;
+			mth::float4x4 toBoneSpace;	// transform to bone space
+			mth::float3 offset;			// offset from parent
+			mth::float3 rotation;		// rotation from parent
+			int parentIndex;
+			std::vector<int> childIndex;
+			int ownIndex;
+		};
+
 		class ModelLoader
 		{
 			std::vector<Vertex> m_vertices;
 			std::vector<unsigned> m_indices;
 			std::vector<VertexGroup> m_groups;
 			std::vector<MaterialLoader> m_materials;
+			std::vector<BoneLoader> m_bones;
 			AABB m_boundingBox;
 			std::wstring m_filename;
 			std::wstring m_foldername;
@@ -68,6 +80,7 @@ namespace TowerDefense
 			void LoadText(const wchar_t* filename);
 			void Clear();
 
+			void Transform(mth::float4x4 transform);
 			void CalculateNormals();
 			void CalculateTangents();
 			void CalculateBoundingBox();
@@ -78,6 +91,7 @@ namespace TowerDefense
 			inline std::vector<MaterialLoader>& Materials() { return m_materials; }
 			inline const wchar_t* Filename() { return m_filename.c_str(); }
 			inline const wchar_t* Foldername() { return m_foldername.c_str(); }
+			inline std::vector<BoneLoader>& Bones() { return m_bones; }
 			inline AABB BoundingBox() { return m_boundingBox; }
 		};
 	}

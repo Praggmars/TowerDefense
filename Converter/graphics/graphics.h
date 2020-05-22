@@ -10,6 +10,7 @@ namespace Converter
 		struct CB_MatrixBuffer
 		{
 			mth::float4x4 worldMatrix;
+			mth::float4x4 viewMatrix;
 			mth::float4x4 cameraMatrix;
 			mth::float4x4 lightMatrix;
 		};

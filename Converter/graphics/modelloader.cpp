@@ -10,6 +10,8 @@
 #pragma comment (lib, "assimp/lib/assimp.lib")
 #pragma comment (lib, "windowscodecs.lib")
 
+#define STORE_BONE_OFFSET_MATRIX true
+
 namespace Converter
 {
 	namespace gfx
@@ -312,12 +314,17 @@ namespace Converter
 			{
 				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
 				b.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
+#if STORE_BONE_OFFSET_MATRIX
+				if (!ScanStream(infile, L"To bone:")) throw Exception::FileRead(filename);
+				infile >> b.toBoneSpace;
+#else
 				mth::float3 toBoneTranslate, toBoneRotate;
 				if (!ScanStream(infile, L"To bone translate:")) throw Exception::FileRead(filename);
 				infile >> toBoneTranslate;
 				if (!ScanStream(infile, L"To bone rotate:")) throw Exception::FileRead(filename);
 				infile >> toBoneRotate;
 				b.toBoneSpace = mth::float4x4::RotationTranslation(toBoneRotate, toBoneTranslate);
+#endif
 				if (!ScanStream(infile, L"Transform:")) throw Exception::FileRead(filename);
 				infile >> b.offset;
 				if (!ScanStream(infile, L"Rotation:")) throw Exception::FileRead(filename);
@@ -690,7 +697,16 @@ namespace Converter
 				for (unsigned b = 0; b < mesh->mNumBones; b++)
 				{
 					auto& bone_ai = *mesh->mBones[b];
-					m_boneOffsets[StoreAiString(bone_ai.mName)] = StoreAiMatrix(bone_ai.mOffsetMatrix);
+					mth::float4x4 mat = StoreAiMatrix(bone_ai.mOffsetMatrix);
+					mth::float3 translate(mat(0, 3), mat(1, 3), mat(2, 3));
+					mth::float3 rotate = static_cast<mth::float3x3>(mat).ToRotationAngles();
+					mth::float4x4 recreated = mth::float4x4::RotationTranslation(rotate, translate);
+					if (!mat.isNear(recreated))
+					{
+						mth::float4x4 diff = mat - recreated;
+						recreated = mat;
+					}
+					m_boneOffsets[StoreAiString(bone_ai.mName)] = recreated;
 				}
 			}
 		}
@@ -834,6 +850,16 @@ namespace Converter
 				filename += (char)ch;
 
 			AssimpLoader(m_vertices, m_indices, m_vertexGroups, m_materials, m_bones).Load(filename);
+			for (Vertex& v : m_vertices)
+			{
+				v.position.x *= -1.0f;
+				v.normal.x *= -1.0f;
+				v.tangent.x *= -1.0f;
+			}
+			m_bones[0].rotation.x -= mth::PI * 0.5f;
+			m_bones[0].rotation.y -= mth::PI;
+			m_bones[0].transform = mth::float4x4::RotationTranslation(m_bones[0].rotation, m_bones[0].offset);
+			FlipInsideOut(false);
 		}
 
 #pragma endregion
@@ -1060,8 +1086,12 @@ namespace Converter
 			for (Bone& b : m_bones)
 			{
 				ss << L"\nName: " << b.name << '\n';
+#if STORE_BONE_OFFSET_MATRIX
+				ss << L"To bone:\n" << b.toBoneSpace;
+#else
 				ss << L"To bone translate: " << mth::float3(b.toBoneSpace(0, 3), b.toBoneSpace(1, 3), b.toBoneSpace(2, 3)) << '\n';
 				ss << L"To bone rotate: " << static_cast<mth::float3x3>(b.toBoneSpace).ToRotationAngles() << '\n';
+#endif
 				ss << L"Transform: " << b.offset << '\n';
 				ss << L"Rotation: " << b.rotation << '\n';
 				ss << L"Parent: " << b.parentIndex << '\n';
@@ -1077,7 +1107,7 @@ namespace Converter
 
 			return ss.str();
 		}
-		void ModelLoader::FlipInsideOut()
+		void ModelLoader::FlipInsideOut(bool invertSurfaceVectors)
 		{
 			for (size_t i = 0; i < m_indices.size(); i += 3)
 			{
@@ -1085,10 +1115,13 @@ namespace Converter
 				m_indices[i + 1] = m_indices[i + 2];
 				m_indices[i + 2] = tmp;
 			}
-			for (Vertex& v : m_vertices)
+			if (invertSurfaceVectors)
 			{
-				v.normal *= -1.0f;
-				v.tangent *= -1.0f;
+				for (Vertex& v : m_vertices)
+				{
+					v.normal *= -1.0f;
+					v.tangent *= -1.0f;
+				}
 			}
 		}
 		void ModelLoader::Transform(mth::float4x4 transform)

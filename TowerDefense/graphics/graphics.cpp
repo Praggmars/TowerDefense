@@ -72,7 +72,6 @@ namespace TowerDefense
 		{
 			HRESULT result;
 			D3D11_BLEND_DESC blendDesc{};
-			blendDesc.RenderTarget[0].BlendEnable = false;
 			blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
@@ -169,6 +168,7 @@ namespace TowerDefense
 cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
+	matrix viewMatrix;
 	matrix cameraMatrix;
 	matrix lightMatrix;
 };
@@ -201,13 +201,19 @@ struct PixelInputType
 PixelInputType main(VertexInputType input)
 {
 	PixelInputType output;
-	output.wndpos = mul(float4(input.position, 1.0f), worldMatrix);
+	matrix transformMatrix = mul(
+		input.weights.x * bones[input.bones.x] + 
+		input.weights.y * bones[input.bones.y] + 
+		input.weights.z * bones[input.bones.z] +
+		(1.0f - input.weights.x - input.weights.y - input.weights.z) * bones[input.bones.w],
+		worldMatrix);
+	output.wndpos = mul(float4(input.position, 1.0f), transformMatrix);
 	output.position = output.wndpos.xyz;
 	output.lightTex = mul(output.wndpos, lightMatrix);
 	output.wndpos = mul(output.wndpos, cameraMatrix);
 	output.texcoord = input.texcoord;
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+	output.normal = mul(input.normal, (float3x3)transformMatrix);
+	output.tangent = mul(input.tangent, (float3x3)transformMatrix);
 	return output;
 }
 )";
@@ -350,7 +356,8 @@ float4 main(PixelInputType input) : SV_TARGET
 	if (intensity > 0.0f)
 	{
 		color = saturate(color + light_diffuseColor * intensity);
-		float3 reflection = normalize(2.0f * intensity * pixelNormal - lightDirection);
+		float3 reflection;
+		//reflection = normalize(2.0f * intensity * pixelNormal - lightDirection);
 		reflection = reflect(-lightDirection, pixelNormal);
 		specular = pow(saturate(dot(reflection, viewDirection)), material_specularPower);
 		specular *= material_specularColor;
@@ -404,6 +411,9 @@ float4 main(PixelInputType input) : SV_TARGET
 
 			bufferDesc.ByteWidth = m_psMaterialBufferSize;
 			ThrowIfFailed(m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_psMaterialBuffer));
+
+			bufferDesc.ByteWidth = sizeof(mth::float4x4) * 96;
+			ThrowIfFailed(m_device3D->CreateBuffer(&bufferDesc, nullptr, &m_boneBuffer));
 		}
 		void Graphics::WriteShaderBuffer(ID3D11Buffer* buffer, void* data, unsigned size)
 		{
@@ -514,6 +524,10 @@ float4 main(PixelInputType input) : SV_TARGET
 		void Graphics::WritePSMaterialBuffer(void* data)
 		{
 			WriteShaderBuffer(m_psMaterialBuffer.Get(), data, m_psMaterialBufferSize);
+		}
+		void Graphics::WriteBoneBuffer(mth::float4x4 bones[], unsigned count)
+		{
+			WriteShaderBuffer(m_boneBuffer.Get(), bones, sizeof(mth::float4x4) * count);
 		}
 		void Graphics::SetSwapChainPanel(Windows::UI::Xaml::Controls::SwapChainPanel^ panel)
 		{

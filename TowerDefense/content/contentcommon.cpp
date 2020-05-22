@@ -32,18 +32,20 @@ namespace TowerDefense
 		}
 		GameResources::GameResources(gfx::Graphics& graphics)
 		{
-			auto texture = gfx::Texture::CreateColoredTexture(graphics, { 100, 125, 225, 255 }, 16);
 			auto normalmap = gfx::Texture::CreateDefaultNormalmap(graphics, 16);
 			gfx::MaterialData materialData = { mth::float4(1.0f), mth::float4(), 1.0f, 1.0f };
 			gfx::ModelLoader ml;
 
-			ml.CreateCube(mth::float3(-0.25f), mth::float3(0.5f));
+			//ml.CreateCube(mth::float3(-0.25f), mth::float3(0.5f));
+			ml.LoadText((graphics.AppDirectory() + L"resources\\duck.ttdm").c_str());
+			//ml.Transform(mth::float4x4::Scaling(mth::float3(0.5f)));
 			enemy.model = gfx::Model::CreateP(graphics, ml);
 			enemy.materials.push_back(
 				gfx::Material(
-					gfx::Texture::CreateColoredTexture(graphics, { 225, 125, 125, 255 }, 16),
-					normalmap,
+					gfx::Texture::CreateColoredTexture(graphics, { 175, 200, 225, 255 }, 16),
+					gfx::Texture::CreateP(graphics, ml.Materials()[0].normalmap.c_str()),
 					materialData));
+			enemy.skeleton = gfx::Skeleton(ml);
 			enemy.hitbox = phy::Hitbox::CreateP(ml);
 
 			ml.LoadText((graphics.AppDirectory() + L"resources\\map.ttdm").c_str());
@@ -55,6 +57,7 @@ namespace TowerDefense
 					CreateMapTexture(graphics, 28, 34, 6),
 					normalmap,
 					materialData));
+			map.skeleton = gfx::Skeleton(ml);
 			map.hitbox = phy::Hitbox::CreateP(ml);
 
 			ml.LoadText((graphics.AppDirectory() + L"resources\\base.ttdm").c_str());
@@ -66,6 +69,7 @@ namespace TowerDefense
 					gfx::Texture::CreateColoredTexture(graphics, { 225, 55, 225, 255 }, 16),
 					normalmap,
 					materialData));
+			base.skeleton = gfx::Skeleton(ml);
 			base.hitbox = phy::Hitbox::CreateP(ml);
 
 			ml.LoadText((graphics.AppDirectory() + L"resources\\heavy.ttdm").c_str());
@@ -73,7 +77,8 @@ namespace TowerDefense
 			materialData = ml.Materials()[0].data;
 			//material = gfx::Material::CreateP(texture, normalmap, materialData);
 			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
-				turret_heavy.materials.push_back(gfx::Material(texture, normalmap, materialData));
+				turret_heavy.materials.push_back(gfx::Material(graphics, ml, ml.VertexGroups()[i].materialIndex));
+			turret_heavy.skeleton = gfx::Skeleton(ml);
 			turret_heavy.hitbox = phy::Hitbox::CreateP(ml);
 
 			ml.LoadText((graphics.AppDirectory() + L"resources\\launcher.ttdm").c_str());
@@ -81,7 +86,8 @@ namespace TowerDefense
 			materialData = ml.Materials()[0].data;
 			//material = gfx::Material::CreateP(texture, normalmap, materialData);
 			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
-				turret_launcher.materials.push_back(gfx::Material(texture, normalmap, materialData));
+				turret_launcher.materials.push_back(gfx::Material(graphics, ml, ml.VertexGroups()[i].materialIndex));
+			turret_launcher.skeleton = gfx::Skeleton(ml);
 			turret_launcher.hitbox = phy::Hitbox::CreateP(ml);
 
 			ml.LoadText((graphics.AppDirectory() + L"resources\\light.ttdm").c_str());
@@ -89,7 +95,8 @@ namespace TowerDefense
 			materialData = ml.Materials()[0].data;
 			//material = gfx::Material::CreateP(texture, normalmap, materialData);
 			for (size_t i = 0; i < ml.VertexGroups().size(); i++)
-				turret_light.materials.push_back(gfx::Material(texture, normalmap, materialData));
+				turret_light.materials.push_back(gfx::Material(graphics, ml, ml.VertexGroups()[i].materialIndex));
+			turret_light.skeleton = gfx::Skeleton(ml);
 			turret_light.hitbox = phy::Hitbox::CreateP(ml);
 		}
 
@@ -98,9 +105,10 @@ namespace TowerDefense
 				gameModel.model,
 				gameModel.materials.data(),
 				static_cast<unsigned>(gameModel.materials.size()),
+				gameModel.skeleton,
 				gameModel.hitbox) {}
-		GameObject::GameObject(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox) :
-			gfx::Entity(model, material, hitbox) {}
+		GameObject::GameObject(gfx::Model::P model, gfx::Material material, gfx::Skeleton& skeleton, phy::Hitbox::P hitbox) :
+			gfx::Entity(model, material, skeleton, hitbox) {}
 		GameObject::P GameObject::CreateP(GameResources::GameModel& gameModel)
 		{
 			return std::make_shared<GameObject>(gameModel);
@@ -109,13 +117,13 @@ namespace TowerDefense
 		{
 			return std::make_unique<GameObject>(gameModel);
 		}
-		GameObject::P GameObject::CreateP(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox)
+		GameObject::P GameObject::CreateP(gfx::Model::P model, gfx::Material material, gfx::Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_shared<GameObject>(model, material, hitbox);
+			return std::make_shared<GameObject>(model, material, skeleton, hitbox);
 		}
-		GameObject::U GameObject::CreateU(gfx::Model::P model, gfx::Material material, phy::Hitbox::P hitbox)
+		GameObject::U GameObject::CreateU(gfx::Model::P model, gfx::Material material, gfx::Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_unique<GameObject>(model, material, hitbox);
+			return std::make_unique<GameObject>(model, material, skeleton, hitbox);
 		}
 	}
 }

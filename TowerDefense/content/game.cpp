@@ -47,8 +47,16 @@ namespace TowerDefense
 			{
 				m_timeCounter -= 1.0f;
 				m_secondCounter++;
-				m_level->SpawnEnemy(Enemy::CreateP(m_gameResources));
+				Enemy::P enemy = Enemy::CreateP(m_gameResources, 100 + m_secondCounter / 10);
+				enemy->SetAnimation<gfx::DuckAnimation>();
+				m_level->SpawnEnemy(enemy);
 			}
+
+			for (auto& e : m_level->RenderedEntities())
+				e->UpdateSkeleton(deltaTime);
+			if (m_movingTurret)
+				m_movingTurret->UpdateSkeleton(deltaTime);
+
 			m_level->Update(deltaTime);
 
 			if (m_movingTurret)
@@ -87,6 +95,7 @@ namespace TowerDefense
 
 			gfx::CB_MatrixBuffer matrixBuffer;
 			matrixBuffer.worldMatrix = mth::float4x4::Identity();
+			matrixBuffer.viewMatrix = m_camera.ViewMatrix();
 			matrixBuffer.cameraMatrix = m_camera.CameraMatrix();
 			matrixBuffer.lightMatrix = m_light.LightMatrix();
 			//matrixBuffer.cameraMatrix = matrixBuffer.lightMatrix;
@@ -101,18 +110,11 @@ namespace TowerDefense
 
 			m_shadowMap.SetAsRenderTarget(m_graphics);
 			for (auto& e : m_level->RenderedEntities())
-			{
-				mth::float4x4 lightMatrix = matrixBuffer.lightMatrix * e->WorldMatrix();
-				m_shadowMap.WriteBuffer(m_graphics, &lightMatrix);
-				e->Model()->RenderAll(m_graphics);
-			}
+				e->RenderBare(m_graphics, matrixBuffer);
 
 			m_ambeintOcclusion.SetAsRenderTarget(m_graphics, m_camera);
 			for (auto& e : m_level->RenderedEntities())
-			{
-				m_ambeintOcclusion.WriteBuffer(m_graphics, m_camera, *e);
-				e->Model()->RenderAll(m_graphics);
-			}
+				e->RenderBare(m_graphics, matrixBuffer);
 			m_ambeintOcclusion.RenderOcclusionMap(m_graphics, m_camera);
 
 			m_graphics.SetScreenAsRenderTarget();
@@ -235,20 +237,18 @@ namespace TowerDefense
 
 			if (!m_movingTurret)
 			{
-				GameResources::GameModel* model = nullptr;
 				switch (turretType)
 				{
 				case TurretType::LIGHT:
-					model = &m_gameResources.turret_light;
+					m_movingTurret = Turret::CreateP(m_gameResources.turret_light, AttackData::Light());
 					break;
 				case TurretType::HEAVY:
-					model = &m_gameResources.turret_heavy;
+					m_movingTurret = Turret::CreateP(m_gameResources.turret_heavy, AttackData::Heavy());
 					break;
 				case TurretType::LAUNCHER:
-					model = &m_gameResources.turret_launcher;
+					m_movingTurret = Turret::CreateP(m_gameResources.turret_launcher, AttackData::Launcher());
 					break;
 				}
-				m_movingTurret = Turret::CreateP(*model);
 			}
 		}
 	}

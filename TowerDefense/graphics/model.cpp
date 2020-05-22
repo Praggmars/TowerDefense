@@ -12,7 +12,7 @@ namespace TowerDefense
 
 			m_vertexCount = vertexCount;
 
-			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 			bufferDesc.ByteWidth = m_vertexCount * sizeof(Vertex);
 			bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			subResourceData.pSysMem = vertices;
@@ -28,7 +28,7 @@ namespace TowerDefense
 
 			m_indexCount = indexCount;
 
-			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 			bufferDesc.ByteWidth = m_indexCount * sizeof(UINT);
 			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			subResourceData.pSysMem = indices;

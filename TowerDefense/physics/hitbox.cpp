@@ -7,7 +7,12 @@ namespace TowerDefense
 	namespace phy
 	{
 		Hitbox::Hitbox(gfx::ModelLoader& loader) :
-			Hitbox(loader.Vertices().data(), static_cast<unsigned>(loader.Vertices().size()), loader.Indices().data(), static_cast<unsigned>(loader.Indices().size())) {}
+			Hitbox(loader.Vertices().data(), static_cast<unsigned>(loader.Vertices().size()), loader.Indices().data(), static_cast<unsigned>(loader.Indices().size())) 
+		{
+			mth::float4x4 transform = mth::float4x4::RotationTranslation(loader.Bones()[0].rotation, loader.Bones()[0].offset);
+			for (size_t i = 0; i < loader.Vertices().size(); i++)
+				m_vertices[i] = mth::Transform(transform, m_vertices[i]);
+		}
 		Hitbox::Hitbox(mth::float3 vertices[], unsigned vertexCount, unsigned indices[], unsigned indexCount) :
 			m_vertices(vertexCount),
 			m_indices(indexCount)

@@ -344,7 +344,7 @@ namespace mth
 		mat4x4<T> Inverse() const
 		{
 			T det = Determinant();
-			return float4x4(
+			return mat4x4<T>(
 				mat3x3<T>(m_mat[1][1], m_mat[1][2], m_mat[1][3], m_mat[2][1], m_mat[2][2], m_mat[2][3], m_mat[3][1], m_mat[3][2], m_mat[3][3]).Determinant() / det,
 				mat3x3<T>(m_mat[0][1], m_mat[0][2], m_mat[0][3], m_mat[2][1], m_mat[2][2], m_mat[2][3], m_mat[3][1], m_mat[3][2], m_mat[3][3]).Determinant() / -det,
 				mat3x3<T>(m_mat[0][1], m_mat[0][2], m_mat[0][3], m_mat[1][1], m_mat[1][2], m_mat[1][3], m_mat[3][1], m_mat[3][2], m_mat[3][3]).Determinant() / det,
@@ -405,7 +405,7 @@ namespace mth
 		}
 		mat4x4<T> operator+(const mat4x4<T> m) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] + m(0, 0), m_mat[0][1] + m(0, 1), m_mat[0][2] + m(0, 2), m_mat[0][3] + m(0, 3),
 				m_mat[1][0] + m(1, 0), m_mat[1][1] + m(1, 1), m_mat[1][2] + m(1, 2), m_mat[1][3] + m(1, 3),
 				m_mat[2][0] + m(2, 0), m_mat[2][1] + m(2, 1), m_mat[2][2] + m(2, 2), m_mat[2][3] + m(2, 3),
@@ -421,7 +421,7 @@ namespace mth
 		}
 		mat4x4<T> operator-(const mat4x4<T> m) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] - m(0, 0), m_mat[0][1] - m(0, 1), m_mat[0][2] - m(0, 2), m_mat[0][3] - m(0, 3),
 				m_mat[1][0] - m(1, 0), m_mat[1][1] - m(1, 1), m_mat[1][2] - m(1, 2), m_mat[1][3] - m(1, 3),
 				m_mat[2][0] - m(2, 0), m_mat[2][1] - m(2, 1), m_mat[2][2] - m(2, 2), m_mat[2][3] - m(2, 3),
@@ -445,7 +445,7 @@ namespace mth
 		}
 		mat4x4<T> operator+(const T t) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] + t, m_mat[0][1] + t, m_mat[0][2] + t, m_mat[0][3] + t,
 				m_mat[1][0] + t, m_mat[1][1] + t, m_mat[1][2] + t, m_mat[1][3] + t,
 				m_mat[2][0] + t, m_mat[2][1] + t, m_mat[2][2] + t, m_mat[2][3] + t,
@@ -461,7 +461,7 @@ namespace mth
 		}
 		mat4x4<T> operator-(const T t) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] - t, m_mat[0][1] - t, m_mat[0][2] - t, m_mat[0][3] - t,
 				m_mat[1][0] - t, m_mat[1][1] - t, m_mat[1][2] - t, m_mat[1][3] - t,
 				m_mat[2][0] - t, m_mat[2][1] - t, m_mat[2][2] - t, m_mat[2][3] - t,
@@ -477,7 +477,7 @@ namespace mth
 		}
 		mat4x4<T> operator*(const T t) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] * t, m_mat[0][1] * t, m_mat[0][2] * t, m_mat[0][3] * t,
 				m_mat[1][0] * t, m_mat[1][1] * t, m_mat[1][2] * t, m_mat[1][3] * t,
 				m_mat[2][0] * t, m_mat[2][1] * t, m_mat[2][2] * t, m_mat[2][3] * t,
@@ -493,7 +493,7 @@ namespace mth
 		}
 		mat4x4<T> operator/(const T t) const
 		{
-			return mat3x3<T>(
+			return mat4x4<T>(
 				m_mat[0][0] / t, m_mat[0][1] / t, m_mat[0][2] / t, m_mat[0][3] / t,
 				m_mat[1][0] / t, m_mat[1][1] / t, m_mat[1][2] / t, m_mat[1][3] / t,
 				m_mat[2][0] / t, m_mat[2][1] / t, m_mat[2][2] / t, m_mat[2][3] / t,

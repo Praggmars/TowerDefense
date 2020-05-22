@@ -18,12 +18,16 @@ namespace TowerDefense
 			alg::PathFinderDiag m_pathFinder;
 			float m_speed;
 			unsigned m_pathProgress;
-			unsigned m_health;
+			float m_maxHealth;
+			float m_health;
+
+		private:
+			void UpdateMaterial();
 
 		public:
-			Enemy(GameResources& resources);
-			static Enemy::P CreateP(GameResources& resources);
-			static Enemy::U CreateU(GameResources& resources);
+			Enemy(GameResources& resources, float health);
+			static Enemy::P CreateP(GameResources& resources, float health);
+			static Enemy::U CreateU(GameResources& resources, float health);
 
 			void Update(float deltaTime, Level& level);
 			void StartPath();

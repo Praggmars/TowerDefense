@@ -10,24 +10,33 @@ namespace TowerDefense
 	{
 		class Enemy;
 
+		struct AttackData
+		{
+			float damage;
+			float reloadTime;
+			float range;
+
+			static AttackData Light();
+			static AttackData Heavy();
+			static AttackData Launcher();
+		};
+
 		class Turret :public GameObject
 		{
 		public:
 			SMART_PTR(Turret)
 		private:
 			alg::Point m_mapPosition;
-			unsigned m_damage;
+			AttackData m_attackData;
 			float m_timeToShoot;
-			float m_reloadTime;
-			float m_range;
 
 		private:
 			virtual void Face(mth::Positionf& target);
 
 		public:
-			Turret(GameResources::GameModel& gameModel);
-			static Turret::P CreateP(GameResources::GameModel& gameModel);
-			static Turret::U CreateU(GameResources::GameModel& gameModel);
+			Turret(GameResources::GameModel& gameModel, AttackData attackData);
+			static Turret::P CreateP(GameResources::GameModel& gameModel, AttackData attackData);
+			static Turret::U CreateU(GameResources::GameModel& gameModel, AttackData attackData);
 
 			void Update(float deltaTime);
 			void Shoot(std::shared_ptr<Enemy> enemies[], size_t enemyCount);

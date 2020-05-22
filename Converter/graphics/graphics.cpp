@@ -169,6 +169,7 @@ namespace Converter
 cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
+	matrix viewMatrix;
 	matrix cameraMatrix;
 	matrix lightMatrix;
 };
@@ -348,19 +349,19 @@ float4 main(PixelInputType input) : SV_TARGET
 	input.lightTex.x = input.lightTex.x / input.lightTex.w * 0.5f + 0.5f;
 	input.lightTex.y = input.lightTex.y / input.lightTex.w * (-0.5f) + 0.5f;
 	input.lightTex.z = input.lightTex.z / input.lightTex.w;
-	float shadowFactor = ShadowFactor5x5(input.lightTex.xyz);
-	//shadowFactor = 1.0f;	//FIXME: delete line
+	float shadowFactor = ShadowFactor1x1(input.lightTex.xyz);
+//shadowFactor = 1.0f;	//FIXME: delete line
 	float intensity = shadowFactor * saturate(dot(pixelNormal, lightDirection));
 
 	float occlusionFactor = texture_ambientMap.Sample(sampler_texture, texCoords).r;
-	//occlusionFactor = 1.0f;	//FIXME: delete line
-	float4 color = light_ambientColor * (occlusionFactor * 0.5f + 0.5f);
+//return texture_ambientMap.Sample(sampler_texture, texCoords);
+//occlusionFactor = 1.0f;	//FIXME: delete line
+	float4 color = light_ambientColor * (occlusionFactor * 1.0f + 0.0f);
 
 	if (intensity > 0.0f)
 	{
 		color = saturate(color + light_diffuseColor * intensity);
-		float3 reflection = normalize(2.0f * intensity * pixelNormal - lightDirection);
-		reflection = reflect(-lightDirection, pixelNormal);
+		float3 reflection = reflect(-lightDirection, pixelNormal);
 		specular = pow(saturate(dot(reflection, viewDirection)), material_specularPower);
 		specular *= material_specularColor;
 	}

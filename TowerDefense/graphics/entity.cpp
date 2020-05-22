@@ -6,6 +6,7 @@ namespace TowerDefense
 	namespace gfx
 	{
 		Entity::Entity(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox) :
+			m_skeleton(modelLoader),
 			m_visible(true)
 		{
 			m_model = Model::CreateP(graphics, modelLoader);
@@ -18,7 +19,8 @@ namespace TowerDefense
 			if (makeHitbox)
 				m_hitbox = phy::Hitbox::CreateP(modelLoader);
 		}
-		Entity::Entity(Model::P model, Material* materials, unsigned materialCount, phy::Hitbox::P hitbox) :
+		Entity::Entity(Model::P model, Material* materials, unsigned materialCount, Skeleton& skeleton, phy::Hitbox::P hitbox) :
+			m_skeleton(skeleton),
 			m_visible(true)
 		{
 			m_model = model;
@@ -27,31 +29,48 @@ namespace TowerDefense
 				m_materials[i] = materials[i];
 			m_hitbox = hitbox;
 		}
-		Entity::Entity(Model::P model, Material material, phy::Hitbox::P hitbox) :
-			Entity(model, &material, 1, hitbox) {}
+		Entity::Entity(Model::P model, Material material, Skeleton& skeleton, phy::Hitbox::P hitbox) :
+			Entity(model, &material, 1, skeleton, hitbox) {}
 		Entity::P Entity::CreateP(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox)
 		{
 			return std::make_shared<Entity>(graphics, modelLoader, makeHitbox);
 		}
-		Entity::P Entity::CreateP(Model::P model, Material* materials, unsigned materialCount, phy::Hitbox::P hitbox)
+		Entity::P Entity::CreateP(Model::P model, Material* materials, unsigned materialCount, Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_shared<Entity>(model, materials, materialCount, hitbox);
+			return std::make_shared<Entity>(model, materials, materialCount, skeleton, hitbox);
 		}
-		Entity::P Entity::CreateP(Model::P model, Material material, phy::Hitbox::P hitbox)
+		Entity::P Entity::CreateP(Model::P model, Material material, Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_shared<Entity>(model, material, hitbox);
+			return std::make_shared<Entity>(model, &material, 1, skeleton, hitbox);
 		}
 		Entity::U Entity::CreateU(Graphics& graphics, ModelLoader& modelLoader, bool makeHitbox)
 		{
 			return std::make_unique<Entity>(graphics, modelLoader, makeHitbox);
 		}
-		Entity::U Entity::CreateU(Model::P model, Material* materials, unsigned materialCount, phy::Hitbox::P hitbox)
+		Entity::U Entity::CreateU(Model::P model, Material* materials, unsigned materialCount, Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_unique<Entity>(model, materials, materialCount, hitbox);
+			return std::make_unique<Entity>(model, materials, materialCount, skeleton, hitbox);
 		}
-		Entity::U Entity::CreateU(Model::P model, Material material, phy::Hitbox::P hitbox)
+		Entity::U Entity::CreateU(Model::P model, Material material, Skeleton& skeleton, phy::Hitbox::P hitbox)
 		{
-			return std::make_unique<Entity>(model, material, hitbox);
+			return std::make_unique<Entity>(model, &material, 1, skeleton, hitbox);
+		}
+		void Entity::UpdateSkeleton(float deltaTime)
+		{
+			if (m_animation)
+				m_animation->CalculateTransform(deltaTime);
+			m_skeleton.Update();
+		}
+		void Entity::RenderBare(Graphics& graphics, CB_MatrixBuffer& matrixBuffer)
+		{
+			if (m_visible)
+			{
+				matrixBuffer.worldMatrix = WorldMatrix();
+				graphics.WriteVSMatrixBuffer(&matrixBuffer);
+				graphics.SetVSBoneBuffer();
+				graphics.WriteBoneBuffer(m_skeleton.MatrixBuffer(), m_skeleton.BoneCount());
+				m_model->RenderAll(graphics);
+			}
 		}
 		void Entity::Render(Graphics& graphics, CB_MatrixBuffer& matrixBuffer)
 		{
@@ -59,6 +78,8 @@ namespace TowerDefense
 			{
 				matrixBuffer.worldMatrix = WorldMatrix();
 				graphics.WriteVSMatrixBuffer(&matrixBuffer);
+				graphics.SetVSBoneBuffer();
+				graphics.WriteBoneBuffer(m_skeleton.MatrixBuffer(), m_skeleton.BoneCount());
 				m_model->SetBuffersToRender(graphics);
 				for (unsigned i = 0; i < m_materials.size(); i++)
 				{

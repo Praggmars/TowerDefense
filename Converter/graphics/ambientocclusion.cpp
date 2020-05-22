@@ -40,6 +40,7 @@ namespace Converter
 cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
+	matrix viewMatrix;
 	matrix cameraMatrix;
 	matrix lightMatrix;
 };
@@ -77,7 +78,7 @@ PixelInputType main(VertexInputType input)
 		(1.0f - input.weights.x - input.weights.y - input.weights.z) * bones[input.bones.w],
 		worldMatrix);
 	output.wndpos = mul(float4(input.position, 1.0f), transformMatrix);
-	output.depth = output.wndpos.z;
+	output.depth = mul(output.wndpos, viewMatrix).z;
 	output.normal = mul(input.normal, (float3x3)transformMatrix);
 	output.wndpos = mul(output.wndpos, cameraMatrix);
 	//output.texcoord = input.texcoord;
@@ -152,7 +153,7 @@ float4 main(PixelInputType input) : SV_TARGET
 			textureDesc.Height = m_height;
 			textureDesc.MipLevels = 1;
 			textureDesc.ArraySize = 1;
-			textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			textureDesc.Format = DXGI_FORMAT_R32_FLOAT;
 			textureDesc.SampleDesc.Count = 1;
 			textureDesc.SampleDesc.Quality = 0;
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;

@@ -127,15 +127,15 @@ namespace TowerDefense
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_vertices.resize(vertexCount);
-			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0])* vertexCount);
+			infile.read(reinterpret_cast<char*>(m_vertices.data()), sizeof(m_vertices[0]) * vertexCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_indices.resize(indexCount);
-			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0])* indexCount);
+			infile.read(reinterpret_cast<char*>(m_indices.data()), sizeof(m_indices[0]) * indexCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_groups.resize(groupCount);
-			infile.read(reinterpret_cast<char*>(m_groups.data()), sizeof(m_groups[0])* groupCount);
+			infile.read(reinterpret_cast<char*>(m_groups.data()), sizeof(m_groups[0]) * groupCount);
 			if (!infile.good()) throw Exception::FileRead(filename);
 
 			m_materials.resize(materialCount);
@@ -144,13 +144,13 @@ namespace TowerDefense
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
 				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].texture.resize(stringSize + 1);
-				infile.read(reinterpret_cast<char*>(m_materials[i].texture.data()), sizeof(wchar_t)* (stringSize + 1));
+				infile.read(reinterpret_cast<char*>(m_materials[i].texture.data()), sizeof(wchar_t) * (stringSize + 1));
 				if (!infile.good()) throw Exception::FileRead(filename);
 
 				infile.read(reinterpret_cast<char*>(&stringSize), sizeof(stringSize));
 				if (!infile.good()) throw Exception::FileRead(filename);
 				m_materials[i].normalmap.resize(stringSize + 1);
-				infile.read(reinterpret_cast<char*>(m_materials[i].normalmap.data()), sizeof(wchar_t)* (stringSize + 1));
+				infile.read(reinterpret_cast<char*>(m_materials[i].normalmap.data()), sizeof(wchar_t) * (stringSize + 1));
 				if (!infile.good()) throw Exception::FileRead(filename);
 			}
 		}
@@ -202,11 +202,11 @@ namespace TowerDefense
 				throw Exception::FileOpen(filename);
 			m_filename = filename;
 			StoreFolderName();
-
 			size_t vertexCount;
 			size_t indexCount;
 			size_t groupCount;
 			size_t materialCount;
+			size_t boneCount;
 
 			if (!ScanStream(infile, L"Vertex count:")) throw Exception::FileRead(filename);
 			infile >> vertexCount;
@@ -224,19 +224,21 @@ namespace TowerDefense
 			infile >> materialCount;
 			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
 
+			if (!ScanStream(infile, L"Bone count:")) throw Exception::FileRead(filename);
+			infile >> boneCount;
+			if (!ScanTill(infile, L'\n')) throw Exception::FileRead(filename);
+
 			if (!ScanStream(infile, L"Vertices:")) throw Exception::FileRead(filename);
 			m_vertices.resize(vertexCount);
-			vertexCount = 0;
 			for (Vertex& v : m_vertices)
 			{
-				vertexCount++;
 				infile >> v.position;
 				infile >> v.texcoord;
 				infile >> v.normal;
 				infile >> v.tangent;
 				infile >> v.boneWeights;
 				infile >> v.boneIndices;
-				if (!infile.good()) throw Exception::FileRead(filename);
+				if (infile.eof()) throw Exception::FileRead(filename);
 			}
 
 			if (!ScanStream(infile, L"Indices:")) throw Exception::FileRead(filename);
@@ -244,7 +246,7 @@ namespace TowerDefense
 			for (unsigned& i : m_indices)
 			{
 				infile >> i;
-				if (!infile.good()) throw Exception::FileRead(filename);
+				if (infile.eof()) throw Exception::FileRead(filename);
 			}
 
 			if (!ScanStream(infile, L"Groups:")) throw Exception::FileRead(filename);
@@ -254,7 +256,7 @@ namespace TowerDefense
 				infile >> g.startIndex;
 				infile >> g.indexCount;
 				infile >> g.materialIndex;
-				if (!infile.good()) throw Exception::FileRead(filename);
+				if (infile.eof()) throw Exception::FileRead(filename);
 			}
 
 			if (!ScanStream(infile, L"Materials:")) throw Exception::FileRead(filename);
@@ -264,9 +266,9 @@ namespace TowerDefense
 				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
 				m.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
 				if (!ScanStream(infile, L"Texture:")) throw Exception::FileRead(filename);
-				m.texture = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				m.texture = m_foldername + ScanStringAfterWhiteSpacesToLineEnd(infile);
 				if (!ScanStream(infile, L"Normalmap:")) throw Exception::FileRead(filename);
-				m.normalmap = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				m.normalmap = m_foldername + ScanStringAfterWhiteSpacesToLineEnd(infile);
 				if (!ScanStream(infile, L"Diffuse color:")) throw Exception::FileRead(filename);
 				infile >> m.data.diffuseColor;
 				if (!ScanStream(infile, L"Texture weight:")) throw Exception::FileRead(filename);
@@ -276,6 +278,54 @@ namespace TowerDefense
 				if (!ScanStream(infile, L"Specular power:")) throw Exception::FileRead(filename);
 				infile >> m.data.specularPower;
 			}
+
+			if (!ScanStream(infile, L"Bones:")) throw Exception::FileRead(filename);
+			m_bones.resize(boneCount);
+			for (BoneLoader& b : m_bones)
+			{
+				if (!ScanStream(infile, L"Name:")) throw Exception::FileRead(filename);
+				b.name = ScanStringAfterWhiteSpacesToLineEnd(infile);
+				if (!ScanStream(infile, L"To bone:")) throw Exception::FileRead(filename);
+				infile >> b.toBoneSpace;
+				if (!ScanStream(infile, L"Transform:")) throw Exception::FileRead(filename);
+				infile >> b.offset;
+				if (!ScanStream(infile, L"Rotation:")) throw Exception::FileRead(filename);
+				infile >> b.rotation;
+				if (!ScanStream(infile, L"Parent:")) throw Exception::FileRead(filename);
+				infile >> b.parentIndex;
+				if (!ScanStream(infile, L"Children:")) throw Exception::FileRead(filename);
+				wchar_t ch;
+				int scanNumber;
+				bool sameNumber = false;
+				for (infile.get(ch); true; infile.get(ch))
+				{
+					if (!infile.good()) throw Exception::FileRead(filename);
+					if (ch >= '0' && ch <= '9')
+					{
+						if (sameNumber)
+						{
+							scanNumber *= 10;
+							scanNumber += ch - '0';
+						}
+						else
+						{
+							sameNumber = true;
+							scanNumber = ch - '0';
+						}
+					}
+					else if (ch == ',')
+					{
+						sameNumber = false;
+						b.childIndex.push_back(scanNumber);
+					}
+					if (ch == '\n')
+					{
+						if (sameNumber)
+							b.childIndex.push_back(scanNumber);
+						break;
+					}
+				}
+			}
 		}
 		void ModelLoader::Clear()
 		{
@@ -283,6 +333,17 @@ namespace TowerDefense
 			m_indices.clear();
 			m_groups.clear();
 			m_filename.clear();
+			m_foldername.clear();
+		}
+		void ModelLoader::Transform(mth::float4x4 transform)
+		{
+			mth::float3x3 surfaceTransform = mth::float3x3(transform).Transposed().Inverse();
+			for (Vertex& v : m_vertices)
+			{
+				v.position = mth::Transform(transform, v.position);
+				v.normal = (surfaceTransform * v.normal).Normalized();
+				v.tangent = (surfaceTransform * v.tangent).Normalized();
+			}
 		}
 		void ModelLoader::CalculateNormals()
 		{

@@ -97,7 +97,7 @@ namespace Converter
 			std::vector<unsigned char> WriteToMemoryBinary();
 			std::wstring WriteToMemoryText();
 
-			void FlipInsideOut();
+			void FlipInsideOut(bool invertSurfaceVectors = true);
 			void Transform(mth::float4x4 transform);
 			void CalculateNormals();
 			void UVMap();

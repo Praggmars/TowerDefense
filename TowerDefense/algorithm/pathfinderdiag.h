@@ -33,12 +33,6 @@ namespace TowerDefense
 			bool isCorner;
 		};
 
-		class MapGraph
-		{
-			std::vector<NodeType*> m_ends;
-			std::vector<NodeType*> m_graph;
-		};
-
 		class PathFinderDiag
 		{
 			Array2D<NodeType> m_map;

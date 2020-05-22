@@ -19,7 +19,6 @@ namespace Converter
 			float m_screenDepth;
 			float m_distance;
 			float m_sensitivity;
-			bool m_tracking;
 
 		private:
 			void SetPosition();

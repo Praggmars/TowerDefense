@@ -18,6 +18,7 @@ namespace Converter
 		gfx::PointLight m_light;
 		std::vector<std::unique_ptr<gfx::ModelLoader>> m_modelLoaders;
 		float m_shadowMapSize;
+		bool m_suspendDrawing;
 
 	private:
 		void LoadModel(const wchar_t* filename);

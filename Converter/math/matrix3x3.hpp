@@ -209,8 +209,8 @@ namespace mth
 		{
 			vec3<T> a;
 			a.y = atan2(m_mat[0][2], m_mat[2][2]);
-			a.x = atan2(-m_mat[1][2], fabs(a.y) < 0.25 ? m_mat[2][2] / cos(a.y) : m_mat[0][2] / sin(a.y));
 			a.z = atan2(m_mat[1][0], m_mat[1][1]);
+			a.x = atan2(-m_mat[1][2], (fmod(abs(a.y), PI * 0.5f) < (PI * 0.25)) ? (m_mat[2][2] / cos(a.y)) : (m_mat[0][2] / sin(a.y)));
 			return a;
 		}
 		vec3<T> ToCameraRotation() const

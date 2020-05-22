@@ -10,6 +10,7 @@ namespace TowerDefense
 		struct CB_MatrixBuffer
 		{
 			mth::float4x4 worldMatrix;
+			mth::float4x4 viewMatrix;
 			mth::float4x4 cameraMatrix;
 			mth::float4x4 lightMatrix;
 		};
@@ -61,6 +62,7 @@ namespace TowerDefense
 			unsigned m_psLightBufferSize;
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_psMaterialBuffer;
 			unsigned m_psMaterialBufferSize;
+			Microsoft::WRL::ComPtr<ID3D11Buffer> m_boneBuffer;
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_textureSampler;
 			Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowSampler;
 
@@ -98,6 +100,7 @@ namespace TowerDefense
 			void WriteVSMatrixBuffer(void* data);
 			void WritePSLightBuffer(void* data);
 			void WritePSMaterialBuffer(void* data);
+			void WriteBoneBuffer(mth::float4x4 bones[], unsigned count);
 
 			void SetSwapChainPanel(Windows::UI::Xaml::Controls::SwapChainPanel^ panel);
 			void Resize(unsigned width, unsigned height);
@@ -105,6 +108,8 @@ namespace TowerDefense
 			inline ID3D11Device3* Device3D() { return m_device3D.Get(); }
 			inline ID3D11DeviceContext3* Context3D() { return m_context3D.Get(); }
 			inline D3D_FEATURE_LEVEL FeatureLevel() { return m_featureLevel; }
+			inline void SetVSMatrixBuffer() { m_context3D->VSSetConstantBuffers(0, 1, m_vsMatrixBuffer.GetAddressOf()); }
+			inline void SetVSBoneBuffer() { m_context3D->VSSetConstantBuffers(1, 1, m_boneBuffer.GetAddressOf()); }
 			inline unsigned Width() { return m_width; }
 			inline unsigned Height() { return m_height; }
 			inline const std::wstring& AppDirectory() { return m_appDirectory; }

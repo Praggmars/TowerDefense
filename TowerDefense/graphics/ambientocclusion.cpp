@@ -40,8 +40,14 @@ namespace TowerDefense
 cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
-	matrix worldViewMatrix;
-	matrix projectionMatrix;
+	matrix viewMatrix;
+	matrix cameraMatrix;
+	matrix lightMatrix;
+};
+
+cbuffer BoneBuffer
+{
+	matrix bones[96];
 };
 
 struct VertexInputType
@@ -65,10 +71,16 @@ struct PixelInputType
 PixelInputType main(VertexInputType input)
 {
 	PixelInputType output;
-	output.wndpos = mul(float4(input.position, 1.0f), worldViewMatrix);
-	output.depth = output.wndpos.z;
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.wndpos = mul(output.wndpos, projectionMatrix);
+	matrix transformMatrix = mul(
+		input.weights.x * bones[input.bones.x] + 
+		input.weights.y * bones[input.bones.y] + 
+		input.weights.z * bones[input.bones.z] +
+		(1.0f - input.weights.x - input.weights.y - input.weights.z) * bones[input.bones.w],
+		worldMatrix);
+	output.wndpos = mul(float4(input.position, 1.0f), transformMatrix);
+	output.depth = mul(output.wndpos, viewMatrix).z;
+	output.normal = mul(input.normal, (float3x3)transformMatrix);
+	output.wndpos = mul(output.wndpos, cameraMatrix);
 	//output.texcoord = input.texcoord;
 	return output;
 }
@@ -533,7 +545,6 @@ PixelInputType main(VertexInputType input)
 		{
 			D3D11_BUFFER_DESC bufferDesc;
 
-			m_normalDepthMapVSBufferSize = sizeof(mth::float4x4) * 3;
 			m_screenQuadVSBufferSize = sizeof(mth::float4x4);
 			m_occlusionMapPSBufferSize = sizeof(OcclusionPSCB);
 			m_blurPSBufferSize = sizeof(mth::float2) * 2;
@@ -544,9 +555,6 @@ PixelInputType main(VertexInputType input)
 			bufferDesc.MiscFlags = 0;
 			bufferDesc.StructureByteStride = 0;
 			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			bufferDesc.ByteWidth = m_normalDepthMapVSBufferSize;
-			ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_normalDepthMapVSBuffer));
-
 			bufferDesc.ByteWidth = m_screenQuadVSBufferSize;
 			ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, &m_screenQuadVSBuffer));
 
@@ -565,10 +573,6 @@ PixelInputType main(VertexInputType input)
 				memcpy(resource.pData, data, dataSize);
 				context->Unmap(buffer, 0);
 			}
-		}
-		void AmbientOcclusion::WriteNormalDepthMapVSBuffer(ID3D11DeviceContext3* context, void* data)
-		{
-			WriteConstantBuffer(context, m_normalDepthMapVSBuffer.Get(), data, m_normalDepthMapVSBufferSize);
 		}
 		void AmbientOcclusion::WriteScreenQuadVSBuffer(ID3D11DeviceContext3* context, void* data)
 		{
@@ -665,6 +669,8 @@ PixelInputType main(VertexInputType input)
 			float clearColor[] = { 0.0f, 0.0f, 0.0f, 1e5f };
 			auto* context = graphics.Context3D();
 			ID3D11RenderTargetView* renderTargets[1] = { m_normalDepthMapRTV.Get() };
+			graphics.SetVSMatrixBuffer();
+			graphics.SetVSBoneBuffer();
 			context->RSSetState(m_rasterizerState.Get());
 			context->OMSetRenderTargets(1, renderTargets, m_depthStencilView.Get());
 			context->RSSetViewports(1, &m_viewport);
@@ -672,17 +678,6 @@ PixelInputType main(VertexInputType input)
 			context->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 			context->VSSetShader(m_vsNormalDepthMap.Get(), nullptr, 0);
 			context->PSSetShader(m_psNormalDepthMap.Get(), nullptr, 0);
-			context->VSSetConstantBuffers(0, 1, m_normalDepthMapVSBuffer.GetAddressOf());
-		}
-		void AmbientOcclusion::WriteBuffer(Graphics& graphics, Camera& camera, mth::Positionf& position)
-		{
-			mth::float4x4 matrixBuffer[] =
-			{
-				position.WorldMatrix(),
-				camera.ViewMatrix() * matrixBuffer[0],
-				camera.ProjectionMatrix()
-			};
-			WriteNormalDepthMapVSBuffer(graphics.Context3D(), matrixBuffer);
 		}
 		void AmbientOcclusion::RenderOcclusionMap(Graphics& graphics, Camera& camera, unsigned blur)
 		{

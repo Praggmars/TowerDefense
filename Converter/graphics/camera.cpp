@@ -20,8 +20,7 @@ namespace Converter
 			m_screenNear(0.1f),
 			m_screenDepth(1000.0f),
 			m_distance(10.0f),
-			m_sensitivity(0.005f),
-			m_tracking(false)
+			m_sensitivity(0.005f)
 		{
 			SetPosition();
 			SetProjection();

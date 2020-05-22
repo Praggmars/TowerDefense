@@ -23,7 +23,8 @@ using namespace Windows::UI::Xaml::Navigation;
 namespace Converter
 {
 	MainPage::MainPage() :
-		m_shadowMapSize(2048.0f)
+		m_shadowMapSize(2048.0f),
+		m_suspendDrawing(false)
 	{
 		InitializeComponent();
 		Windows::UI::Core::CoreWindow^ window = Windows::UI::Xaml::Window::Current->CoreWindow;
@@ -176,6 +177,7 @@ namespace Converter
 
 	void MainPage::FillBoneControls()
 	{
+		m_suspendDrawing = true;
 		int modelIndex = m_modelList->SelectedIndex;
 		int boneIndex = m_boneList->SelectedIndex;
 		if (modelIndex < 0 || boneIndex < 0)
@@ -227,6 +229,7 @@ namespace Converter
 			m_transformRySlider->Value = transformRy;
 			m_transformRzSlider->Value = transformRz;
 		}
+		m_suspendDrawing = false;
 	}
 
 	void MainPage::ReadBoneControls()
@@ -268,8 +271,12 @@ namespace Converter
 
 	void MainPage::Draw()
 	{
+		if (m_suspendDrawing)
+			return;
+
 		gfx::CB_MatrixBuffer matrixBuffer;
 		matrixBuffer.worldMatrix = mth::float4x4::Identity();
+		matrixBuffer.viewMatrix = m_camera.ViewMatrix();
 		matrixBuffer.cameraMatrix = m_camera.CameraMatrix();
 		matrixBuffer.lightMatrix = m_light.LightMatrix();
 		m_graphics->WriteVSMatrixBuffer(&matrixBuffer);
@@ -309,7 +316,7 @@ namespace Converter
 			WriteBoneBuffer(*ml);
 			ml->RenderMesh(*m_graphics);
 		}
-		m_ssao->RenderOcclusionMap(*m_graphics, m_camera);
+		m_ssao->RenderOcclusionMap(*m_graphics, m_camera, 2);
 
 		m_graphics->SetScreenAsRenderTarget();
 
